@@ -1,0 +1,179 @@
+
+Basic Types:
+int
+list
+float
+string
+tag
+record
+map
+function
+bool
+tuple
+chan
+interface
+
+
+
+a int = 4
+
+b string = "hello"
+
+def add_them(a int, b int) int => {
+    a + b
+}
+
+def also_adds(a int, b int) => a + b
+
+def ignore_second(b int , _) => b + 2
+
+import 
+
+defp private_func(b int, User{a, c as hello}) => {
+    g = match return_value(a) {
+        {:ok, v} => v,
+        {:error, "specific message") => "hello",
+        {:error, message} => message
+    }
+}
+
+spawn private_func(5, User{a="scott", b="swarthout"})
+
+
+c chan[string] = chan[string]{}
+
+d = chan{}
+
+send d 5
+
+send c "hello"
+
+send c "world"
+
+n string = recv c
+
+b = recv c
+
+v map[int, string] = {
+    3 => "three",
+    4 => "four",
+    5 => "five"
+}
+
+w = {v | 6 => "six", 5 => "cinco"}
+
+l list = [0..17]
+
+v = l[4..8]
+
+x = l[7..1]
+
+
+type User{a string, b string}
+
+
+type Result = {:ok | :error, message string}
+
+import Fmt from "std/fmt"
+import User, Comment from "github.com/scott/blog"
+import User as U, Comment as C from "github.com/scott/blog"
+
+import 
+
+
+type Comment{user_id, comment_id, text}
+
+u = User{a="hello", b="world"}
+
+r = User{u | b="again"}
+
+s string = r.b
+
+v[3]
+
+a list[int] = [3, 4, 5]
+
+[head | tail] = a
+
+a = b <> "world!"
+
+t = {"world", 3, 4.9}
+
+{b, n, c} = t
+
+module Math {
+    def sum(a, b) => {
+        do_sum(a, b)
+    }
+
+    defp do_sum(a int, b int) int => a + b
+
+    def zero?(0) bool => true
+
+    def zero?(x int) => false
+
+    def positive(x int) when x > 0 => true
+
+    def positive(x) when x < 0 => false
+}
+
+anonymous_func = (a, b) => a + b
+
+other_func = b => b + 2
+
+interface Enumerable {
+    def count(enumerable)
+    def member?(enumerable, element)
+    def reduce(enumerable, acc, fun)
+}
+
+
+interface GenServer {
+
+}
+
+@[GenServer, Enumerable]
+module Stack {
+
+}
+
+@Enumerable
+module String {
+
+}
+    
+module Enum {
+    def map(l list[Enumerable], f (a any) => b any) list[any] => {
+
+    }
+    def reduce([], f) => {
+
+    }
+    defp reduce([h | t], f) => {
+
+    }
+
+
+}
+
+l = [4, 5, 6, 7, 8]
+type take = Enum.take
+
+num = l
+|> Enum.filter(a => a % 2 == 0)
+|> take(2)
+|> Enum.reduce((a, b) => a + b)
+
+# num = 10
+
+filtered_list = Enum.filter(list, a => a % 2 == 0)
+# filtered_list = [4, 6, 8]
+
+a = 4
+
+if a < 6 {
+
+}
+else {
+
+}
