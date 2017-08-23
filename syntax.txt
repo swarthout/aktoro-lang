@@ -42,17 +42,16 @@ spawn private_func(5, User{a="scott", b="swarthout"})
 
 c chan[string] = chan[string]{}
 
-d = chan{}
+d chan[int] = chan[int]{buffer_size=5}
 
-send d 5
 
 send c "hello"
 
 send c "world"
 
-n string = recv c
+n = recv c
 
-b = recv c
+b string = recv c
 
 v map[int, string] = {
     3 => "three",
@@ -68,8 +67,15 @@ v = l[4..8]
 
 x = l[7..1]
 
+d = l[2..]
 
-type User{a string, b string}
+e = l[..4]
+
+type User = {a string, b string}
+
+type Heap[T] = {
+
+}
 
 
 type Result = {:ok | :error, message string}
@@ -81,7 +87,7 @@ import User as U, Comment as C from "github.com/scott/blog"
 import 
 
 
-type Comment{user_id, comment_id, text}
+type Comment = {user_id int, comment_id int, text string}
 
 u = User{a="hello", b="world"}
 
@@ -102,7 +108,7 @@ t = {"world", 3, 4.9}
 {b, n, c} = t
 
 module Math {
-    def sum(a, b) => {
+    def sum(a int, b int) => {
         do_sum(a, b)
     }
 
@@ -132,14 +138,36 @@ interface GenServer {
 
 }
 
-@[GenServer, Enumerable]
 module Stack {
-
+    type Stack[T] = {
+        data list[T],
+    }
+    def push(s Stack[T], e T) Stack[T] => {
+        Stack{data=[e | data]}
+    }
+    def pop(s Stack[T]) Stack[T] => {
+        Stack{data=data[1..]}
+    }
 }
 
-@Enumerable
-module String {
+s = Stack[int]{}
 
+s = Stack.push(s, 4)
+
+type push = Stack.push
+
+s = push(s, 3)
+
+s = s |> push(6) 
+
+a = Stack.pop(s)
+
+# a: int = 6
+
+
+module Calendar {
+    type Calendar = {}
+    type 
 }
     
 module Enum {
@@ -160,6 +188,8 @@ l = [4, 5, 6, 7, 8]
 type take = Enum.take
 
 num = l
+
+num
 |> Enum.filter(a => a % 2 == 0)
 |> take(2)
 |> Enum.reduce((a, b) => a + b)
