@@ -2,6 +2,7 @@
 Basic Types:
 int
 list
+array
 float
 string
 tag
@@ -11,11 +12,12 @@ function
 bool
 tuple
 chan
-interface
 
-
+g = [|3, 4, 5|]
 
 a int = 4
+
+a = 4
 
 b string = "hello"
 
@@ -25,24 +27,30 @@ def add_them(a int, b int) int => {
 
 def also_adds(a int, b int) => a + b
 
-def ignore_second(b int , _) => b + 2
+def ignore_second(b int, _) => b + 2
 
-import 
+type result 't = Ok 't | Error (message string)
 
-defp private_func(b int, User{a, c as hello}) => {
+defp private_func(b int, User{a, c}) => {
     g = match return_value(a) {
-        {:ok, v} => v,
-        {:error, "specific message") => "hello",
-        {:error, message} => message
+        Ok v => v,
+        Error "specific message" => "hello",
+        Error message => message
     }
 }
 
-spawn private_func(5, User{a="scott", b="swarthout"})
+go private_func(5, User{a="scott", b="swarthout"})
+
+for i in 0..10 {
+    go (i) => {
+
+    }
+}
 
 
-c chan[string] = chan[string]{}
+c chan string
 
-d chan[int] = chan[int]{buffer_size=5}
+d = Channel.new(t=string, buffer_size=5)
 
 
 send c "hello"
@@ -53,7 +61,11 @@ n = recv c
 
 b string = recv c
 
-v map[int, string] = {
+type map 'k 'v = {
+
+}
+
+v map int string = {
     3 => "three",
     4 => "four",
     5 => "five"
@@ -61,7 +73,9 @@ v map[int, string] = {
 
 w = {v | 6 => "six", 5 => "cinco"}
 
-l list = [0..17]
+l list int = [0..17]
+
+l = [0..23]
 
 v = l[4..8]
 
@@ -73,19 +87,13 @@ e = l[..4]
 
 type User = {a string, b string}
 
-type Heap[T] = {
+type Heap 't = {
 
 }
 
 
-type Result = {:ok | :error, message string}
-
 import Fmt from "std/fmt"
 import User, Comment from "github.com/scott/blog"
-import User as U, Comment as C from "github.com/scott/blog"
-
-import 
-
 
 type Comment = {user_id int, comment_id int, text string}
 
@@ -97,7 +105,7 @@ s string = r.b
 
 v[3]
 
-a list[int] = [3, 4, 5]
+a list int = [3, 4, 5]
 
 [head | tail] = a
 
@@ -108,49 +116,42 @@ t = {"world", 3, 4.9}
 {b, n, c} = t
 
 module Math {
-    def sum(a int, b int) => {
-        do_sum(a, b)
-    }
+    def sum(a int, b int) => do_sum(a, b)
 
     defp do_sum(a int, b int) int => a + b
 
-    def zero?(0) bool => true
+    def zero?(a int) bool => {
+        match a {
+            0 => true,
+            _ => false
+        }
+    }
 
-    def zero?(x int) => false
-
-    def positive(x int) when x > 0 => true
-
-    def positive(x) when x < 0 => false
+    def positive(x int) => {
+        match {
+            x < 0 => false,
+            x >= 0 => true
+        }
+    }
 }
 
 anonymous_func = (a, b) => a + b
 
 other_func = b => b + 2
 
-interface Enumerable {
-    def count(enumerable)
-    def member?(enumerable, element)
-    def reduce(enumerable, acc, fun)
-}
-
-
-interface GenServer {
-
-}
-
 module Stack {
-    type Stack[T] = {
-        data list[T],
+    type Stack 't = {
+        data list 't,
     }
-    def push(s Stack[T], e T) Stack[T] => {
+    def push(s Stack 't, e 't) Stack 't => {
         Stack{data=[e | data]}
     }
-    def pop(s Stack[T]) Stack[T] => {
+    def pop(s Stack 't) Stack 't=> {
         Stack{data=data[1..]}
     }
 }
 
-s = Stack[int]{}
+s Stack int
 
 s = Stack.push(s, 4)
 
@@ -162,26 +163,21 @@ s = s |> push(6)
 
 a = Stack.pop(s)
 
-# a: int = 6
+# a int = 6
 
 
-module Calendar {
+module Calendar = {
     type Calendar = {}
     type 
 }
     
-module Enum {
-    def map(l list[Enumerable], f (a any) => b any) list[any] => {
+module Enum = {
+    def map(l list 'a, f ('a) => 'b) list 'b => {
 
     }
-    def reduce([], f) => {
+    def reduce(l list 'a, f ('a) => 'b) 'b => {
 
     }
-    defp reduce([h | t], f) => {
-
-    }
-
-
 }
 
 l = [4, 5, 6, 7, 8]
