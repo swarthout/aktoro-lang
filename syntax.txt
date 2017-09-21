@@ -21,17 +21,17 @@ a = 4
 
 b string = "hello"
 
-def add_them(a int, b int) int => {
+add_them = (a int, b int) int => {
     a + b
 }
 
-def also_adds(a int, b int) => a + b
+also_adds = (a int, b int) => a + b
 
-def ignore_second(b int, _) => b + 2
+ignore_second = (b int, _) => b + 2
 
 type result 't = Ok 't | Error (message string)
 
-defp private_func(b int, User{a, c}) => {
+private_func = (b int, User{a, c}) => {
     g = match return_value(a) {
         Ok v => v,
         Error "specific message" => "hello",
@@ -92,8 +92,10 @@ type Heap 't = {
 }
 
 
-import Fmt from "std/fmt"
+import Fmt from "othello/fmt"
 import User, Comment from "github.com/scott/blog"
+
+external import http from "net/http"
 
 type Comment = {user_id int, comment_id int, text string}
 
@@ -115,19 +117,20 @@ t = {"world", 3, 4.9}
 
 {b, n, c} = t
 
-module Math {
-    def sum(a int, b int) => do_sum(a, b)
+module Math = {
+    sum = (a int, b int) => do_sum a, b
 
-    defp do_sum(a int, b int) int => a + b
+    @private
+    do_sum = (a int, b int) int => a + b
 
-    def zero?(a int) bool => {
+    zero? = (a int) bool => {
         match a {
             0 => true,
             _ => false
         }
     }
 
-    def positive(x int) => {
+    positive = (x int) => {
         match {
             x < 0 => false,
             x >= 0 => true
@@ -143,10 +146,10 @@ module Stack {
     type Stack 't = {
         data list 't,
     }
-    def push(s Stack 't, e 't) Stack 't => {
+    push = (s Stack 't, e 't) Stack 't => {
         Stack{data=[e | data]}
     }
-    def pop(s Stack 't) Stack 't=> {
+    pop = (s Stack 't) Stack 't => {
         Stack{data=data[1..]}
     }
 }
@@ -172,10 +175,10 @@ module Calendar = {
 }
     
 module Enum = {
-    def map(l list 'a, f ('a) => 'b) list 'b => {
+    map = (l list 'a, f ('a) => 'b) list 'b => {
 
     }
-    def reduce(l list 'a, f ('a) => 'b) 'b => {
+    reduce = (l list 'a, f ('a) => 'b) 'b => {
 
     }
 }
