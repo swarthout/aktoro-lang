@@ -25,32 +25,44 @@ add_them = (a int, b int) int => {
     a + b
 }
 
-also_adds = (a int, b int) => a + b
+also_adds = fn (a int, b int) => a + b
 
-ignore_second = (b int, _) => b + 2
+ignore_second = fn (b int, _) => b + 2
 
 type result 't = Ok 't | Error (message string)
 
-private_func = (b int, User{a, c}) => {
+private_func = fn (b int, User{a, c}) => {
     g = match return_value(a) {
-        Ok v => v,
-        Error "specific message" => "hello",
-        Error message => message
+        ok v => v,
+        error "specific message" => "hello",
+        error message => message
     }
 }
 
 go private_func(5, User{a="scott", b="swarthout"})
 
 for i in 0..10 {
-    go (i) => {
+    go fn (i) => {
 
     }
 }
 
 
+let mut a = 4
+
+a = 5
+
+let changes_val = fn (mut b) => {
+    b = 3
+}
+
+changes_val(a)
+
+# a = 4
+
 c chan string
 
-d = Channel.new(t=string, buffer_size=5)
+d = chan int {buffer_size=5}
 
 
 send c "hello"
@@ -65,7 +77,7 @@ type map 'k 'v = {
 
 }
 
-v map int string = {
+let v map int string = {
     3 => "three",
     4 => "four",
     5 => "five"
@@ -85,29 +97,48 @@ d = l[2..]
 
 e = l[..4]
 
-type User = {a string, b string}
+type user = {a string, b string}
 
-type Heap 't = {
+type heap 't = {
 
 }
 
 
-import Fmt from "othello/fmt"
-import User, Comment from "github.com/scott/blog"
+import fmt from "othello/fmt"
+import user, comment from "github.com/scott/blog"
 
 external import http from "net/http"
 
-type Comment = {user_id int, comment_id int, text string}
+let req_handler = fn (r http.request) => {
+    match r.request {
+        http.get "/hello" => {
+            "Yo Dawg"
+        },
+        http.post "/hello/{id}" id => {
+            let response map int string = {
+                id => "Your id is \(id)"
+                id + 1 => "The next is \(id + 1)"
+            }
+            json.dump(response)
+        }
+    }
+}
 
-u = User{a="hello", b="world"}
+let server = http.server{port=3000, router=req_handler}
 
-r = User{u | b="again"}
+http.listen(server)
+
+type comment = {user_id int, comment_id int, text string}
+
+let u = user{a="hello", b="world"}
+
+let r = {u | b="again"}
 
 s string = r.b
 
 v[3]
 
-a list int = [3, 4, 5]
+let a list int = [3, 4, 5]
 
 [head | tail] = a
 
@@ -117,20 +148,20 @@ t = {"world", 3, 4.9}
 
 {b, n, c} = t
 
-module Math = {
-    sum = (a int, b int) => do_sum a, b
+module math = {
+    let sum = fn (a int, b int) => do_sum a, b
 
     @private
-    do_sum = (a int, b int) int => a + b
+    let do_sum = fn (a int, b int) int => a + b
 
-    zero? = (a int) bool => {
+    let zero? = fn (a int) bool => {
         match a {
             0 => true,
             _ => false
         }
     }
 
-    positive = (x int) => {
+    let positive = fn (x int) => {
         match {
             x < 0 => false,
             x >= 0 => true
@@ -138,44 +169,51 @@ module Math = {
     }
 }
 
-anonymous_func = (a, b) => a + b
+let anonymous_func = fn (a, b) => a + b
 
 other_func = b => b + 2
 
-module Stack {
-    type Stack 't = {
-        data list 't,
+module stack {
+    type stack 't = {
+        data list 't = [],
+        buffer_size = 5
     }
-    push = (s Stack 't, e 't) Stack 't => {
-        Stack{data=[e | data]}
+    let push = fn (s stack 't, e 't) stack 't => {
+        stack{data=[e | data]}
     }
-    pop = (s Stack 't) Stack 't => {
-        Stack{data=data[1..]}
+    pop = (s stack 't) stack 't => {
+        stack{data=data[1..]}
     }
 }
 
-s Stack int
+s stack int
 
-s = Stack.push(s, 4)
+k = stack int {buffer_size=2}
 
-type push = Stack.push
+s = stack.push(s, 4)
+
+type push = stack.push
 
 s = push(s, 3)
 
 s = s |> push(6) 
 
-a = Stack.pop(s)
+a = stack.pop(s)
 
 # a int = 6
 
 
-module Calendar = {
-    type Calendar = {}
+module calendar = {
+    type calendar = {}
     type 
 }
+
+let map_int_string = fn (l list int, f fn (int) string ) list string => {
+    list.map(f)
+}
     
-module Enum = {
-    map = (l list 'a, f ('a) => 'b) list 'b => {
+module enum = {
+    map = (l list 'a, f fn ('a) => 'b) list 'b => {
 
     }
     reduce = (l list 'a, f ('a) => 'b) 'b => {
@@ -184,18 +222,18 @@ module Enum = {
 }
 
 l = [4, 5, 6, 7, 8]
-type take = Enum.take
+type take = enum.take
 
 num = l
 
 num
-|> Enum.filter(a => a % 2 == 0)
+|> enum.filter(a => a % 2 == 0)
 |> take(2)
-|> Enum.reduce((a, b) => a + b)
+|> enum.reduce((a, b) => a + b)
 
 # num = 10
 
-filtered_list = Enum.filter(list, a => a % 2 == 0)
+filtered_list = enum.filter(list, a => a % 2 == 0)
 # filtered_list = [4, 6, 8]
 
 a = 4
