@@ -10,28 +10,28 @@ record
 map
 function
 bool
-tuple
+
 chan
 
-g = [|3, 4, 5|]
+let g = [|3, 4, 5|]
 
-a int = 4
+let a int = 4
 
 a = 4
 
-b string = "hello"
+let b string = "hello"
 
-add_them = (a int, b int) int => {
+let add_them = fn (a int, b int) int => {
     a + b
 }
 
-also_adds = fn (a int, b int) => a + b
+let also_adds = fn (a int, b int) => a + b
 
-ignore_second = fn (b int, _) => b + 2
+let ignore_second = fn (b int, _) => b + 2
 
-type result 't = Ok 't | Error (message string)
+type result 't = kk 't | error (message string)
 
-private_func = fn (b int, User{a, c}) => {
+let private_func = fn (b int, user{a, c}) => {
     g = match return_value(a) {
         ok v => v,
         error "specific message" => "hello",
@@ -39,9 +39,9 @@ private_func = fn (b int, User{a, c}) => {
     }
 }
 
-go private_func(5, User{a="scott", b="swarthout"})
+go private_func(5, user{a="scott", b="swarthout"})
 
-for i in 0..10 {
+enum.each(0..10, (i) => {
     go fn (i) => {
 
     }
@@ -107,19 +107,26 @@ type heap 't = {
 import fmt from "othello/fmt"
 import user, comment from "github.com/scott/blog"
 
-external import http from "net/http"
+import http from "othello/net/http"
 
-let req_handler = fn (r http.request) => {
-    match r.request {
-        http.get "/hello" => {
+let post_handler = fn (r http.request) => {
+    let {id, username} = http.get_vars(r)
+}
+
+use http.{request, get, post}
+let req_handler = fn (r request) => {
+     match r.path {
+        get "/hello" => fn (r request) => {
             "Yo Dawg"
         },
-        http.post "/hello/{id}" id => {
+        post "/hello/{id}" => fn (r request) => {
             let response map int string = {
                 id => "Your id is \(id)"
                 id + 1 => "The next is \(id + 1)"
             }
             json.dump(response)
+        },
+        post "/hello/{id int}/{username option string}" => post_handler
         }
     }
 }
@@ -144,15 +151,11 @@ let a list int = [3, 4, 5]
 
 a = b <> "world!"
 
-t = {"world", 3, 4.9}
-
-{b, n, c} = t
-
 module math = {
     let sum = fn (a int, b int) => do_sum a, b
 
-    @private
-    let do_sum = fn (a int, b int) int => a + b
+    
+    let priv do_sum = fn (a int, b int) int => a + b
 
     let zero? = fn (a int) bool => {
         match a {
@@ -181,7 +184,7 @@ module stack {
     let push = fn (s stack 't, e 't) stack 't => {
         stack{data=[e | data]}
     }
-    pop = (s stack 't) stack 't => {
+    let pop = fn (s stack 't) stack 't => {
         stack{data=data[1..]}
     }
 }
@@ -192,7 +195,7 @@ k = stack int {buffer_size=2}
 
 s = stack.push(s, 4)
 
-type push = stack.push
+use stack.push
 
 s = push(s, 3)
 
@@ -222,14 +225,14 @@ module enum = {
 }
 
 l = [4, 5, 6, 7, 8]
-type take = enum.take
+use enum.{take, filter, reduce}
 
 num = l
 
 num
-|> enum.filter(a => a % 2 == 0)
+|> filter(a => a % 2 == 0)
 |> take(2)
-|> enum.reduce((a, b) => a + b)
+|> reduce((a, b) => a + b)
 
 # num = 10
 
@@ -244,3 +247,4 @@ if a < 6 {
 else {
 
 }
+
