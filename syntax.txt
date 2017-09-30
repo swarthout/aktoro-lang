@@ -29,7 +29,7 @@ let also_adds = fn (a int, b int) => a + b
 
 let ignore_second = fn (b int, _) => b + 2
 
-type result 't = kk 't | error (message string)
+type result 't = ok 't | error (message string)
 
 let private_func = fn (b int, user{a, c}) => {
     g = match return_value(a) {
@@ -104,10 +104,10 @@ type heap 't = {
 }
 
 
-import fmt from "othello/fmt"
+import fmt from "std/fmt"
 import user, comment from "github.com/scott/blog"
 
-import http from "othello/net/http"
+import http from "std/net/http"
 
 let post_handler = fn (r http.request) => {
     let {id, username} = http.get_vars(r)

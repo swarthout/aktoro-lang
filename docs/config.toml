@@ -1,0 +1,18 @@
+baseurl = "http://othello-lang.org/"
+languageCode = "en-us"
+title = "Othello"
+theme = "alabaster"
+
+[params]
+        name = "Othello Lang"
+        description = "Othello Programming Language"
+
+        github_user = "swarthout"
+        github_repo = "othello"
+        github_banner = false
+
+[params.sidebar]
+        github_button = true
+
+[params.footer]
+        copyright = "[Scott Swarthout](https://github.com/swarthout)"
