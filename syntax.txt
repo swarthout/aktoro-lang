@@ -11,7 +11,6 @@ map
 function
 bool
 
-chan
 
 let g = [|3, 4, 5|]
 
@@ -26,6 +25,14 @@ let add_them = fn (a int, b int) int => {
 }
 
 let also_adds = fn (a int, b int) => a + b
+
+let add_generic = fn (a 't, b 't) 't => a + b
+
+let c = add_generic (3, 4)
+
+let list_creator = fn 't () => {
+    let h = heap.init 't  ([])
+}
 
 let ignore_second = fn (b int, _) => b + 2
 
@@ -60,19 +67,6 @@ changes_val(a)
 
 # a = 4
 
-c chan string
-
-d = chan int {buffer_size=5}
-
-
-send c "hello"
-
-send c "world"
-
-n = recv c
-
-b string = recv c
-
 type map 'k 'v = {
 
 }
@@ -98,6 +92,10 @@ d = l[2..]
 e = l[..4]
 
 type user = {a string, b string}
+
+let u = {a="hello", b="world"}
+
+let r = {u | b="again"}
 
 type heap 't = {
 
@@ -137,9 +135,7 @@ http.listen(server)
 
 type comment = {user_id int, comment_id int, text string}
 
-let u = user{a="hello", b="world"}
 
-let r = {u | b="again"}
 
 s string = r.b
 
@@ -176,22 +172,25 @@ let anonymous_func = fn (a, b) => a + b
 
 other_func = b => b + 2
 
-module stack {
-    type stack 't = {
+module stack = {
+    let init = fn 't ({buffer_size}) stack_state 't=> {
+        {data = [], buffer_size}
+    }
+    type stack_state 't = {
         data list 't = [],
         buffer_size = 5
     }
-    let push = fn (s stack 't, e 't) stack 't => {
-        stack{data=[e | data]}
+    let push = fn (s stack_state 't, e 't) stack_state 't => {
+        {s | data=[e | data]}
     }
-    let pop = fn (s stack 't) stack 't => {
-        stack{data=data[1..]}
+    let pop = fn (s stack_state 't) stack_state 't => {
+        {s | data=data[1..]}
     }
 }
 
-s stack int
+s = stack.init int ()
 
-k = stack int {buffer_size=2}
+k = stack.init int ({buffer_size=2})
 
 s = stack.push(s, 4)
 
@@ -216,10 +215,10 @@ let map_int_string = fn (l list int, f fn (int) string ) list string => {
 }
     
 module enum = {
-    map = (l list 'a, f fn ('a) => 'b) list 'b => {
+    let map = (l list 'a, f fn ('a) => 'b) list 'b => {
 
     }
-    reduce = (l list 'a, f ('a) => 'b) 'b => {
+    let reduce = (l list 'a, f ('a) => 'b) 'b => {
 
     }
 }
@@ -230,13 +229,13 @@ use enum.{take, filter, reduce}
 num = l
 
 num
-|> filter(a => a % 2 == 0)
+|> filter(fn (a) => a % 2 == 0)
 |> take(2)
-|> reduce((a, b) => a + b)
+|> reduce(fn (a, b) => a + b)
 
 # num = 10
 
-filtered_list = enum.filter(list, a => a % 2 == 0)
+filtered_list = enum.filter(list, fn (a) => a % 2 == 0)
 # filtered_list = [4, 6, 8]
 
 a = 4
@@ -248,3 +247,87 @@ else {
 
 }
 
+
+type state = { total_count int, reset_count int}
+
+type message = add num int | reset | get_count
+
+let counter = actor state {
+    init = fn ({start}) state => {total_count = start, reset_count = 0}
+    reducer = fn (s state, m message, sender option actor) state => {
+        match m {
+            add num => {s | total_count = s.total_count + num},
+            reset => {s | total_count = 0, reset_count = s.reset_count + 1},
+            get_count => {
+                sender ! s.total_count
+                s
+            }
+        }
+    }
+}
+
+let pid = go (counter.init ({start = 5}))
+
+tell (pid, add 7)
+
+tell (pid, reset)
+
+let count future int = ask (counter, get_count)
+
+num = match count {
+    ok num => num,
+    error m => m
+}
+
+module stack = {
+    use actor.{go, tell, ask, reply}
+    type pid 't = actor.pid stack_actor 't
+    let init = fn 't ({buffer_size}) pid 't => {
+        go (stack_actor.init 't ({buffer_size}))
+    }
+
+    let push = fn (s pid 't, e 't) => {
+        tell (s, _push e)
+    }
+    let pop = fn (s pid 't) => {
+        tell (s, _pop)
+    }
+
+    let get_top = fn (s pid 't) 't => {
+        ask (s,  _get_top)
+    } 
+
+    type stack_state 't = {
+        data list 't = [],
+        buffer_size int = 5
+    }
+
+    type _message = _push (e 't) | _pop | _get_top
+
+    let stack_actor 't = actor stack_state 't {
+        init = fn 't ({buffer_size}) stack_state 't => {
+            {data = [], buffer_size}
+        }
+        reducer = fn(s stack_state 't, m message, sender option actor.pid) stack_state 't => {
+            match m {
+                _push e => {s | data=[e | data]},
+                _pop => {
+                    {s | data=data[1..]}
+                },
+                _get_top => {
+                    reply (sender, s.data[0])
+                }
+            }
+        }
+    }
+    
+}
+
+
+let s = stack.init int ({buffer_size = 5})
+
+stack.push (s, 4)
+stack.push (s, 3)
+stack.pop (s)
+
+let top = stack.get_top (s)
