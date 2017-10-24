@@ -14,11 +14,11 @@ bool
 
 let g = [|3, 4, 5|]
 
-let a int = 4
+let a = 4
 
 a = 4
 
-let b string = "hello"
+let b = "hello"
 
 let add_them = fn (a int, b int) int => {
     a + b
@@ -48,11 +48,8 @@ let private_func = fn (b int, user{a, c}) => {
 
 go private_func(5, user{a="scott", b="swarthout"})
 
-enum.each(0..10, (i) => {
-    go fn (i) => {
-
-    }
-}
+enum.each(0..10, fn (i) => {
+})
 
 
 let mut a = 4
@@ -71,7 +68,7 @@ type map 'k 'v = {
 
 }
 
-let v map int string = {
+let v = {
     3 => "three",
     4 => "four",
     5 => "five"
@@ -113,35 +110,33 @@ let post_handler = fn (r http.request) => {
 
 use http.{request, get, post}
 let req_handler = fn (r request) => {
-     match r.path {
-        get "/hello" => fn (r request) => {
+     let routes = {
+        :get "/hello" => fn (r request) => {
             "Yo Dawg"
         },
-        post "/hello/{id}" => fn (r request) => {
-            let response map int string = {
+        :post "/hello/{id}" => fn (r request) => {
+            let response = map int string {
                 id => "Your id is \(id)"
                 id + 1 => "The next is \(id + 1)"
             }
             json.dump(response)
         },
-        post "/hello/{id int}/{username option string}" => post_handler
+        :post "/hello/{id int}/{username option string}" => post_handler
         }
     }
 }
 
 let server = http.server{port=3000, router=req_handler}
 
-http.listen(server)
+http.listen (server)
 
 type comment = {user_id int, comment_id int, text string}
 
-
-
-s string = r.b
+let s = r.b
 
 v[3]
 
-let a list int = [3, 4, 5]
+let a = [3, 4, 5]
 
 [head | tail] = a
 
@@ -250,16 +245,16 @@ else {
 
 type state = { total_count int, reset_count int}
 
-type message = add num int | reset | get_count
+type message = :add num int | :reset | :get_count
 
 let counter = actor state {
     init = fn ({start}) state => {total_count = start, reset_count = 0}
     reducer = fn (s state, m message, sender option actor) state => {
         match m {
-            add num => {s | total_count = s.total_count + num},
-            reset => {s | total_count = 0, reset_count = s.reset_count + 1},
-            get_count => {
-                sender ! s.total_count
+            :add num => {s | total_count = s.total_count + num},
+            :reset => {s | total_count = 0, reset_count = s.reset_count + 1},
+            :get_count => {
+                actor.reply (sender, )
                 s
             }
         }
@@ -268,15 +263,15 @@ let counter = actor state {
 
 let pid = go (counter.init ({start = 5}))
 
-tell (pid, add 7)
+tell (pid, :add 7)
 
-tell (pid, reset)
+tell (pid, :reset)
 
 let count future int = ask (counter, get_count)
 
 num = match count {
-    ok num => num,
-    error m => m
+    :ok num => num,
+    :error m => m
 }
 
 module stack = {
@@ -302,7 +297,7 @@ module stack = {
         buffer_size int = 5
     }
 
-    type _message = _push (e 't) | _pop | _get_top
+    type _message = :push (e 't) | :pop | :get_top
 
     let stack_actor 't = actor stack_state 't {
         init = fn 't ({buffer_size}) stack_state 't => {
@@ -310,11 +305,11 @@ module stack = {
         }
         reducer = fn(s stack_state 't, m message, sender option actor.pid) stack_state 't => {
             match m {
-                _push e => {s | data=[e | data]},
-                _pop => {
+                :push e => {s | data=[e | data]},
+                :pop => {
                     {s | data=data[1..]}
                 },
-                _get_top => {
+                :get_top => {
                     reply (sender, s.data[0])
                 }
             }
