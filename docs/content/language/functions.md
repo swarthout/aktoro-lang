@@ -1,7 +1,7 @@
 ---
 menu:
   docs:
-    parent: "language-basics"
+    parent: "language"
     weight: 20
 title: Functions
 weight: 40

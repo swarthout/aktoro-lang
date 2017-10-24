@@ -21,5 +21,5 @@ theme = "alabaster"
 [[menu.docs]]
   name = "Language Basics"
   weight = 15
-  identifier = "language-basics"
-  url = "/language-basics/overview/"
+  identifier = "language"
+  url = "/language/overview/"

@@ -12,6 +12,6 @@ weight: 0
 
 - Pattern matching
 - Type inference
-- Familiar Syntax
-- Concurrency
+- Familiar syntax
+- Actor-based concurrency
  
