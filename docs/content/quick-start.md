@@ -1,7 +1,7 @@
 ---
 date: 2017-09-29T15:57:19+02:00
-menu: "main"
 title: Quick Start
+menu: docs
 weight: 10
 ---
 

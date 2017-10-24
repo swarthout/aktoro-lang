@@ -16,3 +16,10 @@ theme = "alabaster"
 
 [params.footer]
         copyright = "[Scott Swarthout](https://github.com/swarthout)"
+
+
+[[menu.docs]]
+  name = "Language Basics"
+  weight = 15
+  identifier = "language-basics"
+  url = "/language-basics/overview/"
