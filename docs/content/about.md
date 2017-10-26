@@ -9,10 +9,7 @@ weight: 0
 
 [Othello](https://github.com/swarthout/othello) is an open source programming language that makes it easy to write simple, fast, and expressive code while leveraging the powerful Golang ecosytem.
 
-## Features
+Othello is a project created by Scott Swarthout
 
-- Pattern matching
-- Type inference
-- Familiar Syntax
-- Concurrency
+It is intended to be a hobby project, and is not covered by any warranty
  

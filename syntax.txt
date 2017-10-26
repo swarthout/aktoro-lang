@@ -30,8 +30,8 @@ let add_generic = fn (a 't, b 't) 't => a + b
 
 let c = add_generic (3, 4)
 
-let list_creator = fn 't () => {
-    let h = heap.init 't  ([])
+let list_creator = fn ('t) => {
+    let h = heap.init('t, [])
 }
 
 let ignore_second = fn (b int, _) => b + 2
