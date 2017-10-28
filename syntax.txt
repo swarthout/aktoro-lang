@@ -10,6 +10,8 @@ record
 map
 function
 bool
+variant
+atom
 
 
 let g = [|3, 4, 5|]
@@ -36,17 +38,17 @@ let list_creator = fn ('t) => {
 
 let ignore_second = fn (b int, _) => b + 2
 
-type result 't = ok 't | error (message string)
+type result 't = :ok 't | :error (message string)
 
 let private_func = fn (b int, user{a, c}) => {
     g = match return_value(a) {
-        ok v => v,
-        error "specific message" => "hello",
-        error message => message
+        :ok v => v,
+        :error "specific message" => "hello",
+        :error message => message
     }
 }
 
-go private_func(5, user{a="scott", b="swarthout"})
+private_func(5, user{a="scott", b="swarthout"})
 
 enum.each(0..10, fn (i) => {
 })
@@ -115,6 +117,7 @@ let req_handler = fn (r request) => {
             "Yo Dawg"
         },
         :post "/hello/{id}" => fn (r request) => {
+            let {id} = http.get_vars(r)
             let response = map int string {
                 id => "Your id is \(id)"
                 id + 1 => "The next is \(id + 1)"
@@ -168,7 +171,7 @@ let anonymous_func = fn (a, b) => a + b
 other_func = b => b + 2
 
 module stack = {
-    let init = fn 't ({buffer_size}) stack_state 't=> {
+    let init = fn ('t, {buffer_size = 5}) stack_state 't => {
         {data = [], buffer_size}
     }
     type stack_state 't = {
@@ -183,19 +186,19 @@ module stack = {
     }
 }
 
-s = stack.init int ()
+s = stack.init (int, {})
 
-k = stack.init int ({buffer_size=2})
+k = stack.init (int, {buffer_size=2})
 
-s = stack.push(s, 4)
+s = stack.push (s, 4)
 
 use stack.push
 
-s = push(s, 3)
+s = push (s, 3)
 
-s = s |> push(6) 
+s = s |> push (6) 
 
-a = stack.pop(s)
+a = stack.pop (s)
 
 # a int = 6
 
@@ -254,12 +257,14 @@ let counter = actor state {
             :add num => {s | total_count = s.total_count + num},
             :reset => {s | total_count = 0, reset_count = s.reset_count + 1},
             :get_count => {
-                actor.reply (sender, )
+                actor.reply (sender, s.total_count)
                 s
             }
         }
     }
 }
+
+type counter_args = {start int}
 
 let pid = go (counter.init ({start = 5}))
 
