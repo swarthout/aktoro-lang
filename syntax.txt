@@ -202,12 +202,6 @@ a = stack.pop (s)
 
 # a int = 6
 
-
-module calendar = {
-    type calendar = {}
-    type 
-}
-
 let map_int_string = fn (l list int, f fn (int) string ) list string => {
     list.map(f)
 }
@@ -252,7 +246,7 @@ type message = :add num int | :reset | :get_count
 
 let counter = actor state {
     init = fn ({start}) state => {total_count = start, reset_count = 0}
-    reducer = fn (s state, m message, sender option actor) state => {
+    reducer = fn (s state, m message, sender (option actor) state => {
         match m {
             :add num => {s | total_count = s.total_count + num},
             :reset => {s | total_count = 0, reset_count = s.reset_count + 1},
@@ -272,7 +266,7 @@ tell (pid, :add 7)
 
 tell (pid, :reset)
 
-let count future int = ask (counter, get_count)
+let (:ok count) = ask (counter, get_count)
 
 num = match count {
     :ok num => num,
@@ -281,7 +275,7 @@ num = match count {
 
 module stack = {
     use actor.{go, tell, ask, reply}
-    type pid 't = actor.pid stack_actor 't
+    type pid 't = actor.pid (stack_actor 't)
     let init = fn 't ({buffer_size}) pid 't => {
         go (stack_actor.init 't ({buffer_size}))
     }
@@ -291,7 +285,7 @@ module stack = {
     }
     let pop = fn (s pid 't) => {
         tell (s, _pop)
-    }
+    }swift result type
 
     let get_top = fn (s pid 't) 't => {
         ask (s,  _get_top)
@@ -324,7 +318,7 @@ module stack = {
 }
 
 
-let s = stack.init int ({buffer_size = 5})
+let s = stack.init (int, {buffer_size = 5})
 
 stack.push (s, 4)
 stack.push (s, 3)
