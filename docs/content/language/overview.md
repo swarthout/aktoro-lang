@@ -22,6 +22,6 @@ Comparison                            |  `>`, `<`, `>=`, `=<`
 Boolean operations                    |  `not`, `and`, `or`
 Equality                              |  `==`
 Immutable Lists                       |  `[1, 2, 3]`
-Immutable Prepend                     |  `[item1, item2 | the_rest]`
-Arrays                                |  `[|1, 2, 3|]`
+Immutable Prepend                     |  <code>[item1, item2 &#124; the_rest]</code>
+Arrays                                |  <code>[&#124;1, 2, 3&#124;]</code>
 Records                               |  `type player = {score int}`
