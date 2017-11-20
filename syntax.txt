@@ -42,9 +42,9 @@ type result 't = :ok 't | :error (message string)
 
 let private_func = fn (b int, user{a, c}) => {
     g = match return_value(a) {
-        :ok v => v,
-        :error "specific message" => "hello",
-        :error message => message
+        :ok (v) => v,
+        :error ("specific message") => "hello",
+        :error (message) => message
     }
 }
 
@@ -66,7 +66,7 @@ changes_val(a)
 
 # a = 4
 
-type map 'k 'v = {
+type map ('k, 'v) = {
 
 }
 
@@ -113,18 +113,18 @@ let post_handler = fn (r http.request) => {
 use http.{request, get, post}
 let req_handler = fn (r request) => {
      let routes = {
-        :get "/hello" => fn (r request) => {
+        :get ("/hello") => fn (r request) => {
             "Yo Dawg"
         },
-        :post "/hello/{id}" => fn (r request) => {
+        :post ("/hello/{id}") => fn (r request) => {
             let {id} = http.get_vars(r)
-            let response = map int string {
+            let response = map (int, string) {
                 id => "Your id is \(id)"
                 id + 1 => "The next is \(id + 1)"
             }
             json.dump(response)
         },
-        :post "/hello/{id int}/{username option string}" => post_handler
+        :post ("/hello/{id int}/{username option string}") => post_handler
         }
     }
 }
@@ -202,7 +202,7 @@ a = stack.pop (s)
 
 # a int = 6
 
-let map_int_string = fn (l list int, f fn (int) string ) list string => {
+let map_int_string = fn (l list (int), f fn (int) string ) list (string) => {
     list.map(f)
 }
     
