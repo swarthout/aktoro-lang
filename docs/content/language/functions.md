@@ -24,9 +24,16 @@ let translate_left = fn (x int, y int, delta int) tuple int int => {
   (x, y)
 }
 
-(x, y) = translate_left(3, 4, 1) # x = 2, y = 4
+(x, y) = translate_left (3, 4, 1) # x = 2, y = 4
 
-pair = translate_left(5, 6, 2)
+pair = translate_left (5, 6, 2)
 a = pair[0]
 b = pair[1]
+```
+
+#### Type Annotations
+
+Type annotations are only required for function parameters and return types. Type annotations are placed immediately following the parameter name. The return type is placed following the parenthesis surrounding the function parameters.
+```
+let subtract = fn (a int, b int) int => a - b
 ```
