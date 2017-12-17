@@ -1,0 +1,22 @@
+<h3>Navigation</h3>
+<ul>
+    {{ $currentPage := . }} {{ range .Site.Menus.docs }} {{ if .HasChildren }}
+
+    <li class="sub-menu" {{if $currentPage.HasMenuCurrent
+    " docs " . }} active{{end}}>
+    <a class="reference internal" href="{{ .URL }}">{{ .Name }}</a>
+    <ul class="sub">
+        {{ range .Children }}
+        <li
+        {{if $currentPage.IsMenuCurrent "docs" . }} class="active" {{end}}>
+        <a class="reference internal" href="{{ .URL }}">{{ .Name }}</a>
+        </li>
+        {{ end }}
+    </ul>
+    {{else}}
+    <li>
+        <a class="reference internal" href="{{ .URL }}">{{ .Name }}</a>
+        {{end}}
+    </li>
+    {{end}}
+</ul>

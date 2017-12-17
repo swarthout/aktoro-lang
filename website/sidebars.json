@@ -1,0 +1,19 @@
+{
+  "docs": {
+    "Othello": [
+      "doc1"
+    ],
+    "Quickstart": [
+      "doc2"
+    ],
+    "Language Basics": [
+      "doc3"
+    ]
+  },
+  "docs-other": {
+    "First Category": [
+      "doc4",
+      "doc5"
+    ]
+  }
+}
