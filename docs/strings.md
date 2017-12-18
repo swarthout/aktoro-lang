@@ -1,11 +1,8 @@
 ---
-menu:
-  docs:
-    parent: "language"
-    weight: 20
+id: strings
 title: Strings
-weight: 40
 ---
+
 Othello strings are delimited with double quotes.
 ```
 let street_address = "42 Wallaby Way, Sydney"

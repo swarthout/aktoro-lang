@@ -1,11 +1,8 @@
 ---
-menu:
-  docs:
-    parent: "language"
-    weight: 30
+id: functions
 title: Functions
-weight: 40
 ---
+
 Functions are declared with the `fn` keyword.
 ```
 let greet = fn (name string) => "Hello " <> name

@@ -1,14 +1,10 @@
 ---
-menu:
-  docs:
-    parent: "language"
-    weight: 10
+id: types
 title: Types
-weight: 30
 ---
 Othello is a statically typed language, but heavily uses type inference to decrease the amount of typing required to write programs.
 
-#### Creating new types
+## Creating new types
 New types can be created with the `type` keyword.
 ```
 type user = {name string, age int, user_id string}

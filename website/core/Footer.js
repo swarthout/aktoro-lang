@@ -28,27 +28,18 @@ class Footer extends React.Component {
                                 this.props.config.baseUrl +
                                 'docs/' +
                                 this.props.language +
-                                '/doc1.html'
+                                '/quickstart.html'
                             }>
-                            Getting Started (or other categories)
+                            Getting Started
                         </a>
                         <a
                             href={
                                 this.props.config.baseUrl +
                                 'docs/' +
                                 this.props.language +
-                                '/doc2.html'
+                                '/overview.html'
                             }>
-                            Guides (or other categories)
-                        </a>
-                        <a
-                            href={
-                                this.props.config.baseUrl +
-                                'docs/' +
-                                this.props.language +
-                                '/doc3.html'
-                            }>
-                            API Reference (or other categories)
+                            Docs
                         </a>
                     </div>
                     <div>
@@ -85,20 +76,8 @@ class Footer extends React.Component {
                         </a>
                     </div>
                 </section>
-
-                <a
-                    href="https://code.facebook.com/projects/"
-                    target="_blank"
-                    className="fbOpenSource">
-                    <img
-                        src={this.props.config.baseUrl + 'img/oss_logo.png'}
-                        alt="Facebook Open Source"
-                        width="170"
-                        height="45"
-                    />
-                </a>
                 <section className="copyright">
-                    Copyright &copy; {currentYear} Facebook Inc.
+                    Copyright &copy; {currentYear} Scott F. Swarthout
                 </section>
             </footer>
         );

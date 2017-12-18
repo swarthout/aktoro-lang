@@ -22,8 +22,8 @@ const siteConfig = {
     baseUrl: '/test-site/' /* base url for your project */,
     projectName: 'othello-lang',
     headerLinks: [
-        {doc: 'doc4', label: 'Getting Started'},
-        {doc: 'doc1', label: 'Docs'},
+        {doc: 'quickstart', label: 'Getting Started'},
+        {doc: 'overview', label: 'Docs'},
         {page: 'help', label: 'Help'},
         {blog: true, label: 'Blog'},
     ],

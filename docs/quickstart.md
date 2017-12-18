@@ -1,11 +1,11 @@
 ---
-date: 2017-09-29T15:57:19+02:00
+id: quickstart
 title: Quick Start
-menu: docs
-weight: 10
+sidebar_label: Quick Start
 ---
 
-### Install Othello
+## Install Othello
+
 1. Prepare Golang environment
     - Install Golang >= 1.9
     - Make sure $GOPATH in your shell's config file( like .bashrc) is correct
@@ -23,8 +23,10 @@ Let's make sure Othello is set up as expected. You should see a similar version 
 $ othello version
 othello version 0.1 linux/amd64
 ```
-### Writing your first Othello program
-create a new file named `favorite-number.ol` and copy and paste the following:
+
+## Writing your first Othello program
+
+Create a new file named `favorite-number.ol` and copy and paste the following:
 ```
 import rand from "std/math/rand"
 
@@ -34,7 +36,8 @@ let get_random_number = fn () => {
 
 get_random_number()
 ```
-### Compile and run
+
+## Compile and run
 
 ```sh
 $ othello run favorite-number.ol
@@ -47,6 +50,3 @@ favorite-number.ol  favorite-number
 $ ./favorite-number
 My favorite number is 10
 ```
-
-
-###  Next: [Language Overview](/language-basics/overview)

@@ -49,24 +49,6 @@ class HomeSplash extends React.Component {
                                 <div className="promoRow">
                                     <div className="pluginRowBlock">
                                         <Button href="#try">Try It Out</Button>
-                                        <Button
-                                            href={
-                                                siteConfig.baseUrl +
-                                                'docs/' +
-                                                this.props.language +
-                                                '/doc1.html'
-                                            }>
-                                            Example Link
-                                        </Button>
-                                        <Button
-                                            href={
-                                                siteConfig.baseUrl +
-                                                'docs/' +
-                                                this.props.language +
-                                                '/doc2.html'
-                                            }>
-                                            Example Link 2
-                                        </Button>
                                     </div>
                                 </div>
                             </div>
@@ -102,29 +84,39 @@ class Index extends React.Component {
                             align="center"
                             contents={[
                                 {
-                                    content: 'This is the content of my feature',
+                                    content: 'Write efficient and expressive code',
                                     image: siteConfig.baseUrl + 'img/docusaurus.svg',
                                     imageAlign: 'top',
-                                    title: 'Feature One',
+                                    title: 'Pattern Matching',
                                 },
                                 {
-                                    content: 'The content of my second feature',
+                                    content: 'Static typing without of the headache',
                                     image: siteConfig.baseUrl + 'img/docusaurus.svg',
                                     imageAlign: 'top',
-                                    title: 'Feature Two',
+                                    title: 'Type Inference',
                                 },
+                                {
+                                    content: 'Easy to learn',
+                                    image: siteConfig.baseUrl + 'img/docusaurus.svg',
+                                    imageAlign: 'top',
+                                    title: 'Familiar Syntax',
+                                },
+                                {
+                                    content: 'Scale your project with ease',
+                                    image: siteConfig.baseUrl + 'img/docusaurus.svg',
+                                    imageAlign: 'top',
+                                    title: 'Actor-based Concurrency',
+                                },
+                                {
+                                    content: 'Rely on the powerful and robust Golang runtime and vast ecosystem',
+                                    image: siteConfig.baseUrl + 'img/docusaurus.svg',
+                                    imageAlign: 'top',
+                                    title: 'Golang Ecosystem',
+                                }
                             ]}
-                            layout="fourColumn"
+                            layout="threeColumn"
                         />
                     </Container>
-
-                    <div
-                        className="productShowcaseSection paddingBottom"
-                        style={{textAlign: 'center'}}>
-                        <h2>Feature Callout</h2>
-                        <MarkdownBlock>These are features of this project</MarkdownBlock>
-                    </div>
-
                     <Container padding={['bottom', 'top']} background="light">
                         <GridBlock
                             contents={[
@@ -142,7 +134,7 @@ class Index extends React.Component {
                         <GridBlock
                             contents={[
                                 {
-                                    content: 'Talk about trying this out',
+                                    content: 'Othello is easy to install and learn',
                                     image: siteConfig.baseUrl + 'img/docusaurus.svg',
                                     imageAlign: 'left',
                                     title: 'Try it Out',

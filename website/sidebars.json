@@ -1,19 +1,16 @@
 {
   "docs": {
     "Othello": [
-      "doc1"
+      "overview"
     ],
     "Quickstart": [
-      "doc2"
+      "quickstart"
     ],
     "Language Basics": [
-      "doc3"
-    ]
-  },
-  "docs-other": {
-    "First Category": [
-      "doc4",
-      "doc5"
+      "variables",
+      "strings",
+      "functions",
+      "types"
     ]
   }
 }
