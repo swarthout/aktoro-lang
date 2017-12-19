@@ -9,41 +9,50 @@ _line: _NEWLINE
      | expr
      | type_def
 
-decl: "let" NAME "=" expr
+decl: "let" var_decl "=" expr
+var_decl: NAME
+var_usage: NAME
 
-?expr: NUMBER -> number
+?expr: INT    -> int
+     | FLOAT  -> float
      | BOOL   -> bool
-     | NAME   -> var
+     | NAME   -> var_usage
      | STRING -> string
      | list
      | func_def
      | arith_expr
+     | logical_expr
      | func_call
 
-arith_expr: expr "+" expr  -> addition
-          | expr "-" expr  -> subtraction
-          | expr "/" expr  -> division
-          | expr "*" expr  -> multiplication
-          | expr "<>" expr -> concatenation
+arith_expr: expr "+" expr  -> add
+          | expr "-" expr  -> subtract
+          | expr "/" expr  -> divide
+          | expr "*" expr  -> mult
+          | expr "<>" expr -> concat
+
+logical_expr: expr "and" expr -> and
+            | expr "or" expr  -> or
+            | "not" expr      -> not
 
 list: "[" _expr_list? "]"
 _expr_list: expr ("," expr)*
 
-type_def: "type" type_name "=" (record_def | variant_def)
-type_name: NAME
+type_def: "type" type_decl "=" (record_def | variant_def)
+type_decl: NAME
+type_usage: NAME
 
 record_def: "{" param_list? "}"
 variant_def: variant_constructor ("|" variant_constructor)+
-variant_constructor: atom type_name*
+variant_constructor: atom type_usage*
 atom: ":" NAME
 
-func_def: "fn" "(" param_list? ")" [type_name] "=>" func_body
+func_def: "fn" "(" param_list? ")" [type_usage] "=>" func_body
 func_body: stmt | block
 param_list: param ("," param)*
-param: NAME type_name
+param: NAME type_usage
 block: "{" _line* "}"
 
-func_call: NAME "(" _expr_list? ")"
+func_call: var_usage "(" _expr_list? ")"
 
 BOOL.2: "true"
       | "false"
@@ -52,7 +61,8 @@ _NEWLINE: ( /\r?\n[\t ]*/ | COMMENT )+
 COMMENT: /#[^\n]*/
 
 %import common.CNAME -> NAME
-%import common.NUMBER
+%import common.SIGNED_INT -> INT
+%import common.FLOAT
 %import common.WS_INLINE
 %import common.ESCAPED_STRING -> STRING
 

@@ -1,5 +1,5 @@
 from lark import Lark
-from lark.tree import Visitor
+from code_gen import CodeGen
 import argparse
 import os.path
 from io import open
@@ -19,6 +19,11 @@ args = arg_parser.parse_args()
 input_filename = os.path.join(__path__, args.filename)
 with open(input_filename) as ol:
     program = ol.read()
-    parse_tree = othello_parser.parse(program)
+
+parse_tree = othello_parser.parse(program)
 
 print(parse_tree.pretty())
+
+go_code = CodeGen().transform(parse_tree)
+
+print(go_code)
