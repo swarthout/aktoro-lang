@@ -33,8 +33,8 @@ class RecordTable:
         self.name_table = {}
 
     @staticmethod
-    def hash_fields(fields):
-        fields_sorted = sorted(fields)
+    def hash_field_names(field_names):
+        fields_sorted = sorted(field_names)
         field_hash = "#".join(fields_sorted)
         return field_hash
 
@@ -42,14 +42,15 @@ class RecordTable:
         field_hash = self.name_table[name]
         return self.table[field_hash]
 
-    def get_record_by_fields(self, fields):
-        field_hash = self.hash_fields(fields)
+    def get_by_field_names(self, field_names):
+        field_hash = self.hash_field_names(field_names)
         return self.table[field_hash]
 
-    def insert_record(self, name, fields):
-        field_hash = self.hash_fields(fields)
-        self.name_table[name] = field_hash
-        self.table[field_hash] = Record(name=name, fields=fields)
+    def insert_record(self, record):
+        field_names = list(record.fields.keys())
+        field_hash = self.hash_field_names(field_names)
+        self.name_table[record.name] = field_hash
+        self.table[field_hash] = record
 
 
 class CodeGen(Transformer):
@@ -90,7 +91,9 @@ class CodeGen(Transformer):
         return snake_to_camel(args[0])
 
     def var_usage(self, args):
-        return snake_to_camel(args[0])
+        name = snake_to_camel(args[0])
+        var = self.symbol_table.get(name)
+        return Expression(type_name=var.type_name, go_code=name)
 
     def int(self, args):
         return Expression(type_name="int", go_code=args[0])
@@ -118,7 +121,7 @@ class CodeGen(Transformer):
         for f in field_defs:
             r.fields[f["name"]] = f["type_name"]
         self.symbol_table.set(name, r)
-        self.record_table.insert_record(name, [f["name"] for f in field_defs])
+        self.record_table.insert_record(r)
         field_go_code = [f["go_code"] for f in field_defs]
         field_go_code = textwrap.indent("\n".join(field_go_code), "\t")
         go_code = textwrap.dedent("""
@@ -150,7 +153,7 @@ class CodeGen(Transformer):
 
     def record_usage(self, args):
         field_names = [field["name"] for field in args]
-        record = self.record_table.get_record_by_fields(field_names)
+        record = self.record_table.get_by_field_names(field_names)
         fields_go_code = ",\n".join([field["go_code"] for field in args])
         go_code = f"{record.name}{{\n" + textwrap.indent(fields_go_code, "\t") + textwrap.dedent("}")
         return Expression(type_name=record.name, go_code=go_code)
@@ -163,7 +166,23 @@ class CodeGen(Transformer):
             "go_code": f"{name}: {expr.go_code}"
         }
 
+    def field_decl(self, args):
+        name, type_name = args
+        name = snake_to_camel(name)
+        return {
+            "name": name,
+            "type_name": type_name,
+            "go_code": f"{name} {type_name}"
+        }
+
+    def field_list(self, args):
+        return args
+
+    def field_usage(self, args):
+        return snake_to_camel(args[0])
+
     def print(self, args):
         self.imports.append('"fmt"')
-        exprs = ",".join(args)
+        arg_code = [arg.go_code for arg in args]
+        exprs = ",".join(arg_code)
         return f"fmt.Println({exprs})"

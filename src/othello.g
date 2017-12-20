@@ -43,13 +43,17 @@ type_def: "type" type_decl "=" (record_def | variant_def)
 type_decl: NAME
 type_usage: NAME
 
-record_def: "{" param_list? "}"
+record_def: "{" field_list "}"
+field_list: field_decl ("," field_decl)*
+field_decl: NAME type_usage
+
 variant_def: variant_constructor ("|" variant_constructor)+
 variant_constructor: atom type_usage*
 atom: ":" NAME
 
 record_usage: "{" _NEWLINE? field_assignment ("," _NEWLINE? field_assignment)* _NEWLINE? "}"
-field_assignment: var_usage "=" expr
+field_assignment: field_usage "=" expr
+field_usage: NAME
 
 func_def: "fn" "(" param_list? ")" [type_usage] "=>" func_body
 func_body: stmt | block
@@ -58,7 +62,6 @@ param: var_decl type_usage
 block: "{" _line* "}"
 
 func_call: var_usage "(" _expr_list? ")"
-
 print: "print" "(" _expr_list? ")"
 
 BOOL.2: "true"
