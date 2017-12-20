@@ -8,6 +8,7 @@ _line: _NEWLINE
 ?stmt: decl
      | expr
      | type_def
+     | print
 
 decl: "let" var_decl "=" expr
 var_decl: NAME
@@ -57,6 +58,8 @@ param: var_decl type_usage
 block: "{" _line* "}"
 
 func_call: var_usage "(" _expr_list? ")"
+
+print: "print" "(" _expr_list? ")"
 
 BOOL.2: "true"
       | "false"

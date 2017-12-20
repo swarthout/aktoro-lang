@@ -56,18 +56,30 @@ class CodeGen(Transformer):
     def __init__(self):
         self.symbol_table = SymbolTable()
         self.record_table = RecordTable()
+        self.imports = []
 
     def program(self, args):
         lines = "\n".join(args)
+        import_go_code = ""
+        if self.imports:
+            import_tmpl = textwrap.dedent("""
+            import (
+            {imports}
+            )
+            """)
+            import_names = "\n".join(self.imports)
+            import_go_code = import_tmpl.format(imports=textwrap.indent(import_names, "\t"))
+
         go_body = textwrap.dedent("""
             package main
+            {imports}
             
             func main() {{
             {lines}
             }}
             
             """)
-        return go_body.format(lines=textwrap.indent(lines, "\t"))
+        return go_body.format(lines=textwrap.indent(lines, "\t"), imports=import_go_code)
 
     def decl(self, args):
         name, expr = args
@@ -139,8 +151,8 @@ class CodeGen(Transformer):
     def record_usage(self, args):
         field_names = [field["name"] for field in args]
         record = self.record_table.get_record_by_fields(field_names)
-        fields_go_code = "\n".join([field["go_code"] for field in args])
-        go_code = f"{record.name}{{\n" + textwrap.indent(fields_go_code, "\t") + textwrap.dedent("\n}")
+        fields_go_code = ",\n".join([field["go_code"] for field in args])
+        go_code = f"{record.name}{{\n" + textwrap.indent(fields_go_code, "\t") + textwrap.dedent("}")
         return Expression(type_name=record.name, go_code=go_code)
 
     def field_assignment(self, args):
@@ -150,3 +162,8 @@ class CodeGen(Transformer):
             "expr": expr,
             "go_code": f"{name}: {expr.go_code}"
         }
+
+    def print(self, args):
+        self.imports.append('"fmt"')
+        exprs = ",".join(args)
+        return f"fmt.Println({exprs})"
