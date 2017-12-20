@@ -23,6 +23,7 @@ var_usage: NAME
      | arith_expr
      | logical_expr
      | func_call
+     | record_usage
 
 arith_expr: expr "+" expr  -> add
           | expr "-" expr  -> subtract
@@ -46,10 +47,13 @@ variant_def: variant_constructor ("|" variant_constructor)+
 variant_constructor: atom type_usage*
 atom: ":" NAME
 
+record_usage: "{" _NEWLINE? field_assignment ("," _NEWLINE? field_assignment)* _NEWLINE? "}"
+field_assignment: var_usage "=" expr
+
 func_def: "fn" "(" param_list? ")" [type_usage] "=>" func_body
 func_body: stmt | block
 param_list: param ("," param)*
-param: NAME type_usage
+param: var_decl type_usage
 block: "{" _line* "}"
 
 func_call: var_usage "(" _expr_list? ")"
