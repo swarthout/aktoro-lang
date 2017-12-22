@@ -12,12 +12,12 @@ _line: _NEWLINE
 
 decl: "let" var_decl "=" expr
 var_decl: NAME
-var_usage: NAME
+var_usage: NAME ("." NAME)*
 
 ?expr: INT    -> int
      | FLOAT  -> float
      | BOOL   -> bool
-     | NAME   -> var_usage
+     | var_usage
      | STRING -> string
      | list
      | func_def
@@ -52,8 +52,8 @@ variant_constructor: atom type_usage*
 atom: ":" NAME
 
 record_usage: "{" _NEWLINE? field_assignment ("," _NEWLINE? field_assignment)* _NEWLINE? "}"
-field_assignment: field_usage "=" expr
-field_usage: NAME
+field_assignment: field_name "=" expr
+field_name: NAME
 
 func_def: "fn" "(" param_list? ")" [type_usage] "=>" func_body
 func_body: stmt | block

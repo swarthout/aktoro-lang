@@ -178,7 +178,7 @@ class CodeGen(Transformer):
     def field_list(self, args):
         return args
 
-    def field_usage(self, args):
+    def field_name(self, args):
         return snake_to_camel(args[0])
 
     def print(self, args):
