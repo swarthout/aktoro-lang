@@ -91,9 +91,17 @@ class CodeGen(Transformer):
         return snake_to_camel(args[0])
 
     def var_usage(self, args):
-        name = snake_to_camel(args[0])
-        var = self.symbol_table.get(name)
-        return Expression(type_name=var.type_name, go_code=name)
+        root_name = snake_to_camel(args[0])
+        root_var = self.symbol_table.get(root_name)
+        var_type = root_var.type_name
+        if len(args) > 1:
+            for arg in args[1:]:
+                arg_name = snake_to_camel(arg)
+                record = self.record_table.get_record_by_name(var_type)
+                var_type = record.fields[arg_name]
+
+        full_name = ".".join([snake_to_camel(name) for name in args])
+        return Expression(type_name=var_type, go_code=full_name)
 
     def int(self, args):
         return Expression(type_name="int", go_code=args[0])

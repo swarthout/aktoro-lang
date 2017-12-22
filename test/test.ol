@@ -1,5 +1,14 @@
-type user = {user_id string, age int}
+type car = {name string, miles int}
 
-let u = {user_id = "Scott", age = 21}
+type user = {user_id string, age int, car car}
 
-print(u.user_id)
+let u = {
+        user_id = "Scott",
+        age = 21,
+        car = {
+            name = "Mustang",
+            miles = 12345
+         }
+    }
+
+print(u.car.miles)
