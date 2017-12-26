@@ -100,7 +100,19 @@ type heap 't = {
 
 }
 
+let a = with {
 
+    let b <- returns_result()
+    let c ?=
+
+} yield
+
+user_id = "Scott",
+    age = 21,
+    car = {
+        name = "Mustang",
+        miles = 12345
+        }
 import fmt from "std/fmt"
 import user, comment from "github.com/scott/blog"
 
@@ -200,7 +212,7 @@ a = stack.pop (s)
 
 # a int = 6
 
-let map_int_string = fn (l list int, f fn (int) string ) list string => {
+let map_int_string = fn (l either int string, f fn (option string) string ) list string => {
     list.map(f)
 }
     

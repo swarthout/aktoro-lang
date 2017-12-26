@@ -41,7 +41,18 @@ _expr_list: expr ("," expr)*
 
 type_def: "type" type_decl "=" (record_def | variant_def)
 type_decl: NAME
-type_usage: NAME
+type_usage: _t
+
+_t: NAME
+  | _t _t
+  | paren_type
+  | func_type
+
+paren_type: "(" _t ")" -> type_usage
+
+func_type: "fn" "(" type_list? ")" type_usage
+
+type_list: type_usage ("," type_usage)*
 
 record_def: "{" field_list "}"
 field_list: field_decl ("," field_decl)*
@@ -56,7 +67,7 @@ field_assignment: field_name "=" expr
 field_name: NAME
 
 func_def: "fn" "(" param_list? ")" [type_usage] "=>" func_body
-func_body: stmt | block
+func_body: expr | block
 param_list: param ("," param)*
 param: var_decl type_usage
 block: "{" _line* "}"

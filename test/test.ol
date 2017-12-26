@@ -1,14 +1,5 @@
-type car = {name string, miles int}
-
-type user = {user_id string, age int, car car}
-
-let u = {
-        user_id = "Scott",
-        age = 21,
-        car = {
-            name = "Mustang",
-            miles = 12345
-         }
-    }
+let add_to_list = fn (a maybe string, b fn (list string, int) string, c list (option string), d maybe (list (maybe(string))) ) map string string => {
+    let a = 4
+}
 
 print(u.car.miles)
