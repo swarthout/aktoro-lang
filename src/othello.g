@@ -8,35 +8,36 @@ _line: _NEWLINE
 ?stmt: decl
      | expr
      | type_def
-     | print
+     | print_stmt
 
 decl: "let" var_decl "=" expr
 var_decl: NAME
 var_usage: NAME ("." NAME)*
 
-?expr: INT    -> int
-     | FLOAT  -> float
-     | BOOL   -> bool
+?expr: INT    -> int_literal
+     | FLOAT  -> float_literal
+     | BOOL   -> bool_literal
      | var_usage
-     | STRING -> string
-     | list
+     | STRING -> string_literal
+     | list_literal
      | func_def
      | arith_expr
      | logical_expr
      | func_call
-     | record_usage
+     | record_literal
+     | record_update
 
-arith_expr: expr "+" expr  -> add
-          | expr "-" expr  -> subtract
-          | expr "/" expr  -> divide
-          | expr "*" expr  -> mult
-          | expr "<>" expr -> concat
+arith_expr: expr "+" expr  -> add_expr
+          | expr "-" expr  -> subtract_expr
+          | expr "/" expr  -> divide_expr
+          | expr "*" expr  -> mult_expr
+          | expr "<>" expr -> concat_expr
 
-logical_expr: expr "and" expr -> and
-            | expr "or" expr  -> or
-            | "not" expr      -> not
+logical_expr: expr "and" expr -> and_expr
+            | expr "or" expr  -> or_expr
+            | "not" expr      -> not_expr
 
-list: "[" _expr_list? "]"
+list_literal: "[" _expr_list? "]"
 _expr_list: expr ("," expr)*
 
 type_def: "type" type_decl "=" (record_def | variant_def)
@@ -59,21 +60,26 @@ field_list: field_decl ("," field_decl)*
 field_decl: NAME type_usage
 
 variant_def: variant_constructor ("|" variant_constructor)+
-variant_constructor: atom type_usage*
-atom: ":" NAME
+variant_constructor: atom_literal type_usage*
+atom_literal: ":" NAME
 
-record_usage: "{" _NEWLINE? field_assignment ("," _NEWLINE? field_assignment)* _NEWLINE? "}"
+record_literal: "{" _NEWLINE? field_assignment ("," _NEWLINE? field_assignment)* _NEWLINE? "}"
 field_assignment: field_name "=" expr
 field_name: NAME
 
-func_def: "fn" "(" param_list? ")" [type_usage] "=>" func_body
-func_body: expr | block
+record_update: "{" var_usage "|" field_assignment ("," _NEWLINE? field_assignment)* "}"
+
+func_def: "fn" open_params param_list? close_params [type_usage] "=>" func_body
+func_body: open_block _line* close_block
 param_list: param ("," param)*
 param: var_decl type_usage
-block: "{" _line* "}"
+open_params: "("
+close_params: ")"
+open_block: "{"
+close_block: "}"
 
 func_call: var_usage "(" _expr_list? ")"
-print: "print" "(" _expr_list? ")"
+print_stmt: "print" "(" _expr_list? ")"
 
 BOOL.2: "true"
       | "false"

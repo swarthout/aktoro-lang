@@ -20,11 +20,17 @@ class SymbolTable:
     def __init__(self):
         self.table = {}
 
-    def set(self, name, data):
+    def add_symbol(self, name, data):
         self.table[name] = data
 
-    def get(self, name):
+    def get_symbol(self, name):
         return self.table[name]
+
+    def push_scope(self):
+        pass
+
+    def pop_scope(self):
+        pass
 
 
 class RecordTable:
@@ -84,7 +90,7 @@ class CodeGen(Transformer):
 
     def decl(self, args):
         name, expr = args
-        self.symbol_table.set(name, Variable(name, expr.type_name))
+        self.symbol_table.add_symbol(name, Variable(name, expr.type_name))
         return f"{name} := {expr.go_code}"
 
     def var_decl(self, args):
@@ -92,7 +98,7 @@ class CodeGen(Transformer):
 
     def var_usage(self, args):
         root_name = snake_to_camel(args[0])
-        root_var = self.symbol_table.get(root_name)
+        root_var = self.symbol_table.get_symbol(root_name)
         var_type = root_var.type_name
         if len(args) > 1:
             for arg in args[1:]:
@@ -103,19 +109,19 @@ class CodeGen(Transformer):
         full_name = ".".join([snake_to_camel(name) for name in args])
         return Expression(type_name=var_type, go_code=full_name)
 
-    def int(self, args):
+    def int_literal(self, args):
         return Expression(type_name="int", go_code=args[0])
 
-    def float(self, args):
+    def float_literal(self, args):
         return Expression(type_name="float64", go_code=args[0])
 
-    def bool(self, args):
+    def bool_literal(self, args):
         return Expression(type_name="bool", go_code=args[0])
 
-    def string(self, args):
+    def string_literal(self, args):
         return Expression(type_name="string", go_code=args[0])
 
-    def list(self, args):
+    def list_literal(self, args):
         item_type = args[0].type_name
         type_name = f"[]{item_type}"
         arg_code = [arg.go_code for arg in args]
@@ -128,7 +134,7 @@ class CodeGen(Transformer):
         r = Record(name=name, fields={})
         for f in field_defs:
             r.fields[f["name"]] = f["type_name"]
-        self.symbol_table.set(name, r)
+        self.symbol_table.add_symbol(name, r)
         self.record_table.insert_record(r)
         field_go_code = [f["go_code"] for f in field_defs]
         field_go_code = textwrap.indent("\n".join(field_go_code), "\t")
@@ -159,7 +165,7 @@ class CodeGen(Transformer):
     def type_usage(self, args):
         return snake_to_camel(args[0])
 
-    def record_usage(self, args):
+    def record_literal(self, args):
         field_names = [field["name"] for field in args]
         record = self.record_table.get_by_field_names(field_names)
         fields_go_code = ",\n".join([field["go_code"] for field in args])
@@ -189,7 +195,19 @@ class CodeGen(Transformer):
     def field_name(self, args):
         return snake_to_camel(args[0])
 
-    def print(self, args):
+    def func_def(self, args):
+        return Expression(type_name="func", go_code="")
+
+    def func_body(self, args):
+        pass
+
+    def open_params(self, args):
+        pass
+
+    def close_block(self, args):
+        pass
+
+    def print_stmt(self, args):
         self.imports.append('"fmt"')
         arg_code = [arg.go_code for arg in args]
         exprs = ",".join(arg_code)
