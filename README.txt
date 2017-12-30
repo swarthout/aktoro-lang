@@ -1,1 +1,0 @@
-Othello Programming Language

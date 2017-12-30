@@ -2,7 +2,6 @@
 Basic Types:
 int
 list
-array
 float
 string
 tag
@@ -14,7 +13,7 @@ variant
 atom
 
 
-let g = [|3, 4, 5|]
+let g = [3, 4, 5]
 
 let a = 4
 
@@ -70,13 +69,13 @@ type map 'k 'v = {
 
 }
 
-let v = {
+let v = %{
     3 => "three",
     4 => "four",
     5 => "five"
 }
 
-w = {v | 6 => "six", 5 => "cinco"}
+w = %{v | 6 => "six", 5 => "cinco"}
 
 l list int = [0..17]
 
@@ -101,11 +100,10 @@ type heap 't = {
 }
 
 let a = with {
-
     let b <- returns_result()
-    let c ?=
-
-} yield
+    let c <- get_other_thing(b)
+    let d <- another_op()
+} yield perform_thing(c, d)
 
 user_id = "Scott",
     age = 21,
@@ -130,10 +128,7 @@ let req_handler = fn (r request) => {
         },
         :post "/hello/{id}" => fn (r request) => {
             let {id} = http.get_vars(r)
-            let response = map (int, string) {
-                id => "Your id is \(id)"
-                id + 1 => "The next is \(id + 1)"
-            }
+            let response = dict int string {}
             json.dump(response)
         },
         :post "/hello/{id int}/{username option string}" => post_handler
@@ -158,10 +153,9 @@ let a = [3, 4, 5]
 a = b <> "world!"
 
 module math = {
-    let sum = fn (a int, b int) => do_sum a, b
-
+    let sum = fn (a int, b int) => do_sum_ (a, b)
     
-    let priv do_sum = fn (a int, b int) int => a + b
+    let do_sum_ = fn (a int, b int) int => a + b
 
     let zero? = fn (a int) bool => {
         match a {
@@ -181,12 +175,13 @@ module math = {
 let anonymous_func = fn (a, b) => a + b
 
 module stack = {
-    let init = fn (_ 't, {buffer_size = 5}) stack_state 't => {
-        {data = [], buffer_size}
+    type stack_args = {buffer_size int}
+    let init = fn 't (args stack_args) stack_state 't => {
+        {data = [], buffer_size = args.buffer_size}
     }
     type stack_state 't = {
         data list 't = [],
-        buffer_size = 5
+        buffer_size int = 5
     }
     let push = fn (s stack_state 't, e 't) stack_state 't => {
         {s | data=[e | data]}
