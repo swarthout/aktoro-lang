@@ -249,9 +249,7 @@ type state = { total_count int, reset_count int}
 
 type message = :add int | :reset | :get_count
 
-let counter = actor state {
-    init = fn ({start}) state => {total_count = start, reset_count = 0}
-    reducer = fn (s state, m message, sender (option actor)) state => {
+let counter_reducer = fn (s state, m message, sender (option actor)) state => {
         match m {
             :add num => {s | total_count = s.total_count + num},
             :reset => {s | total_count = 0, reset_count = s.reset_count + 1},
@@ -265,13 +263,21 @@ let counter = actor state {
 
 type counter_args = {start int}
 
-let pid = go (counter.init ({start = 5}))
+let init_counter(args counter_args) actor.pid => {
+    let init_state = {
+        total_count=start,
+        reset_count=0
+    }
+    go (init_state, counter_reducer)
+}
 
-tell (pid, :add 7)
+let counter = init_counter({start=5})
 
-tell (pid, :reset)
+tell (counter, :add 7)
 
-let (:ok count) = ask (counter, get_count)
+tell (counter, :reset)
+
+let count = ask (counter, :get_count)
 
 num = match count {
     :ok num => num,
@@ -279,51 +285,52 @@ num = match count {
 }
 
 module stack = {
-    use actor.{go, tell, ask, reply}
-    type pid 't = actor.pid (stack_actor 't)
-    let init = fn 't ({buffer_size}) pid 't => {
-        go (stack_actor.init 't ({buffer_size}))
+
+    type state_ 't = {
+        data list 't,
+        buffer_size int
     }
 
-    let push = fn (s pid 't, e 't) => {
-        tell (s, :push e)
-    }
-    let pop = fn (s pid 't) => {
-        tell (s, :pop)
-    }
+    type message_ = :push 't | :pop | :get_top
 
-    let get_top = fn (s pid 't) 't => {
-        ask (s, :get_top)
-    } 
-
-    type stack_state 't = {
-        data list 't = [],
-        buffer_size int = 5
-    }
-
-    type _message = :push 't | :pop | :get_top
-
-    let stack_actor 't = actor stack_state 't {
-        init = fn 't ({buffer_size}) stack_state 't => {
-            {data = [], buffer_size}
-        }
-        reducer = fn(s stack_state 't, m message, sender option actor.pid) stack_state 't => {
-            match m {
-                :push e => {s | data=[e | data]},
-                :pop => {
-                    {s | data=data[1..]}
-                },
-                :get_top => {
-                    reply (sender, s.data[0])
-                }
+    let reducer_ = fn(s state_ 't, m message_, sender option actor.pid) state_ 't => {
+        match m {
+            :push e => {
+                {s | data = data <> [e]}
+             },
+            :pop => {
+                {s | data=data[..-1]}
+            },
+            :get_top => {
+                actor.reply (sender, s.data[-1])
             }
         }
     }
-    
+
+    let init = fn ('t, buffer_size int ) actor.pid => {
+        let init_state = {
+            data = list.init('t),
+            buffer_size
+        }
+        actor.go (init_state, reducer_)
+    }
+
+    let push = fn (s actor.pid, e 't) => {
+        actor.tell (s, :push e)
+    }
+    let pop = fn (s pid 't) => {
+        actor.tell (s, :pop)
+    }
+
+    let get_top = fn (s pid 't) 't => {
+        actor.ask (s, :get_top)
+    } 
+
 }
 
 
-let s = stack.init (0, {buffer_size = 5})
+
+let s = stack.init (int, 5)
 
 stack.push (s, 4)
 stack.push (s, 3)
