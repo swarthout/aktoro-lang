@@ -20,17 +20,17 @@ var_usage: NAME ("." NAME)*
 ?add_expr: mult_expr ( ( "+" | "-" ) mult_expr )*
 ?mult_expr: primary ( ( "*" | "/" ) primary )*
 ?primary: "(" expr ")"
-        | INT        -> int_literal
-        | FLOAT      -> float_literal
-        | BOOL       -> bool_literal
+        | INT         -> int_literal
+        | FLOAT       -> float_literal
+        | BOOL        -> bool_literal
         | var_usage
-        | STRING     -> string_literal
+        | STRING      -> string_literal
         | list_literal
         | func_def
         | func_call
         | record_literal
         | record_update
-        | "-" primary
+        | "-" primary -> negation_expr
 
 list_literal: "[" _expr_list? "]"
 _expr_list: expr ("," expr)*

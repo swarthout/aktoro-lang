@@ -132,6 +132,11 @@ class CodeGen(Transformer):
         go_code = f"{type_name}{{{arg_code}}}"
         return Expression(type_name, go_code)
 
+    def add_expr(self, args):
+        left, right = args
+        go_code = f"{left.go_code} + {right.go_code}"
+        return Expression(left.type_name, go_code)
+
     def type_def(self, args):
         name, field_defs = args
         r = Record(name=name, fields={})
@@ -200,15 +205,18 @@ class CodeGen(Transformer):
         return snake_to_camel(args[0])
 
     def func_def(self, args):
-        _, params, return_type, func_body = args
+        _, params, _, return_type, func_body = args
         param_types = [param["type_name"] for param in params]
         param_types = ", ".join(param_types)
         func_type = f"func({param_types}) {return_type}"
-        go_code = textwrap.dedent("""
-        func ({params}) {return_type} {{
+        params = [param["go_code"] for param in params]
+        params = ", ".join(params)
+        func_body = "\n".join(line.go_code for line in func_body)
+        go_code = """func ({params}) {return_type} {{
         {func_body}
         }}
-        """)
+        """
+        go_code = go_code.format(params=params, return_type=return_type, func_body=func_body)
         return Expression(type_name=func_type, go_code=go_code)
 
     def func_body(self, args):
@@ -216,10 +224,19 @@ class CodeGen(Transformer):
         args.pop()  # remove close block instruction
         last_expr = args[-1]
         last_expr = self.return_expr(last_expr)
+        args[-1] = last_expr
         return args
 
+    def func_call(self, args):
+        func_type = args[0].type_name
+        expr_type = func_type.rsplit(")", 1)[-1]
+        arg_code = [arg.go_code for arg in args[1:]]
+        arg_code = ",".join(arg_code)
+        go_code = f"{args[0].go_code}({arg_code})"
+        return Expression(type_name=expr_type, go_code=go_code)
+
     def return_expr(self, args):
-        return Expression(args[0].type_name, go_code=f"return {args[0].go_code}")
+        return Expression(args.type_name, go_code=f"return {args.go_code}")
 
     def open_params(self, args):
         self.symbol_table.push_scope()

@@ -1,5 +1,5 @@
-let anything_ = 4
-
 let adds = fn (a int, b int) int => {
-    a + b * c
+    a + b
 }
+
+print(adds(3,4) + 4)
