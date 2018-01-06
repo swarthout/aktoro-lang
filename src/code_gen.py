@@ -18,19 +18,22 @@ def snake_to_camel(name):
 
 class SymbolTable:
     def __init__(self):
-        self.table = {}
+        self.table = [{}]
 
     def add_symbol(self, name, data):
-        self.table[name] = data
+        self.table[-1][name] = data
 
     def get_symbol(self, name):
-        return self.table[name]
+        for scope in reversed(self.table):
+            if name in scope.keys():
+                return scope[name]
+        raise KeyError(name)
 
     def push_scope(self):
-        pass
+        self.table.append({})
 
     def pop_scope(self):
-        pass
+        self.table.pop()
 
 
 class RecordTable:
@@ -156,6 +159,7 @@ class CodeGen(Transformer):
 
     def param(self, args):
         name, type_name = args
+        self.symbol_table.add_symbol(name, Variable(name, type_name))
         return {
             "name": name,
             "type_name": type_name,
@@ -196,16 +200,32 @@ class CodeGen(Transformer):
         return snake_to_camel(args[0])
 
     def func_def(self, args):
-        return Expression(type_name="func", go_code="")
+        _, params, return_type, func_body = args
+        param_types = [param["type_name"] for param in params]
+        param_types = ", ".join(param_types)
+        func_type = f"func({param_types}) {return_type}"
+        go_code = textwrap.dedent("""
+        func ({params}) {return_type} {{
+        {func_body}
+        }}
+        """)
+        return Expression(type_name=func_type, go_code=go_code)
 
     def func_body(self, args):
-        pass
+        args.pop(0)  # remove open block instruction
+        args.pop()  # remove close block instruction
+        last_expr = args[-1]
+        last_expr = self.return_expr(last_expr)
+        return args
+
+    def return_expr(self, args):
+        return Expression(args[0].type_name, go_code=f"return {args[0].go_code}")
 
     def open_params(self, args):
-        pass
+        self.symbol_table.push_scope()
 
     def close_block(self, args):
-        pass
+        self.symbol_table.pop_scope()
 
     def print_stmt(self, args):
         self.imports.append('"fmt"')

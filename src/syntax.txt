@@ -263,7 +263,7 @@ let counter_reducer = fn (s state, m message, sender (option actor)) state => {
 
 type counter_args = {start int}
 
-let init_counter(args counter_args) actor.pid => {
+let init_counter = fn (args counter_args) actor.pid => {
     let init_state = {
         total_count=start,
         reset_count=0

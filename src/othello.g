@@ -14,28 +14,23 @@ decl: "let" var_decl "=" expr
 var_decl: NAME
 var_usage: NAME ("." NAME)*
 
-?expr: INT    -> int_literal
-     | FLOAT  -> float_literal
-     | BOOL   -> bool_literal
-     | var_usage
-     | STRING -> string_literal
-     | list_literal
-     | func_def
-     | arith_expr
-     | logical_expr
-     | func_call
-     | record_literal
-     | record_update
 
-arith_expr: expr "+" expr  -> add_expr
-          | expr "-" expr  -> subtract_expr
-          | expr "/" expr  -> divide_expr
-          | expr "*" expr  -> mult_expr
-          | expr "<>" expr -> concat_expr
-
-logical_expr: expr "and" expr -> and_expr
-            | expr "or" expr  -> or_expr
-            | "not" expr      -> not_expr
+?expr: equality_expr
+?equality_expr: add_expr ( ( "==" | "!=" ) add_expr )*
+?add_expr: mult_expr ( ( "+" | "-" ) mult_expr )*
+?mult_expr: primary ( ( "*" | "/" ) primary )*
+?primary: "(" expr ")"
+        | INT        -> int_literal
+        | FLOAT      -> float_literal
+        | BOOL       -> bool_literal
+        | var_usage
+        | STRING     -> string_literal
+        | list_literal
+        | func_def
+        | func_call
+        | record_literal
+        | record_update
+        | "-" primary
 
 list_literal: "[" _expr_list? "]"
 _expr_list: expr ("," expr)*
