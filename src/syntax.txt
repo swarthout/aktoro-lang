@@ -148,8 +148,6 @@ v[3]
 
 let a = [3, 4, 5]
 
-[head | tail] = a
-
 a = b <> "world!"
 
 module math = {
@@ -157,14 +155,14 @@ module math = {
     
     let do_sum_ = fn (a int, b int) int => a + b
 
-    let zero? = fn (a int) bool => {
+    let is_zero = fn (a int) bool => {
         match a {
             0 => true,
             _ => false
         }
     }
 
-    let positive = fn (x int) => {
+    let positive = fn (x int) bool => {
         match {
             x < 0 => false,
             x >= 0 => true
@@ -251,8 +249,12 @@ type message = :add int | :reset | :get_count
 
 let counter_reducer = fn (s state, m message, sender (option actor)) state => {
         match m {
-            :add num => {s | total_count = s.total_count + num},
-            :reset => {s | total_count = 0, reset_count = s.reset_count + 1},
+            :add num => {
+            {s | total_count = s.total_count + num}
+            },
+            :reset => {
+            {s | total_count = 0, reset_count = s.reset_count + 1}
+            },
             :get_count => {
                 actor.reply (sender, s.total_count)
                 s
