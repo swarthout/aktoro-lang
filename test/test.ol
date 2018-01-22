@@ -1,5 +1,5 @@
-let adds = fn (a int, b int) int => {
-    a + b
+let first = fn (a list (option int)) int => {
+    a[0]
 }
 
-print(adds(3,4) + 4)
+print(first([1,2,3]))

@@ -16,9 +16,15 @@ var_usage: NAME ("." NAME)*
 
 
 ?expr: equality_expr
-?equality_expr: add_expr ( ( "==" | "!=" ) add_expr )*
-?add_expr: mult_expr ( ( "+" | "-" ) mult_expr )*
-?mult_expr: primary ( ( "*" | "/" ) primary )*
+?equality_expr: add_expr ( ( COMP_EQU
+                           | COMP_NEQU
+                           | COMP_GTR
+                           | COMP_GTE
+                           | COMP_LESS
+                           | COMP_LTE ) add_expr )*
+
+?add_expr: mult_expr ( ( PLUS | MINUS ) mult_expr )*
+?mult_expr: primary ( ( MULTIPLY | DIVIDE ) primary )*
 ?primary: "(" expr ")"
         | INT         -> int_literal
         | FLOAT       -> float_literal
@@ -31,6 +37,18 @@ var_usage: NAME ("." NAME)*
         | record_literal
         | record_update
         | "-" primary -> negation_expr
+        | var_usage "[" expr "]" -> list_index
+
+COMP_EQU: "=="
+COMP_NEQU: "!="
+COMP_GTR: ">"
+COMP_GTE: ">="
+COMP_LESS: "<"
+COMP_LTE: "<="
+PLUS: "+"
+MINUS: "-"
+MULTIPLY: "*"
+DIVIDE: "/"
 
 list_literal: "[" _expr_list? "]"
 _expr_list: expr ("," expr)*

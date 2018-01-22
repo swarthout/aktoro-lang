@@ -6,6 +6,18 @@ Expression = namedtuple('Expression', ['type_name', 'go_code'])
 Variable = namedtuple('Variable', ['name', 'type_name'])
 Record = namedtuple('Record', ['name', 'fields'])
 
+BUILTIN_TYPES = {
+    "list": True,
+    "option": True,
+    "map": True,
+    "int": True,
+    "float": True,
+    "string": True,
+    "fn": True,
+    "bool": True,
+    "result": True
+}
+
 
 def snake_to_camel(name):
     words = name.split("_")
@@ -78,7 +90,8 @@ class CodeGen(Transformer):
             )
             """)
             import_names = "\n".join(self.imports)
-            import_go_code = import_tmpl.format(imports=textwrap.indent(import_names, "\t"))
+            import_go_code = import_tmpl.format(
+                imports=textwrap.indent(import_names, "\t"))
 
         go_body = textwrap.dedent("""
             package main
@@ -133,8 +146,13 @@ class CodeGen(Transformer):
         return Expression(type_name, go_code)
 
     def add_expr(self, args):
-        left, right = args
-        go_code = f"{left.go_code} + {right.go_code}"
+        left, op, right = args
+        go_code = f"{left.go_code} {op} {right.go_code}"
+        return Expression(left.type_name, go_code)
+
+    def mult_expr(self, args):
+        left, op, right = args
+        go_code = f"{left.go_code} {op} {right.go_code}"
         return Expression(left.type_name, go_code)
 
     def type_def(self, args):
@@ -178,7 +196,8 @@ class CodeGen(Transformer):
         field_names = [field["name"] for field in args]
         record = self.record_table.get_by_field_names(field_names)
         fields_go_code = ",\n".join([field["go_code"] for field in args])
-        go_code = f"{record.name}{{\n" + textwrap.indent(fields_go_code, "\t") + textwrap.dedent("}")
+        go_code = f"{record.name}{{\n" + \
+            textwrap.indent(fields_go_code, "\t") + textwrap.dedent("}")
         return Expression(type_name=record.name, go_code=go_code)
 
     def field_assignment(self, args):
@@ -216,7 +235,8 @@ class CodeGen(Transformer):
         {func_body}
         }}
         """
-        go_code = go_code.format(params=params, return_type=return_type, func_body=func_body)
+        go_code = go_code.format(
+            params=params, return_type=return_type, func_body=func_body)
         return Expression(type_name=func_type, go_code=go_code)
 
     def func_body(self, args):

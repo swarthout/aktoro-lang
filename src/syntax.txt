@@ -39,7 +39,7 @@ let ignore_second = fn (b int, _) => b + 2
 
 type result 't = :ok 't | :error string
 
-let private_func = fn (b int, user{a, c}) => {
+let private_func = fn (b int, {a, c} user) => {
     g = match return_value(a) {
         :ok v => v,
         :error "specific message" => "hello",
@@ -100,9 +100,9 @@ type heap 't = {
 }
 
 let a = with {
-    let b <- returns_result()
-    let c <- get_other_thing(b)
-    let d <- another_op()
+    b <- returns_result()
+    c <- get_other_thing(b)
+    d <- another_op()
 } yield perform_thing(c, d)
 
 user_id = "Scott",
@@ -205,7 +205,7 @@ a = stack.pop (s)
 
 # a int = 6
 
-let map_int_string = fn (l either int string, f fn (option string) string ) list string => {
+let map_int_string = fn (l result string, f fn (option string) string ) list string => {
     list.map(f)
 }
     
@@ -247,14 +247,10 @@ type state = { total_count int, reset_count int}
 
 type message = :add int | :reset | :get_count
 
-let counter_reducer = fn (s state, m message, sender (option actor)) state => {
+let counter_reducer = fn (s state, m message, sender option actor) state => {
         match m {
-            :add num => {
-            {s | total_count = s.total_count + num}
-            },
-            :reset => {
-            {s | total_count = 0, reset_count = s.reset_count + 1}
-            },
+            :add num => ({s | total_count = s.total_count + num}),
+            :reset => ({s | total_count = 0, reset_count = s.reset_count + 1}),
             :get_count => {
                 actor.reply (sender, s.total_count)
                 s
