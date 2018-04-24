@@ -12,10 +12,10 @@ __path__ = os.path.dirname(__file__)
 cli = argparse.ArgumentParser()
 subparsers = cli.add_subparsers(dest="subcommand")
 
-othello_grammar_filename = os.path.join(__path__, "othello.g")
+aktoro_grammar_filename = os.path.join(__path__, "aktoro.g")
 
-with open(othello_grammar_filename) as f:
-    othello_grammar = Lark(f, parser="lalr", start="program")
+with open(aktoro_grammar_filename) as f:
+    aktoro_grammar = Lark(f, parser="lalr", start="program")
 
 
 def sub_command(args=None, parent=subparsers):
@@ -42,12 +42,13 @@ def build(args):
     with open(input_filename) as ol:
         program = ol.read()
 
-    parse_tree = othello_grammar.parse(program)
+    parse_tree = aktoro_grammar.parse(program)
     generated = CodeGen().transform(parse_tree)
-    input_filename_no_extension = input_filename.split(".ol", 1)[0]
+    input_filename_no_extension = input_filename.split(".ak", 1)[0]
     input_path = input_filename_no_extension.split("/")
     input_path = "/".join(input_path[:len(input_path) - 1])
-    temp_go_filename = str(input_filename_no_extension) + "_othello_generated" + ".go"
+    temp_go_filename = str(input_filename_no_extension) + \
+        "_aktoro_generated" + ".go"
     with open(temp_go_filename, "w") as go_file:
         go_file.write(generated)
     build_str = f"cd {input_path} && go build"
@@ -60,13 +61,14 @@ def build(args):
 @sub_command([argument('filename', type=str, help="filename")])
 def run(args):
     input_filename = os.path.join(__path__, args.filename)
-    with open(input_filename) as ol:
-        program = ol.read()
+    with open(input_filename) as ak:
+        program = ak.read()
 
-    parse_tree = othello_grammar.parse(program)
+    parse_tree = aktoro_grammar.parse(program)
     generated = CodeGen().transform(parse_tree)
-    input_filename_no_extension = input_filename.split(".ol", 1)[0]
-    temp_go_filename = str(input_filename_no_extension) + "_othello_generated" + ".go"
+    input_filename_no_extension = input_filename.split(".ak", 1)[0]
+    temp_go_filename = str(input_filename_no_extension) + \
+        "_aktoro_generated" + ".go"
     with open(temp_go_filename, "w") as go_file:
         go_file.write(generated)
     output = subprocess.check_output(f"go run {temp_go_filename}", shell=True)
@@ -81,17 +83,17 @@ def parse(args):
     with open(input_filename) as ol:
         program = ol.read()
 
-    parse_tree = othello_grammar.parse(program)
+    parse_tree = aktoro_grammar.parse(program)
     print(parse_tree.pretty())
 
 
 @sub_command([argument('filename', type=str, help="filename")])
 def generate(args):
     input_filename = os.path.join(__path__, args.filename)
-    with open(input_filename) as ol:
-        program = ol.read()
+    with open(input_filename) as ak:
+        program = ak.read()
 
-    parse_tree = othello_grammar.parse(program)
+    parse_tree = aktoro_grammar.parse(program)
     generated = CodeGen().transform(parse_tree)
     print(generated)
 

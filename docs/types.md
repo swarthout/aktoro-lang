@@ -2,7 +2,7 @@
 id: types
 title: Types
 ---
-Othello is a statically typed language, but heavily uses type inference to decrease the amount of typing required to write programs.
+Aktoro is a statically typed language, but heavily uses type inference to decrease the amount of typing required to write programs.
 
 ## Creating new types
 New types can be created with the `type` keyword.

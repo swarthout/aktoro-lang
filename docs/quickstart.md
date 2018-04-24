@@ -4,29 +4,29 @@ title: Quick Start
 sidebar_label: Quick Start
 ---
 
-## Install Othello
+## Install Aktoro
 
 1. Prepare Golang environment
     - Install Golang >= 1.9
     - Make sure $GOPATH in your shell's config file( like .bashrc) is correct
     - Add you $GOPATH/bin to $PATH
-2. Run `go get github.com/othello-lang/othello`
+2. Run `go get github.com/aktoro-lang/aktoro`
 
 3. Set the Othello project's exact root path $OTHELLO_ROOT manually, which should be:
 ```sh
-$GOPATH/src/github.com/othello-lang/othello
+$GOPATH/src/github.com/aktoro-lang/aktoro`
 ```
 
-Let's make sure Othello is set up as expected. You should see a similar version number in your terminal:
+Let's make sure Aktoro is set up as expected. You should see a similar version number in your terminal:
 
 ```sh
-$ othello version
-othello version 0.1 linux/amd64
+$ aktoro version
+aktoro version 0.1 linux/amd64
 ```
 
-## Writing your first Othello program
+## Writing your first Aktoro program
 
-Create a new file named `favorite-number.ol` and copy and paste the following:
+Create a new file named `favorite-number.ak` and copy and paste the following:
 ```
 import rand from "std/math/rand"
 
@@ -40,12 +40,12 @@ get_random_number()
 ## Compile and run
 
 ```sh
-$ othello run favorite-number.ol
+$ aktoro run favorite-number.ak
 My favorite number is 10
 
-$ othello build favorite-number.ol
+$ aktoro build favorite-number.ak
 $ ls
-favorite-number.ol  favorite-number
+favorite-number.ak  favorite-number
 
 $ ./favorite-number
 My favorite number is 10

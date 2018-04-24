@@ -1,4 +1,4 @@
-// Grammar for Othello Language
+// Grammar for Aktoro Language
 
 program: _line*
 

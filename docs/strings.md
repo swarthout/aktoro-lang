@@ -3,7 +3,7 @@ id: strings
 title: Strings
 ---
 
-Othello strings are delimited with double quotes.
+Aktoro strings are delimited with double quotes.
 ```
 let street_address = "42 Wallaby Way, Sydney"
 ```

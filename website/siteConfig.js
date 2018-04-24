@@ -16,11 +16,11 @@ const users = [
 ];
 
 const siteConfig = {
-    title: 'Othello Lang' /* title for your website */,
+    title: 'Aktoro Lang' /* title for your website */,
     tagline: 'An Expressive Language for the Golang Ecosystem',
-    url: 'https://othello-lang.github.io' /* your website url */,
+    url: 'https://aktoro-lang.github.io' /* your website url */,
     baseUrl: '/test-site/' /* base url for your project */,
-    projectName: 'othello-lang',
+    projectName: 'aktoro-lang',
     headerLinks: [
         {doc: 'quickstart', label: 'Getting Started'},
         {doc: 'overview', label: 'Docs'},
