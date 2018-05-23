@@ -1,10 +1,44 @@
 from lark import Transformer
 from collections import namedtuple
 import textwrap
+from enum import Enum
 
 Expression = namedtuple('Expression', ['type_name', 'go_code'])
+Statement = namedtuple('Statement', ['go_code'])
 Variable = namedtuple('Variable', ['name', 'type_name'])
 Record = namedtuple('Record', ['name', 'fields'])
+
+
+class TypeKind(Enum):
+    RECORD = 1
+    VARIANT = 2
+
+
+class AkType:
+    # map primitive aktoro types to their golang equivalents
+    primitive_types = {
+        "int": "int",
+        "float": "float64",
+        "string": "string",
+        "bool": "bool"
+    }
+
+    def __init__(self, name, type_params):
+        self.name = name
+        self.type_params = type_params
+
+    def get_go_type_usage(self):
+        if self.name in self.primitive_types:
+            return self.primitive_types[self.name]
+        elif self.name == "list":
+            elem_type = self.type_params[0]
+            return "[]{}".format(elem_type.get_go_type_usage())
+        else:
+            return snake_to_camel(self.name)
+
+    def get_go_type_def(self):
+        pass
+
 
 BUILTIN_TYPES = {
     "list": True,
@@ -48,9 +82,9 @@ class SymbolTable:
         self.table.pop()
 
 
-class RecordTable:
+class TypeDefTable:
     def __init__(self):
-        self.table = {}
+        self.field_table = {}
         self.name_table = {}
 
     @staticmethod
@@ -61,27 +95,29 @@ class RecordTable:
 
     def get_record_by_name(self, name):
         field_hash = self.name_table[name]
-        return self.table[field_hash]
+        return self.field_table[field_hash]
 
     def get_by_field_names(self, field_names):
         field_hash = self.hash_field_names(field_names)
-        return self.table[field_hash]
+        return self.field_table[field_hash]
 
     def insert_record(self, record):
         field_names = list(record.fields.keys())
         field_hash = self.hash_field_names(field_names)
         self.name_table[record.name] = field_hash
-        self.table[field_hash] = record
+        self.field_table[field_hash] = record
 
 
 class CodeGen(Transformer):
     def __init__(self):
         self.symbol_table = SymbolTable()
-        self.record_table = RecordTable()
+        self.type_def_table = TypeDefTable()
         self.imports = []
+        self.module_type_defs = []
 
     def program(self, args):
-        lines = "\n".join(args)
+        args = filter(None, args)
+        lines = "\n".join([arg.go_code for arg in args])
         import_go_code = ""
         if self.imports:
             import_tmpl = textwrap.dedent("""
@@ -92,22 +128,25 @@ class CodeGen(Transformer):
             import_names = "\n".join(self.imports)
             import_go_code = import_tmpl.format(
                 imports=textwrap.indent(import_names, "\t"))
+        type_def_go_code = ""
+        if self.module_type_defs:
+            type_def_go_code = "\n".join([t.go_code for t in self.module_type_defs])
 
         go_body = textwrap.dedent("""
             package main
             {imports}
-            
+            {type_defs}
             func main() {{
             {lines}
             }}
             
             """)
-        return go_body.format(lines=textwrap.indent(lines, "\t"), imports=import_go_code)
+        return go_body.format(lines=textwrap.indent(lines, "\t"), imports=import_go_code, type_defs=type_def_go_code)
 
     def decl(self, args):
         name, expr = args
         self.symbol_table.add_symbol(name, Variable(name, expr.type_name))
-        return f"{name} := {expr.go_code}"
+        return Statement(f"{name} := {expr.go_code}")
 
     def var_decl(self, args):
         return snake_to_camel(args[0])
@@ -119,7 +158,7 @@ class CodeGen(Transformer):
         if len(args) > 1:
             for arg in args[1:]:
                 arg_name = snake_to_camel(arg)
-                record = self.record_table.get_record_by_name(var_type)
+                record = self.type_def_table.get_record_by_name(var_type)
                 var_type = record.fields[arg_name]
 
         full_name = ".".join([snake_to_camel(name) for name in args])
@@ -156,23 +195,29 @@ class CodeGen(Transformer):
         return Expression(left.type_name, go_code)
 
     def type_def(self, args):
-        name, field_defs = args
-        r = Record(name=name, fields={})
-        for f in field_defs:
-            r.fields[f["name"]] = f["type_name"]
-        self.symbol_table.add_symbol(name, r)
-        self.record_table.insert_record(r)
-        field_go_code = [f["go_code"] for f in field_defs]
-        field_go_code = textwrap.indent("\n".join(field_go_code), "\t")
-        go_code = textwrap.dedent("""
-        type {name} struct {{
-        {fields}
-        }}
-        """)
-        return go_code.format(name=name, fields=field_go_code)
+        name, body = args
+        if body["type_kind"] == TypeKind.RECORD:
+            r = Record(name=name, fields={})
+            field_defs = body["field_defs"]
+            for f in field_defs:
+                r.fields[f["name"]] = f["type_name"]
+            self.symbol_table.add_symbol(name, r)
+            self.type_def_table.insert_record(r)
+            field_go_code = [f["go_code"] for f in field_defs]
+            field_go_code = textwrap.indent("\n".join(field_go_code), "\t")
+            go_code = textwrap.dedent("""
+            type {name} struct {{
+            {fields}
+            }}
+            """)
+            self.module_type_defs.append(
+                Statement(go_code.format(name=name, fields=field_go_code)))
 
     def record_def(self, args):
-        return args[0]
+        return {
+            "type_kind": TypeKind.RECORD,
+            "field_defs": args[0]
+        }
 
     def type_decl(self, args):
         return snake_to_camel(args[0])
@@ -190,14 +235,17 @@ class CodeGen(Transformer):
         }
 
     def type_usage(self, args):
-        return snake_to_camel(args[0])
+        type_name, *type_params = args
+        type_params = [AkType(param, []) for param in type_params if not isinstance(param, AkType)]
+        ak_type = AkType(type_name, type_params)
+        return ak_type.get_go_type_usage()
 
     def record_literal(self, args):
         field_names = [field["name"] for field in args]
-        record = self.record_table.get_by_field_names(field_names)
+        record = self.type_def_table.get_by_field_names(field_names)
         fields_go_code = ",\n".join([field["go_code"] for field in args])
         go_code = f"{record.name}{{\n" + \
-            textwrap.indent(fields_go_code, "\t") + textwrap.dedent("}")
+                  textwrap.indent(fields_go_code, "\t") + textwrap.dedent("}")
         return Expression(type_name=record.name, go_code=go_code)
 
     def field_assignment(self, args):
@@ -265,7 +313,8 @@ class CodeGen(Transformer):
         self.symbol_table.pop_scope()
 
     def print_stmt(self, args):
-        self.imports.append('"fmt"')
+        if '"fmt"' not in self.imports:
+            self.imports.append('"fmt"')
         arg_code = [arg.go_code for arg in args]
         exprs = ",".join(arg_code)
-        return f"fmt.Println({exprs})"
+        return Statement(f"fmt.Println({exprs})")
