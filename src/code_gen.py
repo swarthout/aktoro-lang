@@ -2,19 +2,42 @@ from lark import Transformer
 from collections import namedtuple
 import textwrap
 from enum import Enum
+from abc import ABC, abstractmethod
 
 Expression = namedtuple('Expression', ['type_name', 'go_code'])
 Statement = namedtuple('Statement', ['go_code'])
 Variable = namedtuple('Variable', ['name', 'type_name'])
 Record = namedtuple('Record', ['name', 'fields'])
 
+PRIMITIVE_TYPES = ["int", "float", "string", "bool"]
+
 
 class TypeKind(Enum):
     RECORD = 1
     VARIANT = 2
+    TYPE_ALIAS = 3
 
 
-class AkType:
+class AkType(ABC):
+
+    def __init__(self, name):
+        self.name = name
+
+    @abstractmethod
+    def get_go_type_usage(self):
+        pass
+
+
+class ListType(AkType):
+    def __init__(self, name, elem_type):
+        super().__init__(name)
+        self.elem_type = elem_type
+
+    def get_go_type_usage(self):
+        return "[]{}".format(self.elem_type.get_go_type_usage())
+
+
+class PrimitiveType(AkType):
     # map primitive aktoro types to their golang equivalents
     primitive_types = {
         "int": "int",
@@ -23,34 +46,44 @@ class AkType:
         "bool": "bool"
     }
 
-    def __init__(self, name, type_params):
-        self.name = name
-        self.type_params = type_params
+    def __init__(self, name):
+        super().__init__(name)
 
     def get_go_type_usage(self):
         if self.name in self.primitive_types:
             return self.primitive_types[self.name]
-        elif self.name == "list":
-            elem_type = self.type_params[0]
-            return "[]{}".format(elem_type.get_go_type_usage())
-        else:
-            return snake_to_camel(self.name)
 
-    def get_go_type_def(self):
+
+class DictType(AkType):
+    def __init__(self, name, key_type, val_type):
+        super().__init__(name)
+        self.key_type = key_type
+        self.val_type = val_type
+
+    def get_go_type_usage(self):
+        return "map[{}]{}".format(self.key_type, self.val_type)
+
+
+class RecordType(AkType):
+    def __init__(self, name, type_params, fields):
+        super().__init__(name)
+        self.type_params = type_params
+        self.fields = fields
+
+    def get_go_type_usage(self):
+        return snake_to_camel(self.name)
+
+    def get_go_type_def(self, type_args):
+        """
+        Gets a go struct definition for a given record
+        :param type_args: dict of type_param to specialized type
+        :return: specialized go struct
+        """
         pass
 
 
-BUILTIN_TYPES = {
-    "list": True,
-    "option": True,
-    "map": True,
-    "int": True,
-    "float": True,
-    "string": True,
-    "fn": True,
-    "bool": True,
-    "result": True
-}
+class VariantType(AkType):
+    pass
 
 
 def snake_to_camel(name):
@@ -94,7 +127,11 @@ class TypeDefTable:
         return field_hash
 
     def get_record_by_name(self, name):
+        if name not in self.name_table:
+            return
         field_hash = self.name_table[name]
+        if field_hash not in self.field_table:
+            return
         return self.field_table[field_hash]
 
     def get_by_field_names(self, field_names):
@@ -163,6 +200,10 @@ class CodeGen(Transformer):
 
         full_name = ".".join([snake_to_camel(name) for name in args])
         return Expression(type_name=var_type, go_code=full_name)
+
+    def list_index(self, args):
+        var, index = args
+        return Expression(None, None)
 
     def int_literal(self, args):
         return Expression(type_name="int", go_code=args[0])
@@ -234,10 +275,23 @@ class CodeGen(Transformer):
             "go_code": f"{name} {type_name}"
         }
 
+    def build_ak_type(self, args):
+        ak_type = None
+        type_name = args[0]
+        if isinstance(type_name, AkType):
+            return type_name
+        if type_name in PRIMITIVE_TYPES:
+            ak_type = PrimitiveType(type_name)
+        elif type_name == "list":
+            elem_type = self.build_ak_type(args[1:])
+            ak_type = ListType(type_name, elem_type)
+        record = self.type_def_table.get_record_by_name(type_name)
+        if record:
+            ak_type = RecordType(type_name, [], {})
+        return ak_type
+
     def type_usage(self, args):
-        type_name, *type_params = args
-        type_params = [AkType(param, []) for param in type_params if not isinstance(param, AkType)]
-        ak_type = AkType(type_name, type_params)
+        ak_type = self.build_ak_type(args)
         return ak_type.get_go_type_usage()
 
     def record_literal(self, args):
