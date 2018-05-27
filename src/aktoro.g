@@ -37,7 +37,7 @@ var_usage: NAME ("." NAME)*
         | record_literal
         | record_update
         | "-" primary -> negation_expr
-        | var_usage "[" expr "]" -> list_index
+        | var_usage "[" expr "]" -> index_expr
 
 COMP_EQU: "=="
 COMP_NEQU: "!="
