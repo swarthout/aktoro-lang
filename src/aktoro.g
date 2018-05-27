@@ -5,13 +5,13 @@ program: _line*
 _line: _NEWLINE
      | stmt _NEWLINE?
 
-?stmt: decl
+?stmt: var_decl
      | expr
      | type_def
      | print_stmt
 
-decl: "let" var_decl "=" expr
-var_decl: NAME
+var_decl: "let" var_name "=" expr
+var_name: NAME
 var_usage: NAME ("." NAME)*
 
 

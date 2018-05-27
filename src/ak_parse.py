@@ -1,90 +1,20 @@
 from lark import Transformer
-from collections import namedtuple
-import textwrap
-from enum import Enum
-from abc import ABC, abstractmethod
+from collections import ChainMap
 from .ak_ast import *
+from .ak_types import *
 
-Expression = namedtuple('Expression', ['type_name', 'go_code'])
-Statement = namedtuple('Statement', ['go_code'])
-Variable = namedtuple('Variable', ['name', 'type_name'])
-Record = namedtuple('Record', ['name', 'fields'])
-
-PRIMITIVE_TYPES = ["int", "float", "string", "bool"]
+PRIMITIVE_TYPES = {
+    "int": PrimitiveType("int"),
+    "float": PrimitiveType("float"),
+    "string": PrimitiveType("string"),
+    "bool": PrimitiveType("bool")
+}
 
 
 class TypeKind(Enum):
     RECORD = 1
     VARIANT = 2
     TYPE_ALIAS = 3
-
-
-class AkType(ABC):
-
-    def __init__(self, name):
-        self.name = name
-
-    @abstractmethod
-    def get_go_type_usage(self):
-        pass
-
-
-class ListType(AkType):
-    def __init__(self, name, elem_type):
-        super().__init__(name)
-        self.elem_type = elem_type
-
-    def get_go_type_usage(self):
-        return "[]{}".format(self.elem_type.get_go_type_usage())
-
-
-class PrimitiveType(AkType):
-    # map primitive aktoro types to their golang equivalents
-    primitive_types = {
-        "int": "int",
-        "float": "float64",
-        "string": "string",
-        "bool": "bool"
-    }
-
-    def __init__(self, name):
-        super().__init__(name)
-
-    def get_go_type_usage(self):
-        if self.name in self.primitive_types:
-            return self.primitive_types[self.name]
-
-
-class DictType(AkType):
-    def __init__(self, name, key_type, val_type):
-        super().__init__(name)
-        self.key_type = key_type
-        self.val_type = val_type
-
-    def get_go_type_usage(self):
-        return "map[{}]{}".format(self.key_type, self.val_type)
-
-
-class RecordType(AkType):
-    def __init__(self, name, type_params, fields):
-        super().__init__(name)
-        self.type_params = type_params
-        self.fields = fields
-
-    def get_go_type_usage(self):
-        return snake_to_camel(self.name)
-
-    def get_go_type_def(self, type_args):
-        """
-        Gets a go struct definition for a given record
-        :param type_args: dict of type_param to specialized type
-        :return: specialized go struct
-        """
-        pass
-
-
-class VariantType(AkType):
-    pass
 
 
 def snake_to_camel(name):
@@ -96,30 +26,48 @@ def snake_to_camel(name):
     return camel_name
 
 
-class SymbolTable:
+class SymbolTable(object):
+    """
+    Class representing a symbol table.  It should provide functionality
+    for adding and looking up nodes associated with identifiers.
+    """
+
     def __init__(self):
-        self.table = [{}]
+        self.table = ChainMap()
+        self.current_scope = self.table
+        self.root_scope = self.table
 
-    def add_symbol(self, name, data):
-        self.table[-1][name] = data
+    def add(self, symbol, data):
+        self.current_scope[symbol] = data
 
-    def get_symbol(self, name):
-        for scope in reversed(self.table):
-            if name in scope.keys():
-                return scope[name]
-        raise KeyError(name)
+    def get(self, symbol):
+        if symbol in self.current_scope:
+            return self.current_scope[symbol]
+        return None
 
     def push_scope(self):
-        self.table.append({})
+        self.current_scope = self.table.new_child()
+        return self.current_scope
 
     def pop_scope(self):
-        self.table.pop()
+        self.current_scope = self.current_scope.parents
+        return self.current_scope
+
+    def pprint(self):
+        print("{}top".format("-" * 10))
+        for symbol in self.table:
+            print("{}: {}".format(symbol, self.table.get(symbol)))
+        print("-" * 10)
 
 
-class TypeDefTable:
+class Parser(Transformer):
     def __init__(self):
+        self.symbol_table = SymbolTable()
+        # self.record_table = RecordTable()
+        self.imports = []
+        # self.module_type_defs = []
+
         self.field_table = {}
-        self.name_table = {}
 
     @staticmethod
     def hash_field_names(field_names):
@@ -128,45 +76,45 @@ class TypeDefTable:
         return field_hash
 
     def get_record_by_name(self, name):
-        if name not in self.name_table:
-            return
-        field_hash = self.name_table[name]
-        if field_hash not in self.field_table:
-            return
-        return self.field_table[field_hash]
+        return self.symbol_table.get(name)
 
-    def get_by_field_names(self, field_names):
+    def get_record_by_field_names(self, field_names):
         field_hash = self.hash_field_names(field_names)
-        return self.field_table[field_hash]
+        record_name = self.field_table[field_hash]
+        return self.symbol_table.get(record_name)
 
-    def insert_record(self, record):
+    def insert_record(self, name, record):
         field_names = list(record.fields.keys())
         field_hash = self.hash_field_names(field_names)
-        self.name_table[record.name] = field_hash
-        self.field_table[field_hash] = record
+        self.symbol_table.add(name, record)
+        self.field_table[field_hash] = name
 
-
-class Parser(Transformer):
-    def __init__(self):
-        self.symbol_table = SymbolTable()
-        self.type_def_table = TypeDefTable()
-        self.imports = []
-        self.module_type_defs = []
+    def get_variant_by_constructor(self, constructor):
+        pass
 
     def program(self, args):
         args = filter(None, args)
         return Program(args)
 
-    def decl(self, args):
-        name, expr = args
-        return VarDecl(name, expr, expr.ak_type)
-
     def var_decl(self, args):
-        return snake_to_camel(args[0])
+        name, expr = args
+        v = VarDecl(name, expr, expr.ak_type)
+        self.symbol_table.add(name, v)
+        return v
+
+    def var_name(self, args):
+        return args[0]
 
     def var_usage(self, args):
+        root_name = args[0]
+        root_var = self.symbol_table.get(root_name)
+        ak_type = root_var.ak_type
+        if len(args) > 1:
+            for arg in args[1:]:
+                record = self.get_record_by_name(ak_type)
+                ak_type = record.fields[arg]
         name = ".".join(args)
-        return VarUsage(name, ak_type=None)  # ak_type is not known until type checking
+        return VarUsage(name, ak_type)
 
     def list_index(self, args):
         var, index_expr = args
@@ -186,60 +134,40 @@ class Parser(Transformer):
 
     def list_literal(self, args):
         if not args:
-            raise NotImplemented("empty list literals not implemented yet!")
+            raise NotImplemented("empty list literals not implemented!")
         elem_type = args[0].ak_type
         ak_type = ListType(elem_type)
         return ListLiteral(args, ak_type)
 
     def add_expr(self, args):
         left, op, right = args
-        go_code = f"{left.go_code} {op} {right.go_code}"
         return BinaryOpExpr(left, op, right, left.ak_type)
 
     def mult_expr(self, args):
         left, op, right = args
-        go_code = f"{left.go_code} {op} {right.go_code}"
         return BinaryOpExpr(left, op, right, left.ak_type)
 
     def type_def(self, args):
-        name, body = args
-        if body["type_kind"] == TypeKind.RECORD:
-            r = Record(name=name, fields={})
-            field_defs = body["field_defs"]
-            for f in field_defs:
-                r.fields[f["name"]] = f["type_name"]
-            self.symbol_table.add_symbol(name, r)
-            self.type_def_table.insert_record(r)
-            field_go_code = [f["go_code"] for f in field_defs]
-            field_go_code = textwrap.indent("\n".join(field_go_code), "\t")
-            go_code = textwrap.dedent("""
-            type {name} struct {{
-            {fields}
-            }}
-            """)
-            self.module_type_defs.append(
-                Statement(go_code.format(name=name, fields=field_go_code)))
+        name, (type_kind, fields) = args
+        if type_kind == TypeKind.RECORD:
+            fields = dict(fields)
+            r = RecordType(name, [], fields)
+            self.insert_record(name, r)
+            return r
+        raise NotImplemented("variants not implemented!")
 
     def record_def(self, args):
-        return {
-            "type_kind": TypeKind.RECORD,
-            "field_defs": args[0]
-        }
+        return TypeKind.RECORD, args[0]
 
     def type_decl(self, args):
-        return snake_to_camel(args[0])
+        return args[0]
 
     def param_list(self, args):
         return args
 
     def param(self, args):
         name, type_name = args
-        self.symbol_table.add_symbol(name, Variable(name, type_name))
-        return {
-            "name": name,
-            "type_name": type_name,
-            "go_code": f"{name} {type_name}"
-        }
+        return name, type_name
 
     def build_ak_type(self, args):
         ak_type = None
@@ -250,8 +178,8 @@ class Parser(Transformer):
             ak_type = PrimitiveType(type_name)
         elif type_name == "list":
             elem_type = self.build_ak_type(args[1:])
-            ak_type = ListType(type_name, elem_type)
-        record = self.type_def_table.get_record_by_name(type_name)
+            ak_type = ListType(elem_type)
+        record = self.get_record_by_name(type_name)
         if record:
             ak_type = RecordType(type_name, [], {})
         return ak_type
@@ -262,11 +190,9 @@ class Parser(Transformer):
 
     def record_literal(self, args):
         field_dict = dict(args)
-        record = self.type_def_table.get_by_field_names(field_names)
-        fields_go_code = ",\n".join([field["go_code"] for field in args])
-        go_code = f"{record.name}{{\n" + \
-                  textwrap.indent(fields_go_code, "\t") + textwrap.dedent("}")
-        return Expression(type_name=record.name, go_code=go_code)
+        field_names = field_dict.keys()
+        record_type = self.get_record_by_field_names(field_names)
+        return RecordType(record_type, [], field_dict)
 
     def field_assignment(self, args):
         name, expr = args
