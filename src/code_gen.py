@@ -158,7 +158,7 @@ class CodeGen(Transformer):
         import_go_code = ""
         if self.imports:
             import_tmpl = textwrap.dedent("""
-            import (
+            import ( 
             {imports}
             )
             """)

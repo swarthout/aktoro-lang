@@ -2,9 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="059401df-47e3-419c-bc7f-871e5906265b" name="Default" comment="">
+      <change afterPath="$PROJECT_DIR$/src/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ak_check.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ak_code_gen.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ak_parse.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ak_types.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/aktoro.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/aktoro.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/code_gen.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/code_gen.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/test.ak" beforeDir="false" afterPath="$PROJECT_DIR$/test/test.ak" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -25,18 +30,18 @@
     <SUITE FILE_PATH="coverage/aktoro_lang$build_test_ol.coverage" NAME="build test.ol Coverage Results" MODIFIED="1527096584556" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
     <SUITE FILE_PATH="coverage/othello_lang$generate_test_ol.coverage" NAME="generate test.ol Coverage Results" MODIFIED="1515873897824" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
     <SUITE FILE_PATH="coverage/aktoro_lang$generate_test_ol.coverage" NAME="generate test.ol Coverage Results" MODIFIED="1526003473021" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
-    <SUITE FILE_PATH="coverage/aktoro_lang$parse_test_ol.coverage" NAME="parse test.ol Coverage Results" MODIFIED="1527291461827" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+    <SUITE FILE_PATH="coverage/aktoro_lang$parse_test_ol.coverage" NAME="parse test.ol Coverage Results" MODIFIED="1527296714520" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
   </component>
   <component name="FavoritesManager">
     <favorites_list name="othello-lang" />
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="code_gen.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="code_gen.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/code_gen.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="572">
-              <caret line="229" column="56" lean-forward="true" selection-start-line="229" selection-start-column="56" selection-end-line="229" selection-end-column="56" />
+            <state relative-caret-position="2042">
+              <caret line="122" column="17" lean-forward="true" selection-start-line="122" selection-start-column="17" selection-end-line="122" selection-end-column="17" />
               <folding>
                 <element signature="e#0#28#0" expanded="true" />
               </folding>
@@ -47,17 +52,8 @@
       <file leaf-file-name="aktoro.g" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/aktoro.g">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="819">
-              <caret line="39" column="46" lean-forward="true" selection-start-line="39" selection-start-column="46" selection-end-line="39" selection-end-column="46" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="syntax.txt" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/syntax.txt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="63">
-              <caret line="36" selection-start-line="36" selection-end-line="36" />
+            <state relative-caret-position="1701">
+              <caret line="81" lean-forward="true" selection-start-line="81" selection-end-line="81" />
             </state>
           </provider>
         </entry>
@@ -65,10 +61,15 @@
       <file leaf-file-name="test.ak" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/test/test.ak">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="252">
-              <caret line="12" column="19" lean-forward="true" selection-start-line="12" selection-start-column="19" selection-end-line="12" selection-end-column="19" />
+            <state relative-caret-position="273">
+              <caret line="13" column="16" lean-forward="true" selection-start-line="13" selection-start-column="16" selection-end-line="13" selection-end-column="16" />
             </state>
           </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ak_parse.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/ak_parse.py">
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
       <file leaf-file-name="tree.py" pinned="false" current-in-tab="false">
@@ -80,13 +81,40 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="aktoro.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="aktoro.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/aktoro.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="357">
-              <caret line="23" lean-forward="true" selection-start-line="23" selection-end-line="23" />
+            <state relative-caret-position="945">
+              <caret line="45" column="47" lean-forward="true" selection-start-line="45" selection-start-column="47" selection-end-line="45" selection-end-column="47" />
+              <folding>
+                <element signature="e#23#44#0" expanded="true" />
+              </folding>
             </state>
           </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ak_ast.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/ak_ast.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="21">
+              <caret line="1" column="8" lean-forward="true" selection-start-line="1" selection-start-column="8" selection-end-line="1" selection-end-column="8" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ak_code_gen.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/ak_code_gen.py">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file leaf-file-name="ak_types.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/ak_types.py">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file leaf-file-name="ak_check.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/ak_check.py">
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
     </leaf>
@@ -142,8 +170,16 @@
         <option value="$PROJECT_DIR$/src/othello.g" />
         <option value="$PROJECT_DIR$/test/test.ol" />
         <option value="$PROJECT_DIR$/src/syntax.txt" />
-        <option value="$PROJECT_DIR$/src/code_gen.py" />
         <option value="$PROJECT_DIR$/test/test.ak" />
+        <option value="$PROJECT_DIR$/src/ast/expression.py" />
+        <option value="$PROJECT_DIR$/src/stuff/__init__.py" />
+        <option value="$PROJECT_DIR$/src/ast.py" />
+        <option value="$PROJECT_DIR$/src/aktoro.py" />
+        <option value="$PROJECT_DIR$/src/code_gen.py" />
+        <option value="$PROJECT_DIR$/src/ak_code_gen.py" />
+        <option value="$PROJECT_DIR$/src/ak_types.py" />
+        <option value="$PROJECT_DIR$/src/ak_check.py" />
+        <option value="$PROJECT_DIR$/src/ak_parse.py" />
       </list>
     </option>
   </component>
@@ -176,7 +212,25 @@
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
-    <panes />
+    <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="aktoro-lang" type="b2602c69:ProjectViewProjectNode" />
+              <item name="aktoro-lang" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="aktoro-lang" type="b2602c69:ProjectViewProjectNode" />
+              <item name="aktoro-lang" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="Scope" />
+    </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
@@ -204,7 +258,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.run test.ak">
+  <component name="RunManager" selected="Python.parse test.ol">
     <configuration name="build test.ol" type="PythonConfigurationType" factoryName="Python">
       <module name="othello-lang" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -425,7 +479,14 @@
       <option name="project" value="LOCAL" />
       <updated>1527097656542</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="refactor">
+      <created>1527292820010</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1527292820010</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -439,7 +500,7 @@
       <window_info anchor="bottom" id="Python Console" order="7" weight="0.3296617" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.32887492" />
       <window_info anchor="bottom" id="Terminal" order="7" weight="0.3296617" />
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49134198" weight="0.33993745" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49134198" visible="true" weight="0.33982158" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="right" id="Database" order="3" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32887492" />
@@ -456,25 +517,26 @@
     </layout>
     <layout-to-restore>
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="bottom" id="Docker" order="11" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25198638" />
-      <window_info id="Structure" order="1" weight="0.25" />
-      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Run" order="2" />
-      <window_info anchor="bottom" id="Python Console" order="9" />
-      <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="right" id="Database" order="3" />
-      <window_info anchor="bottom" id="Terminal" order="10" />
-      <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" visible="true" weight="0.32900432" />
+      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49134198" visible="true" weight="0.33982158" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Database Changes" order="12" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32887492" />
+      <window_info anchor="bottom" id="Python Console" order="9" weight="0.3296617" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32887492" />
+      <window_info anchor="right" id="Database" order="3" />
+      <window_info anchor="bottom" id="Terminal" order="10" weight="0.3296617" />
+      <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" weight="0.32900432" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="SciView" order="4" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.3988985" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
-      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info id="Favorites" order="2" sideWeight="0.508658" side_tool="true" weight="0.16823465" />
     </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -504,12 +566,13 @@
     <MESSAGE value="add precedence rules for arithmetic operations" />
     <MESSAGE value="implement basic functions" />
     <MESSAGE value="basic list arguments" />
-    <option name="LAST_COMMIT_MESSAGE" value="basic list arguments" />
+    <MESSAGE value="refactor" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="51" />
+      <option name="time" value="52" />
     </breakpoint-manager>
   </component>
   <component name="debuggerHistoryManager">
@@ -522,34 +585,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/code_gen.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="840">
-          <caret line="42" selection-start-line="42" selection-end-line="42" />
-          <folding>
-            <element signature="e#0#28#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/syntax.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="777">
-          <caret line="37" column="42" lean-forward="true" selection-start-line="37" selection-start-column="42" selection-end-line="37" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/docs/quickstart.md" />
-    <entry file="file://$PROJECT_DIR$/docs/variables.md" />
-    <entry file="file://$PROJECT_DIR$/website/pages/en/index.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="15" column="47" selection-start-line="15" selection-start-column="47" selection-end-line="15" selection-end-column="47" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/docs/overview.md" />
-    <entry file="file://$PROJECT_DIR$/docs/strings.md" />
     <entry file="file://$PROJECT_DIR$/website/siteConfig.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="180">
@@ -620,7 +655,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/website/blog/2018-01-08-blog-post.md" />
-    <entry file="file://$PROJECT_DIR$/src/__init__.py" />
     <entry file="file://$USER_HOME$/.local/lib/python3.6/site-packages/lark/utils.py" />
     <entry file="file:///usr/lib/python3.6/subprocess.py" />
     <entry file="file://$USER_HOME$/.local/lib/python3.6/site-packages/lark/tree.py" />
@@ -630,31 +664,10 @@
     <entry file="file://$USER_HOME$/.local/lib/python3.6/site-packages/lark/parsers/lalr_parser.py" />
     <entry file="file://$PROJECT_DIR$/src/othello.py" />
     <entry file="file://$PROJECT_DIR$/src/othello.g" />
-    <entry file="file://$PROJECT_DIR$/src/aktoro.g">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="819">
-          <caret line="39" column="46" lean-forward="true" selection-start-line="39" selection-start-column="46" selection-end-line="39" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/syntax.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="63">
           <caret line="36" selection-start-line="36" selection-end-line="36" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/aktoro.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="357">
-          <caret line="23" lean-forward="true" selection-start-line="23" selection-end-line="23" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/test.ak">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="12" column="19" lean-forward="true" selection-start-line="12" selection-start-column="19" selection-end-line="12" selection-end-column="19" />
         </state>
       </provider>
     </entry>
@@ -665,12 +678,72 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/ast/expression.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="42">
+          <caret line="2" lean-forward="true" selection-start-line="2" selection-end-line="2" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/ast/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="32" lean-forward="true" selection-start-column="32" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/__init__.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/ak_code_gen.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/ak_types.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/ak_check.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/test.ak">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="273">
+          <caret line="13" column="16" lean-forward="true" selection-start-line="13" selection-start-column="16" selection-end-line="13" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/code_gen.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="572">
-          <caret line="229" column="56" lean-forward="true" selection-start-line="229" selection-start-column="56" selection-end-line="229" selection-end-column="56" />
+        <state relative-caret-position="2042">
+          <caret line="122" column="17" lean-forward="true" selection-start-line="122" selection-start-column="17" selection-end-line="122" selection-end-column="17" />
           <folding>
             <element signature="e#0#28#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/aktoro.g">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1701">
+          <caret line="81" lean-forward="true" selection-start-line="81" selection-end-line="81" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/ak_parse.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/ak_ast.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="21">
+          <caret line="1" column="8" lean-forward="true" selection-start-line="1" selection-start-column="8" selection-end-line="1" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/aktoro.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="945">
+          <caret line="45" column="47" lean-forward="true" selection-start-line="45" selection-start-column="47" selection-end-line="45" selection-end-column="47" />
+          <folding>
+            <element signature="e#23#44#0" expanded="true" />
           </folding>
         </state>
       </provider>

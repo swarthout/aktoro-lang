@@ -48,7 +48,7 @@ def build(args):
     input_path = input_filename_no_extension.split("/")
     input_path = "/".join(input_path[:len(input_path) - 1])
     temp_go_filename = str(input_filename_no_extension) + \
-        "_aktoro_generated" + ".go"
+                       "_aktoro_generated" + ".go"
     with open(temp_go_filename, "w") as go_file:
         go_file.write(generated)
     build_str = f"cd {input_path} && go build"
@@ -68,7 +68,7 @@ def run(args):
     generated = CodeGen().transform(parse_tree)
     input_filename_no_extension = input_filename.split(".ak", 1)[0]
     temp_go_filename = str(input_filename_no_extension) + \
-        "_aktoro_generated" + ".go"
+                       "_aktoro_generated" + ".go"
     with open(temp_go_filename, "w") as go_file:
         go_file.write(generated)
     output = subprocess.check_output(f"go run {temp_go_filename}", shell=True)
