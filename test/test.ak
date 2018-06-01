@@ -1,6 +1,6 @@
 type car = {name string, year int}
 
-let first = fn (a list (list car)) car => {
+let first = fn (b list car) car => {
    {name="Mustang", year=2013}
 }
 
@@ -10,6 +10,6 @@ let a = 4
 
 
 let c = {name="Mustang", year=2013}
-print(first([[c]]))
+print(first([c]))
 print(a, c.name)
 print(add(4, 5))

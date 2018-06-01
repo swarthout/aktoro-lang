@@ -85,7 +85,7 @@ record_update: "{" var_usage "|" field_assignment ("," _NEWLINE? field_assignmen
 func_def: "fn" open_params param_list? close_params [type_usage] "=>" func_body
 func_body: open_block _line* close_block
 param_list: param ("," param)*
-param: var_decl type_usage
+param: var_name type_usage
 open_params: "("
 close_params: ")"
 open_block: "{"

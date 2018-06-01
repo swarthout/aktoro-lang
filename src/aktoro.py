@@ -77,7 +77,7 @@ def run(args):
         program = ak.read()
 
     parse_tree = AK_GRAMMAR.parse(program)
-    generated = CodeGen().transform(parse_tree)
+    generated = CodeGenVisitor().transform(parse_tree)
     input_filename_no_extension = input_filename.split(".ak", 1)[0]
     temp_go_filename = str(input_filename_no_extension) + \
                        "_aktoro_generated" + ".go"
@@ -105,8 +105,7 @@ def generate(args):
     with open(input_filename) as ak:
         program = ak.read()
 
-    parse_tree = AK_GRAMMAR.parse(program)
-    generated = CodeGen().transform(parse_tree)
+    generated = compile_ak(program)
     print(generated)
 
 

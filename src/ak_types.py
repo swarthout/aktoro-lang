@@ -31,6 +31,11 @@ class ListType(AkType):
         super().__init__("list")
         self.elem_type = elem_type
 
+    def __str__(self):
+        return "ListType({})".format(self.elem_type)
+
+    __repr__ = __str__
+
     def get_go_type_usage(self):
         return "[]{}".format(self.elem_type.get_go_type_usage())
 
@@ -46,6 +51,11 @@ class PrimitiveType(AkType):
 
     def __init__(self, name):
         super().__init__(name)
+
+    def __str__(self):
+        return "PrimitiveType({})".format(self.name)
+
+    __repr__ = __str__
 
     def get_go_type_usage(self):
         if self.name in self.primitive_types:
@@ -71,19 +81,16 @@ class RecordType(AkType):
     def get_go_type_usage(self):
         return snake_to_camel(self.name)
 
-    def get_go_type_def(self, type_args):
-        """
-        Gets a go struct definition for a given record
-        :param type_args: dict of type_param to specialized type
-        :return: specialized go struct
-        """
-        pass
 
+class FuncType(AkType):
+    def __init__(self, params, return_type):
+        super().__init__("fn")
+        self.params = params
+        self.return_type = return_type
 
-class UnknownRecordType(AkType):
-    def __init__(self, fields):
-        super().__init__("UNKNOWN")
-        self.fields = fields
+    def get_go_type_usage(self):
+        param_type_usage = ", ".join([p.ak_type.get_go_type_usage() for p in self.params.values()])
+        return "func({}) {}".format(param_type_usage, self.return_type.get_go_type_usage())
 
 
 class VariantType(AkType):

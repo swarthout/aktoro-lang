@@ -1,7 +1,7 @@
 from lark import Transformer
 from collections import ChainMap
-from .ak_ast import *
-from .ak_types import *
+from ak_ast import *
+from ak_types import *
 
 PRIMITIVE_TYPES = {
     "int": PrimitiveType("int"),
@@ -33,31 +33,22 @@ class SymbolTable(object):
     """
 
     def __init__(self):
-        self.table = ChainMap()
-        self.current_scope = self.table
-        self.root_scope = self.table
+        self.table = [{}]
 
-    def add(self, symbol, data):
-        self.current_scope[symbol] = data
+    def add(self, name, data):
+        self.table[-1][name] = data
 
-    def get(self, symbol):
-        if symbol in self.current_scope:
-            return self.current_scope[symbol]
-        return None
+    def get(self, name):
+        for scope in reversed(self.table):
+            if name in scope.keys():
+                return scope[name]
+        raise KeyError(name)
 
     def push_scope(self):
-        self.current_scope = self.table.new_child()
-        return self.current_scope
+        self.table.append({})
 
     def pop_scope(self):
-        self.current_scope = self.current_scope.parents
-        return self.current_scope
-
-    def pprint(self):
-        print("{}top".format("-" * 10))
-        for symbol in self.table:
-            print("{}: {}".format(symbol, self.table.get(symbol)))
-        print("-" * 10)
+        self.table.pop()
 
 
 class Parser(Transformer):
@@ -93,7 +84,7 @@ class Parser(Transformer):
         pass
 
     def program(self, args):
-        args = filter(None, args)
+        args = list(filter(None, args))
         return Program(args)
 
     def var_decl(self, args):
@@ -103,7 +94,7 @@ class Parser(Transformer):
         return v
 
     def var_name(self, args):
-        return args[0]
+        return str(args[0])
 
     def var_usage(self, args):
         root_name = args[0]
@@ -111,7 +102,7 @@ class Parser(Transformer):
         ak_type = root_var.ak_type
         if len(args) > 1:
             for arg in args[1:]:
-                record = self.get_record_by_name(ak_type)
+                record = self.get_record_by_name(ak_type.name)
                 ak_type = record.fields[arg]
         name = ".".join(args)
         return VarUsage(name, ak_type)
@@ -121,16 +112,16 @@ class Parser(Transformer):
         return IndexExpr(var, index_expr)
 
     def int_literal(self, args):
-        return PrimitiveLiteral(value=args[0], ak_type=PrimitiveType("int"))
+        return PrimitiveLiteral(args[0], PrimitiveType("int"))
 
     def float_literal(self, args):
-        return PrimitiveLiteral(value=args[0], ak_type=PrimitiveType("float"))
+        return PrimitiveLiteral(args[0], PrimitiveType("float"))
 
     def bool_literal(self, args):
-        return PrimitiveLiteral(value=args[0], ak_type=PrimitiveType("bool"))
+        return PrimitiveLiteral(args[0], PrimitiveType("bool"))
 
     def string_literal(self, args):
-        return PrimitiveLiteral(value=args[0], ak_type=PrimitiveType("string"))
+        return PrimitiveLiteral(args[0], PrimitiveType("string"))
 
     def list_literal(self, args):
         if not args:
@@ -151,7 +142,7 @@ class Parser(Transformer):
         name, (type_kind, fields) = args
         if type_kind == TypeKind.RECORD:
             fields = dict(fields)
-            r = RecordType(name, [], fields)
+            r = RecordDecl(name, [], fields)
             self.insert_record(name, r)
             return r
         raise NotImplemented("variants not implemented!")
@@ -160,39 +151,42 @@ class Parser(Transformer):
         return TypeKind.RECORD, args[0]
 
     def type_decl(self, args):
-        return args[0]
+        return str(args[0])
 
     def param_list(self, args):
         return args
 
     def param(self, args):
-        name, type_name = args
-        return name, type_name
+        name, ak_type = args
+        param_decl = ParamDecl(name, ak_type)
+        self.symbol_table.add(name, param_decl)
+        return name, param_decl
 
     def build_ak_type(self, args):
         ak_type = None
         type_name = args[0]
         if isinstance(type_name, AkType):
             return type_name
-        if type_name in PRIMITIVE_TYPES:
+        if type_name in PRIMITIVE_TYPES.keys():
             ak_type = PrimitiveType(type_name)
         elif type_name == "list":
             elem_type = self.build_ak_type(args[1:])
             ak_type = ListType(elem_type)
-        record = self.get_record_by_name(type_name)
-        if record:
-            ak_type = RecordType(type_name, [], {})
+        else:
+            record = self.get_record_by_name(type_name)
+            if record:
+                ak_type = RecordType(type_name, [], {})
         return ak_type
 
     def type_usage(self, args):
         ak_type = self.build_ak_type(args)
-        return ak_type.get_go_type_usage()
+        return ak_type
 
     def record_literal(self, args):
         field_dict = dict(args)
         field_names = field_dict.keys()
         record_type = self.get_record_by_field_names(field_names)
-        return RecordType(record_type, [], field_dict)
+        return RecordLiteral(field_dict, record_type)
 
     def field_assignment(self, args):
         name, expr = args
@@ -200,29 +194,19 @@ class Parser(Transformer):
 
     def field_decl(self, args):
         name, type_name = args
-        return name, type_name
+        return str(name), type_name
 
     def field_list(self, args):
         return args
 
     def field_name(self, args):
-        return args[0]
+        return str(args[0])
 
     def func_def(self, args):
         _, params, _, return_type, func_body = args
-        param_types = [param["type_name"] for param in params]
-        param_types = ", ".join(param_types)
-        func_type = f"func({param_types}) {return_type}"
-        params = [param["go_code"] for param in params]
-        params = ", ".join(params)
-        func_body = "\n".join(line.go_code for line in func_body)
-        go_code = """func ({params}) {return_type} {{
-        {func_body}
-        }}
-        """
-        go_code = go_code.format(
-            params=params, return_type=return_type, func_body=func_body)
-        return Expression(type_name=func_type, go_code=go_code)
+        params = dict(params)
+        ak_type = FuncType(params, return_type)
+        return FuncDef(params, return_type, func_body, ak_type)
 
     def func_body(self, args):
         args.pop(0)  # remove open block instruction
@@ -233,15 +217,11 @@ class Parser(Transformer):
         return args
 
     def func_call(self, args):
-        func_type = args[0].type_name
-        expr_type = func_type.rsplit(")", 1)[-1]
-        arg_code = [arg.go_code for arg in args[1:]]
-        arg_code = ",".join(arg_code)
-        go_code = f"{args[0].go_code}({arg_code})"
-        return Expression(type_name=expr_type, go_code=go_code)
+        var_usage, *arg_exprs = args
+        return FuncCall(var_usage, arg_exprs, var_usage.ak_type.return_type)
 
     def return_expr(self, args):
-        return Expression(args.type_name, go_code=f"return {args.go_code}")
+        return ReturnExpr(args, args.ak_type)
 
     def open_params(self, args):
         self.symbol_table.push_scope()
@@ -250,8 +230,4 @@ class Parser(Transformer):
         self.symbol_table.pop_scope()
 
     def print_stmt(self, args):
-        if '"fmt"' not in self.imports:
-            self.imports.append('"fmt"')
-        arg_code = [arg.go_code for arg in args]
-        exprs = ",".join(arg_code)
-        return Statement(f"fmt.Println({exprs})")
+        return PrintStmt(args)

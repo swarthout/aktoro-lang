@@ -31,6 +31,10 @@ class VarDecl(AST):
     _fields = ["var", "expr", "ak_type"]
 
 
+class RecordDecl(AST):
+    _fields = ["name", "type_params", "fields"]
+
+
 class VarUsage(AST):
     _fields = ["name", "ak_type"]
 
@@ -59,16 +63,20 @@ class FieldDecl(AST):
     _fields = ["name", "ak_type"]
 
 
+class ParamDecl(AST):
+    _fields = ["name", "ak_type"]
+
+
 class FieldAssignment(AST):
     _fields = ["name", "expr"]
 
 
 class FuncDef(AST):
-    _fields = ["params", "return_type", "body"]
+    _fields = ["params", "return_type", "body", "ak_type"]
 
 
 class FuncCall(AST):
-    _fields = ["func_name", "args"]
+    _fields = ["func_name", "args", "ak_type"]
 
 
 class ReturnExpr(AST):
