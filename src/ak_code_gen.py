@@ -1,9 +1,7 @@
-from lark import Transformer
 from collections import namedtuple
 import textwrap
-from enum import Enum
-from abc import ABC, abstractmethod
-from ak_ast import NodeVisitor
+from ak_ast import *
+from ak_types import *
 
 Expression = namedtuple('Expression', ['type_name', 'go_code'])
 Statement = namedtuple('Statement', ['go_code'])
@@ -315,3 +313,51 @@ class CodeGenVisitor(NodeVisitor):
             return visitor(node)
         else:
             return None
+
+    def visit_Program(self, node):
+
+        record_decls = []
+        main_statements = []
+        for line in node.statements:
+            if isinstance(line, RecordDecl):
+                record_decls.append(line)
+            elif line is not None:
+                main_statements.append(line)
+        main_go_code = "\n".join([self.visit(s) for s in main_statements])
+        record_decl_go_code = "\n".join([self.visit(r) for r in record_decls])
+
+        go_body = textwrap.dedent("""
+                    package main
+                    import (
+                    "fmt"
+                    )
+                    {record_decls}
+                    func main() {{
+                    {main_code}
+                    }}
+
+                    """)
+        return go_body.format(main_code=textwrap.indent(main_go_code, "\t"), record_decls=record_decl_go_code)
+
+    def visit_VarDecl(self, node):
+        return f"{node.name} := {self.visit(node.expr)}"
+
+    def visit_RecordDecl(self, node):
+        fields = "\n".join([f"{name} {ak_type.get_go_type_usage()}" for name, ak_type in node.fields.items()])
+        fields = textwrap.indent(fields, "\t")
+        go_code = textwrap.dedent("""
+        type {name} struct {{
+        {fields}
+        }}
+        """)
+        return go_code.format(name=node.name, fields=fields)
+
+    def visit_RecordLiteral(self, node):
+        fields = [f"{name}: {self.visit(expr)}" for name, expr in node.fields.items()]
+        fields = ".\n".join([textwrap.indent(f, "\t") for f in fields])
+        record_type = node.ak_type.get_go_type_usage()
+        go_code = f"{record_type}{{\n" + textwrap.indent(fields, "\t") + textwrap.dedent("}")
+        return go_code
+
+    def visit_PrimitiveLiteral(self, node):
+        return node.value

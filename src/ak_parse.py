@@ -142,9 +142,10 @@ class Parser(Transformer):
         name, (type_kind, fields) = args
         if type_kind == TypeKind.RECORD:
             fields = dict(fields)
-            r = RecordDecl(name, [], fields)
-            self.insert_record(name, r)
-            return r
+            record_decl = RecordDecl(name, [], fields)
+            record_type = RecordType(name, [], fields)
+            self.insert_record(name, record_type)
+            return record_decl
         raise NotImplemented("variants not implemented!")
 
     def record_def(self, args):

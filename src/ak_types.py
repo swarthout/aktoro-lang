@@ -1,11 +1,5 @@
-from collections import namedtuple
 from enum import Enum
 from abc import ABC, abstractmethod
-
-Expression = namedtuple('Expression', ['type_name', 'go_code'])
-Statement = namedtuple('Statement', ['go_code'])
-Variable = namedtuple('Variable', ['name', 'type_name'])
-Record = namedtuple('Record', ['name', 'fields'])
 
 PRIMITIVE_TYPES = ["int", "float", "string", "bool"]
 

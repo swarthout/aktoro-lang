@@ -28,7 +28,7 @@ class Program(AST):
 
 
 class VarDecl(AST):
-    _fields = ["var", "expr", "ak_type"]
+    _fields = ["name", "expr", "ak_type"]
 
 
 class RecordDecl(AST):
@@ -52,7 +52,7 @@ class DictLiteral(AST):
 
 
 class RecordLiteral(AST):
-    _fields = ["field_dict", "ak_type"]
+    _fields = ["fields", "ak_type"]
 
 
 class BinaryOpExpr(AST):
