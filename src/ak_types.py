@@ -16,7 +16,7 @@ class AkType(ABC):
         self.name = name
 
     @abstractmethod
-    def get_go_type_usage(self):
+    def go_code(self):
         pass
 
 
@@ -30,8 +30,8 @@ class ListType(AkType):
 
     __repr__ = __str__
 
-    def get_go_type_usage(self):
-        return "[]{}".format(self.elem_type.get_go_type_usage())
+    def go_code(self):
+        return "[]{}".format(self.elem_type.go_code())
 
 
 class PrimitiveType(AkType):
@@ -51,7 +51,7 @@ class PrimitiveType(AkType):
 
     __repr__ = __str__
 
-    def get_go_type_usage(self):
+    def go_code(self):
         if self.name in self.primitive_types:
             return self.primitive_types[self.name]
 
@@ -62,7 +62,7 @@ class DictType(AkType):
         self.key_type = key_type
         self.val_type = val_type
 
-    def get_go_type_usage(self):
+    def go_code(self):
         return "map[{}]{}".format(self.key_type, self.val_type)
 
 
@@ -72,7 +72,7 @@ class RecordType(AkType):
         self.type_params = type_params
         self.fields = fields
 
-    def get_go_type_usage(self):
+    def go_code(self):
         return snake_to_camel(self.name)
 
 
@@ -82,9 +82,9 @@ class FuncType(AkType):
         self.params = params
         self.return_type = return_type
 
-    def get_go_type_usage(self):
-        param_type_usage = ", ".join([p.ak_type.get_go_type_usage() for p in self.params.values()])
-        return "func({}) {}".format(param_type_usage, self.return_type.get_go_type_usage())
+    def go_code(self):
+        param_type_usage = ", ".join([p.ak_type.go_code() for p in self.params.values()])
+        return "func({}) {}".format(param_type_usage, self.return_type.go_code())
 
 
 class VariantType(AkType):

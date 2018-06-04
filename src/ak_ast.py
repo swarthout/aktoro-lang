@@ -59,16 +59,8 @@ class BinaryOpExpr(AST):
     _fields = ["left", "op", "right", "ak_type"]
 
 
-class FieldDecl(AST):
-    _fields = ["name", "ak_type"]
-
-
 class ParamDecl(AST):
     _fields = ["name", "ak_type"]
-
-
-class FieldAssignment(AST):
-    _fields = ["name", "expr"]
 
 
 class FuncDef(AST):

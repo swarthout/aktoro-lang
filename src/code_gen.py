@@ -34,7 +34,7 @@ class ListType(AkType):
         self.elem_type = elem_type
 
     def get_go_type_usage(self):
-        return "[]{}".format(self.elem_type.get_go_type_usage())
+        return "[]{}".format(self.elem_type.go_code())
 
 
 class PrimitiveType(AkType):
