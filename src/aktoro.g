@@ -7,7 +7,7 @@ _line: _NEWLINE
 
 ?stmt: var_decl
      | expr
-     | type_def
+     | type_decl
      | print_stmt
 
 var_decl: "let" var_name "=" expr
@@ -50,11 +50,11 @@ MINUS: "-"
 MULTIPLY: "*"
 DIVIDE: "/"
 
-list_literal: "[" _expr_list? "]"
-_expr_list: expr ("," expr)*
+list_literal: "[" list_elems "]" ("::" type_usage)?
+list_elems: (expr ("," expr)*)?
 
-type_def: "type" type_decl "=" (record_def | variant_def)
-type_decl: NAME
+type_decl: "type" type_name "=" (record_def | variant_def)
+type_name: NAME
 type_usage: _t
 
 _t: NAME
@@ -93,6 +93,7 @@ close_block: "}"
 
 func_call: var_usage "(" _expr_list? ")"
 print_stmt: "print" "(" _expr_list? ")"
+_expr_list: expr ("," expr)*
 
 BOOL.2: "true"
       | "false"

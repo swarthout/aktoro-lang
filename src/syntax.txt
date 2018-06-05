@@ -173,25 +173,25 @@ module math = {
 let anonymous_func = fn (a, b) => a + b
 
 module stack = {
-    type stack_args = {buffer_size int}
-    let init = fn 't (args stack_args) stack_state 't => {
-        {data = [], buffer_size = args.buffer_size}
+    type state 't = {
+        data list 't,
+        buffer_size int
     }
-    type stack_state 't = {
-        data list 't = [],
-        buffer_size int = 5
+    let init = fn (init_list list 't, buffer_size int) state 't => {
+        {data = init_list, buffer_size}
     }
-    let push = fn (s stack_state 't, e 't) stack_state 't => {
+
+    let push = fn (s state 't, e 't) state 't => {
         {s | data=[e | data]}
     }
-    let pop = fn (s stack_state 't) stack_state 't => {
+    let pop = fn (s state 't) state 't => {
         {s | data=data[1..]}
     }
 }
 
-s = stack.init (0, {})
+s = stack.init ([] :: list int, 5)
 
-k = stack.init (0, {buffer_size=2})
+let a = 5
 
 s = stack.push (s, 4)
 
@@ -205,15 +205,15 @@ a = stack.pop (s)
 
 # a int = 6
 
-let map_int_string = fn (l result string, f fn (option string) string ) list string => {
-    list.map(f)
+let map_int_string = fn (l list string, f fn (string) string ) list string => {
+    list.map(l, f)
 }
     
 module enum = {
-    let map = (l list 'a, f fn ('a) => 'b) list 'b => {
+    let map = (l list 'a, f fn ('a) 'b) list 'b => {
 
     }
-    let reduce = (l list 'a, f ('a) => 'b) 'b => {
+    let reduce = (l list 'a, f fn ('a, 'b) 'b) 'b => {
 
     }
 }

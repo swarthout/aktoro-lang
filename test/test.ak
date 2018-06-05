@@ -6,7 +6,7 @@ let first = fn (b list (list car)) car => {
 
 let add = fn (a int, b int) int => { a + b }
 
-let a = [4,5,6]
+let a = [] :: list int
 
 let my_car = {name="Mustang", year=2013}
 print(first([[my_car]]))

@@ -1,14 +1,6 @@
 from lark import Transformer
-from collections import ChainMap
 from ak_ast import *
 from ak_types import *
-
-PRIMITIVE_TYPES = {
-    "int": PrimitiveType("int"),
-    "float": PrimitiveType("float"),
-    "string": PrimitiveType("string"),
-    "bool": PrimitiveType("bool")
-}
 
 
 class TypeKind(Enum):
@@ -33,7 +25,13 @@ class SymbolTable(object):
     """
 
     def __init__(self):
-        self.table = [{}]
+        self.table = [{
+            "int": PrimitiveType("int"),
+            "float": PrimitiveType("float"),
+            "string": PrimitiveType("string"),
+            "bool": PrimitiveType("bool")
+        }, {}]
+        self.field_table = {}
 
     def add(self, name, data):
         self.table[-1][name] = data
@@ -50,38 +48,31 @@ class SymbolTable(object):
     def pop_scope(self):
         self.table.pop()
 
-
-class Parser(Transformer):
-    def __init__(self):
-        self.symbol_table = SymbolTable()
-        # self.record_table = RecordTable()
-        self.imports = []
-        # self.module_type_defs = []
-
-        self.field_table = {}
-
     @staticmethod
     def hash_field_names(field_names):
         fields_sorted = sorted(field_names)
         field_hash = "#".join(fields_sorted)
         return field_hash
 
-    def get_record_by_name(self, name):
-        return self.symbol_table.get(name)
-
     def get_record_by_field_names(self, field_names):
         field_hash = self.hash_field_names(field_names)
         record_name = self.field_table[field_hash]
-        return self.symbol_table.get(record_name)
+        return self.get(record_name)
 
-    def insert_record(self, name, record):
+    def add_record(self, name, record):
         field_names = list(record.fields.keys())
         field_hash = self.hash_field_names(field_names)
-        self.symbol_table.add(name, record)
+        self.add(name, record)
         self.field_table[field_hash] = name
 
     def get_variant_by_constructor(self, constructor):
         pass
+
+
+class Parser(Transformer):
+    def __init__(self):
+        self.symbol_table = SymbolTable()
+        self.imports = []
 
     def program(self, args):
         args = list(filter(None, args))
@@ -102,7 +93,7 @@ class Parser(Transformer):
         ak_type = root_var.ak_type
         if len(args) > 1:
             for arg in args[1:]:
-                record = self.get_record_by_name(ak_type.name)
+                record = self.symbol_table.get(ak_type.name)
                 ak_type = record.fields[arg]
         name = ".".join(args)
         return VarUsage(name, ak_type)
@@ -124,11 +115,19 @@ class Parser(Transformer):
         return PrimitiveLiteral(args[0], PrimitiveType("string"))
 
     def list_literal(self, args):
-        if not args:
-            raise NotImplemented("empty list literals not implemented!")
-        elem_type = args[0].ak_type
-        ak_type = ListType(elem_type)
-        return ListLiteral(args, ak_type)
+        if len(args) == 2:
+            elems, ak_type = args
+            return ListLiteral(elems, ak_type)
+        else:
+            elems = args[0]
+            if not elems:
+                raise TypeError("Must add type annotation to empty list literal")
+            elem_type = elems[0].ak_type
+            ak_type = ListType(elem_type)
+            return ListLiteral(elems, ak_type)
+
+    def list_elems(self, args):
+        return args
 
     def add_expr(self, args):
         left, op, right = args
@@ -138,20 +137,20 @@ class Parser(Transformer):
         left, op, right = args
         return BinaryOpExpr(left, op, right, left.ak_type)
 
-    def type_def(self, args):
+    def type_decl(self, args):
         name, (type_kind, fields) = args
         if type_kind == TypeKind.RECORD:
             fields = dict(fields)
             record_decl = RecordDecl(name, [], fields)
             record_type = RecordType(name, [], fields)
-            self.insert_record(name, record_type)
+            self.symbol_table.add_record(name, record_type)
             return record_decl
         raise NotImplemented("variants not implemented!")
 
     def record_def(self, args):
         return TypeKind.RECORD, args[0]
 
-    def type_decl(self, args):
+    def type_name(self, args):
         return str(args[0])
 
     def param_list(self, args):
@@ -168,14 +167,14 @@ class Parser(Transformer):
         type_name = args[0]
         if isinstance(type_name, AkType):
             return type_name
-        if type_name in PRIMITIVE_TYPES.keys():
-            ak_type = PrimitiveType(type_name)
-        elif type_name == "list":
+        if type_name == "list":
             elem_type = self.build_ak_type(args[1:])
             ak_type = ListType(elem_type)
         else:
-            record = self.get_record_by_name(type_name)
-            if record:
+            symbol_entry = self.symbol_table.get(type_name)
+            if isinstance(symbol_entry, PrimitiveType):
+                ak_type = symbol_entry
+            else:
                 ak_type = RecordType(type_name, [], {})
         return ak_type
 
@@ -186,7 +185,7 @@ class Parser(Transformer):
     def record_literal(self, args):
         field_dict = dict(args)
         field_names = field_dict.keys()
-        record_type = self.get_record_by_field_names(field_names)
+        record_type = self.symbol_table.get_record_by_field_names(field_names)
         return RecordLiteral(field_dict, record_type)
 
     def field_assignment(self, args):
