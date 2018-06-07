@@ -63,7 +63,7 @@ class DictType(AkType):
         self.val_type = val_type
 
     def go_code(self):
-        return "map[{}]{}".format(self.key_type, self.val_type)
+        return "map[{}]{}".format(self.key_type.go_code(), self.val_type.go_code())
 
 
 class RecordType(AkType):

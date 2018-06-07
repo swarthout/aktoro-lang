@@ -48,7 +48,7 @@ class ListLiteral(AST):
 
 
 class DictLiteral(AST):
-    _fields = ["dict", "ak_type"]
+    _fields = ["kv_exprs", "ak_type"]
 
 
 class RecordLiteral(AST):

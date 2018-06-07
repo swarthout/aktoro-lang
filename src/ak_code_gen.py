@@ -70,13 +70,14 @@ class CodeGenVisitor(NodeVisitor):
         return node.value
 
     def visit_ListLiteral(self, node):
-        elem_type_go_code = node.ak_type.elem_type.go_code()
         elems = [self.visit(elem) for elem in node.values]
         elem_go_code = ", ".join(elems)
-        return f"[]{elem_type_go_code}{{{elem_go_code}}}"
+        return f"{node.ak_type.go_code()}{{{elem_go_code}}}"
 
     def visit_DictLiteral(self, node):
-        pass
+        kv_pairs = [f"{self.visit(key)}: {self.visit(val)}" for key, val in node.kv_exprs.items()]
+        kv_pairs_go_code = ",\n".join(kv_pairs)
+        return f"{node.ak_type.go_code()}{{{kv_pairs_go_code}}}"
 
     def visit_RecordLiteral(self, node):
         fields = [f"{name}: {self.visit(expr)}" for name, expr in node.fields.items()]

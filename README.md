@@ -2,36 +2,25 @@
 
 
 ####Todo
-- Functions
-    - [x] declaration parsing
-    - [x] function call parsing
-    - [ ] code gen
-- Maps
-    - [ ] language design
-    - [ ] parsing
-    - [ ] code gen
-- Atoms
-    - [x] parsing
-    - [ ] code gen
+- Dictionary Literals: DONE
+- Dict and List indexing
+- Range Indexing
+- Update Syntax
+    - List
+    - Dict
+    - Record
+- If and Else
+- String concatenation
+- Pipe operator
+- Basic Pattern Matching (no arguments)
+- Destructuring
+    - Record
+    - List
 - Variants
-    - [ ] parsing
-    - [ ] code gen
-- Arithmetic Operators
-    - [x] parsing
-    - [ ] code gen
-- Records
-    - [x] record literal parsing
-    - [x] record literal code gen
-    - [ ] update parsing
-    - [ ] update code gen
-- Generic Types
-    - [x] language design
-    - [ ] parsing
-    - [ ] code gen
+- Generics
+- Advanced Pattern Matching
 - Modules
+- With Expressions
 - Imports
-- Pattern Matching
-- If/Else Statement
-- Actors
-- Go Interop
-- Do Notation
+- Use Statements
+-

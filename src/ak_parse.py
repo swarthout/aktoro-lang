@@ -129,6 +129,28 @@ class Parser(Transformer):
     def list_elems(self, args):
         return args
 
+    def dict_literal(self, args):
+        if len(args) == 2:
+            kv_exprs = dict(args[0])
+            ak_type = args[1]
+            return DictLiteral(kv_exprs, ak_type)
+        else:
+            kv_exprs = dict(args[0])
+            if not kv_exprs:
+                raise TypeError("Must add type annotation to empty dict literal")
+            first_pair = args[0][0]
+            key_type = first_pair[0].ak_type
+            val_type = first_pair[1].ak_type
+            ak_type = DictType(key_type, val_type)
+            return DictLiteral(kv_exprs, ak_type)
+
+    def kv_pair_list(self, args):
+        return args
+
+    def kv_pair(self, args):
+        key, val = args
+        return key, val
+
     def add_expr(self, args):
         left, op, right = args
         return BinaryOpExpr(left, op, right, left.ak_type)
@@ -170,6 +192,10 @@ class Parser(Transformer):
         if type_name == "list":
             elem_type = self.build_ak_type(args[1:])
             ak_type = ListType(elem_type)
+        elif type_name == "dict":
+            key_type = self.build_ak_type([args[1]])
+            val_type = self.build_ak_type([args[2]])
+            ak_type = DictType(key_type, val_type)
         else:
             symbol_entry = self.symbol_table.get(type_name)
             if isinstance(symbol_entry, PrimitiveType):

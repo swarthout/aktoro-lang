@@ -32,6 +32,7 @@ var_usage: NAME ("." NAME)*
         | var_usage
         | STRING      -> string_literal
         | list_literal
+        | dict_literal
         | func_def
         | func_call
         | record_literal
@@ -52,6 +53,10 @@ DIVIDE: "/"
 
 list_literal: "[" list_elems "]" ("::" type_usage)?
 list_elems: (expr ("," expr)*)?
+
+dict_literal: "%{" _NEWLINE? kv_pair_list _NEWLINE? "}" ("::" type_usage)?
+kv_pair_list:  (kv_pair ("," _NEWLINE? kv_pair)*)?
+kv_pair: expr "=>" expr
 
 type_decl: "type" type_name "=" (record_def | variant_def)
 type_name: NAME
