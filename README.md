@@ -3,8 +3,8 @@
 
 ####Todo
 - Dictionary Literals: DONE
-- Dict and List indexing
-- Range Indexing
+- Dict and List indexing: DONE
+- Range Indexing: DONE
 - Update Syntax
     - List
     - Dict
@@ -18,6 +18,8 @@
     - List
 - Variants
 - Generics
+- Option type
+- Result type (result and option are magic types, not just variants)
 - Advanced Pattern Matching
 - Modules
 - With Expressions

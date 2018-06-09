@@ -83,6 +83,10 @@ class IndexExpr(AST):
     _fields = ["var", "index_expr", "ak_type"]
 
 
+class RangeIndex(AST):
+    _fields = ["low", "high"]
+
+
 class NodeVisitor(object):
     def visit(self, node):
         '''

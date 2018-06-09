@@ -114,3 +114,11 @@ class CodeGenVisitor(NodeVisitor):
     def visit_PrintStmt(self, node):
         exprs = ",".join([self.visit(expr) for expr in node.exprs])
         return f"fmt.Println({exprs})"
+
+    def visit_IndexExpr(self, node):
+        return f"{self.visit(node.var)}[{self.visit(node.index_expr)}]"
+
+    def visit_RangeIndex(self, node):
+        low = self.visit(node.low) if node.low else ""
+        high = self.visit(node.high) if node.high else ""
+        return f"{low}:{high}"

@@ -98,9 +98,25 @@ class Parser(Transformer):
         name = ".".join(args)
         return VarUsage(name, ak_type)
 
-    def list_index(self, args):
+    def index_expr(self, args):
         var, index_expr = args
-        return IndexExpr(var, index_expr)
+        if isinstance(var.ak_type, ListType):
+            ak_type = var.ak_type.elem_type
+        elif isinstance(var.ak_type, DictType):
+            ak_type = var.ak_type.val_type
+        return IndexExpr(var, index_expr, ak_type)
+
+    def range_index(self, args):
+        low, high = args
+        return RangeIndex(low, high)
+
+    def low(self, args):
+        if args:
+            return args[0]
+
+    def high(self, args):
+        if args:
+            return args[0]
 
     def int_literal(self, args):
         return PrimitiveLiteral(args[0], PrimitiveType("int"))

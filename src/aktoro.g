@@ -38,7 +38,7 @@ var_usage: NAME ("." NAME)*
         | record_literal
         | record_update
         | "-" primary -> negation_expr
-        | var_usage "[" expr "]" -> index_expr
+        | index_expr
 
 COMP_EQU: "=="
 COMP_NEQU: "!="
@@ -57,6 +57,11 @@ list_elems: (expr ("," expr)*)?
 dict_literal: "%{" _NEWLINE? kv_pair_list _NEWLINE? "}" ("::" type_usage)?
 kv_pair_list:  (kv_pair ("," _NEWLINE? kv_pair)*)?
 kv_pair: expr "=>" expr
+
+index_expr: var_usage "[" ( expr | range_index ) "]"
+range_index: low ".." high
+low: expr?
+high: expr?
 
 type_decl: "type" type_name "=" (record_def | variant_def)
 type_name: NAME
@@ -106,9 +111,14 @@ BOOL.2: "true"
 _NEWLINE: ( /\r?\n[\t ]*/ | COMMENT )+
 COMMENT: /#[^\n]*/
 
+DECIMAL: UINT "." UINT
+_EXP: ("e"|"E") INT
+UFLOAT: INT _EXP | DECIMAL _EXP?
+FLOAT: ["+" | "-"] UFLOAT
+
 %import common.CNAME -> NAME
+%import common.INT -> UINT
 %import common.SIGNED_INT -> INT
-%import common.FLOAT
 %import common.WS_INLINE
 %import common.ESCAPED_STRING -> STRING
 
