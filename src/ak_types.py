@@ -31,16 +31,16 @@ class ListType(AkType):
     __repr__ = __str__
 
     def go_code(self):
-        return "[]{}".format(self.elem_type.go_code())
+        return "list.List"
 
 
 class PrimitiveType(AkType):
     # map primitive aktoro types to their golang equivalents
     primitive_types = {
-        "int": "int",
-        "float": "float64",
-        "string": "string",
-        "bool": "bool"
+        "int": "types.AkInt",
+        "float": "types.AkFloat",
+        "string": "types.AkString",
+        "bool": "types.AkBool"
     }
 
     def __init__(self, name):

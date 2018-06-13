@@ -51,16 +51,15 @@ def argument(*name_or_flags, **kwargs):
               argument('-o', type=str, help="output")])
 def build(args):
     input_filename = os.path.join(__path__, args.filename)
-    with open(input_filename) as ol:
-        program = ol.read()
+    with open(input_filename) as ak:
+        program = ak.read()
 
     generated = compile_ak(program)
 
     input_filename_no_extension = input_filename.split(".ak", 1)[0]
     input_path = input_filename_no_extension.split("/")
     input_path = "/".join(input_path[:len(input_path) - 1])
-    temp_go_filename = str(input_filename_no_extension) + \
-                       "_aktoro_generated" + ".go"
+    temp_go_filename = f"{input_filename_no_extension}_aktoro_generated.go"
     with open(temp_go_filename, "w") as go_file:
         go_file.write(generated)
     build_str = f"cd {input_path} && go build"
@@ -78,8 +77,7 @@ def run(args):
 
     generated = compile_ak(program)
     input_filename_no_extension = input_filename.split(".ak", 1)[0]
-    temp_go_filename = str(input_filename_no_extension) + \
-                       "_aktoro_generated" + ".go"
+    temp_go_filename = f"{input_filename_no_extension}_aktoro_generated.go"
     with open(temp_go_filename, "w") as go_file:
         go_file.write(generated)
     output = subprocess.check_output(f"go run {temp_go_filename}", shell=True)
@@ -91,8 +89,8 @@ def run(args):
 @sub_command([argument('filename', type=str, help="filename")])
 def parse(args):
     input_filename = os.path.join(__path__, args.filename)
-    with open(input_filename) as ol:
-        program = ol.read()
+    with open(input_filename) as ak:
+        program = ak.read()
 
     parse_tree = AK_GRAMMAR.parse(program)
     print(parse_tree.pretty())

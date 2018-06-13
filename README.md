@@ -2,9 +2,11 @@
 
 
 ####Todo
-- Dictionary Literals: DONE
-- Dict and List indexing: DONE
-- Range Indexing: DONE
+- Function Type Erasure
+- Immutable List and Dict
+- Dictionary Literals
+- Dict and List indexing
+- Range Indexing
 - Update Syntax
     - List
     - Dict

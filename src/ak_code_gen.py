@@ -9,6 +9,7 @@ class CodeGenVisitor(NodeVisitor):
 
     def __init__(self):
         super(CodeGenVisitor, self).__init__()
+        self.imports = set()
 
     def visit(self, node):
         '''
@@ -33,11 +34,12 @@ class CodeGenVisitor(NodeVisitor):
                 main_statements.append(line)
         main_go_code = "\n".join([self.visit(s) for s in main_statements])
         record_decl_go_code = "\n".join([self.visit(r) for r in record_decls])
+        imports_go_code = "\n".join(list(self.imports))
 
         go_body = textwrap.dedent("""
                     package main
                     import (
-                    "fmt"
+                    {imports}
                     )
                     {record_decls}
                     func main() {{
@@ -45,7 +47,8 @@ class CodeGenVisitor(NodeVisitor):
                     }}
 
                     """)
-        return go_body.format(main_code=textwrap.indent(main_go_code, "\t"), record_decls=record_decl_go_code)
+        return go_body.format(main_code=textwrap.indent(main_go_code, "\t"), record_decls=record_decl_go_code,
+                              imports=imports_go_code)
 
     def visit_VarDecl(self, node):
         node_name = self.visit_VarUsage(node)
@@ -67,12 +70,24 @@ class CodeGenVisitor(NodeVisitor):
         return go_code
 
     def visit_PrimitiveLiteral(self, node):
-        return node.value
+        self.imports.add('"github.com/aktoro-lang/types"')
+        literal_type = node.ak_type.name
+        if literal_type == "string":
+            return f"types.AkString({node.value})"
+        elif literal_type == "int":
+            return f"types.AkInt({node.value})"
+        elif literal_type == "float":
+            return f"types.AkFloat({node.value})"
+        elif literal_type == "bool":
+            return f"types.AkBool({node.value})"
+        else:
+            raise TypeError("unhandled primitive type")
 
     def visit_ListLiteral(self, node):
+        self.imports.add('"github.com/aktoro-lang/container/list"')
         elems = [self.visit(elem) for elem in node.values]
         elem_go_code = ", ".join(elems)
-        return f"{node.ak_type.go_code()}{{{elem_go_code}}}"
+        return f"list.New({elem_go_code})"
 
     def visit_DictLiteral(self, node):
         kv_pairs = [f"{self.visit(key)}: {self.visit(val)}" for key, val in node.kv_exprs.items()]
@@ -93,11 +108,14 @@ class CodeGenVisitor(NodeVisitor):
         return f"{snake_to_camel(node.name)} {node.ak_type.go_code()}"
 
     def visit_FuncDef(self, node):
-        params = [self.visit(param) for param in node.params.values()]
-        params = ", ".join(params)
+        param_init = []
+        for i, param in enumerate(node.params.values()):
+            param_init.append(f"{param.name} := _params[{i}].({param.ak_type.go_code()})")
+        param_init = "\n".join(param_init)
+
         func_body = "\n".join([self.visit(line) for line in node.body])
-        return_type = node.return_type.go_code()
-        go_code = f"""func ({params}) {return_type} {{
+        go_code = f"""func(_params ...interface{{}}) interface{{}} {{
+        {param_init}
         {func_body}
         }}
         """
@@ -112,6 +130,7 @@ class CodeGenVisitor(NodeVisitor):
         return f"return {self.visit(node.expr)}"
 
     def visit_PrintStmt(self, node):
+        self.imports.add('"fmt"')
         exprs = ",".join([self.visit(expr) for expr in node.exprs])
         return f"fmt.Println({exprs})"
 
