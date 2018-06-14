@@ -37,6 +37,8 @@ var_usage: NAME ("." NAME)*
         | func_call
         | record_literal
         | record_update
+        | list_cons
+        | dict_update
         | "-" primary -> negation_expr
         | index_expr
 
@@ -54,9 +56,14 @@ DIVIDE: "/"
 list_literal: "[" list_elems "]" ("::" type_usage)?
 list_elems: (expr ("," expr)*)?
 
+list_cons: "[" cons_args "|" expr "]"
+cons_args: expr ("," expr)*
+
 dict_literal: "%{" _NEWLINE? kv_pair_list _NEWLINE? "}" ("::" type_usage)?
 kv_pair_list:  (kv_pair ("," _NEWLINE? kv_pair)*)?
 kv_pair: expr "=>" expr
+
+dict_update: "%{" expr "|" kv_pair ("," _NEWLINE? kv_pair)* "}"
 
 index_expr: var_usage "[" ( expr | range_index ) "]"
 range_index: low ".." high
@@ -90,7 +97,7 @@ record_literal: "{" _NEWLINE? field_assignment ("," _NEWLINE? field_assignment)*
 field_assignment: field_name "=" expr
 field_name: NAME
 
-record_update: "{" var_usage "|" field_assignment ("," _NEWLINE? field_assignment)* "}"
+record_update: "{" expr "|" field_assignment ("," _NEWLINE? field_assignment)* "}"
 
 func_def: "fn" open_params param_list? close_params [type_usage] "=>" func_body
 func_body: open_block _line* close_block

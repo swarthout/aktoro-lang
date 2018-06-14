@@ -90,9 +90,17 @@ class CodeGenVisitor(NodeVisitor):
         return f"list.New({elem_go_code})"
 
     def visit_DictLiteral(self, node):
-        kv_pairs = [f"{self.visit(key)}: {self.visit(val)}" for key, val in node.kv_exprs.items()]
+        self.imports.add('"github.com/aktoro-lang/container/dict"')
+        kv_pairs = [self.visit(kv) for kv in node.key_values]
         kv_pairs_go_code = ",\n".join(kv_pairs)
-        return f"{node.ak_type.go_code()}{{{kv_pairs_go_code}}}"
+        return f"dict.New({kv_pairs_go_code})"
+
+    def visit_KeyValue(self, node):
+        return f"dict.NewKeyValue({self.visit(node.key)},{self.visit(node.value)})"
+
+    def visit_DictUpdate(self, node):
+        updates_go_code = ",".join([self.visit(update) for update in node.updates])
+        return f"dict.Put({self.visit(node.var)}, {updates_go_code})"
 
     def visit_RecordLiteral(self, node):
         fields = [f"{name}: {self.visit(expr)}" for name, expr in node.fields.items()]
@@ -135,9 +143,29 @@ class CodeGenVisitor(NodeVisitor):
         return f"fmt.Println({exprs})"
 
     def visit_IndexExpr(self, node):
-        return f"{self.visit(node.var)}[{self.visit(node.index_expr)}]"
+        var_type = node.var.ak_type
+        if isinstance(var_type, ListType):
+            return self.visit_ListIndexExpr(node)
+        elif isinstance(var_type, DictType):
+            return self.visit_DictIndexExpr(node)
 
-    def visit_RangeIndex(self, node):
-        low = self.visit(node.low) if node.low else ""
-        high = self.visit(node.high) if node.high else ""
-        return f"{low}:{high}"
+    def visit_ListIndexExpr(self, node):
+        if isinstance(node.index_expr, RangeIndex):
+            return self.visit_ListRangeIndexExpr(node)
+        else:
+            return f"list.At({self.visit(node.var)},{self.visit(node.index_expr)})"
+
+    def visit_ListRangeIndexExpr(self, node):
+        low = self.visit(node.index_expr.low) if node.index_expr.low else "0"
+        if node.index_expr.high:
+            high = self.visit(node.index_expr.high)
+            return f"list.GetRange({self.visit(node.var)}, {low}, {high})"
+        else:
+            return f"list.Drop({self.visit(node.var)}, {low})"
+
+    def visit_ListConsExpr(self, node):
+        cons_args_go_code = ",".join([self.visit(arg) for arg in node.cons_args])
+        return f"list.Cons({self.visit(node.var)}, {cons_args_go_code})"
+
+    def visit_DictIndexExpr(self, node):
+        return f"dict.Get({self.visit(node.var)}, {self.visit(node.index_expr)})"

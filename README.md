@@ -3,14 +3,6 @@
 
 ####Todo
 - Function Type Erasure
-- Immutable List and Dict
-- Dictionary Literals
-- Dict and List indexing
-- Range Indexing
-- Update Syntax
-    - List
-    - Dict
-    - Record
 - If and Else
 - String concatenation
 - Pipe operator

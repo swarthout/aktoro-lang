@@ -31,7 +31,7 @@ class ListType(AkType):
     __repr__ = __str__
 
     def go_code(self):
-        return "list.List"
+        return "*list.List"
 
 
 class PrimitiveType(AkType):
@@ -62,8 +62,13 @@ class DictType(AkType):
         self.key_type = key_type
         self.val_type = val_type
 
+    def __str__(self):
+        return "DictType({} => {})".format(self.key_type, self.val_type)
+
+    __repr__ = __str__
+
     def go_code(self):
-        return "map[{}]{}".format(self.key_type.go_code(), self.val_type.go_code())
+        return "dict.Dict"
 
 
 class RecordType(AkType):
@@ -71,6 +76,11 @@ class RecordType(AkType):
         super().__init__(name)
         self.type_params = type_params
         self.fields = fields
+
+    def __str__(self):
+        return "RecordType({})".format(self.name)
+
+    __repr__ = __str__
 
     def go_code(self):
         return snake_to_camel(self.name)

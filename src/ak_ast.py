@@ -48,7 +48,15 @@ class ListLiteral(AST):
 
 
 class DictLiteral(AST):
-    _fields = ["kv_exprs", "ak_type"]
+    _fields = ["key_values", "ak_type"]
+
+
+class KeyValue(AST):
+    _fields = ["key", "value"]
+
+
+class DictUpdate(AST):
+    _fields = ["var", "updates", "ak_type"]
 
 
 class RecordLiteral(AST):
@@ -81,6 +89,10 @@ class PrintStmt(AST):
 
 class IndexExpr(AST):
     _fields = ["var", "index_expr", "ak_type"]
+
+
+class ListConsExpr(AST):
+    _fields = ["var", "cons_args", "ak_type"]
 
 
 class RangeIndex(AST):
