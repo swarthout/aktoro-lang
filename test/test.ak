@@ -27,3 +27,7 @@ print(numbers)
 let spanish_five = %{more_numbers | 5 => "cinco"}
 print(spanish_five)
 print(more_numbers)
+
+let mustang = {name="Mustang", year=2013}
+let new_mustang = {mustang | year=2018}
+print(new_mustang)

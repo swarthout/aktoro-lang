@@ -63,6 +63,10 @@ class RecordLiteral(AST):
     _fields = ["fields", "ak_type"]
 
 
+class RecordUpdate(AST):
+    _fields = ["var", "updates", "ak_type"]
+
+
 class BinaryOpExpr(AST):
     _fields = ["left", "op", "right", "ak_type"]
 

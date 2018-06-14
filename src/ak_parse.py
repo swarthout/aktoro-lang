@@ -243,6 +243,11 @@ class Parser(Transformer):
         record_type = self.symbol_table.get_record_by_field_names(field_names)
         return RecordLiteral(field_dict, record_type)
 
+    def record_update(self, args):
+        var = args[0]
+        updates = args[1:]
+        return RecordUpdate(var, updates, var.ak_type)
+
     def field_assignment(self, args):
         name, expr = args
         return name, expr

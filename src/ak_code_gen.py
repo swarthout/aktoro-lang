@@ -109,6 +109,18 @@ class CodeGenVisitor(NodeVisitor):
         go_code = f"{record_type}{{\n" + textwrap.indent(fields, "\t") + textwrap.dedent("}")
         return go_code
 
+    def visit_RecordUpdate(self, node):
+        record_type = node.ak_type.go_code()
+        updated_fields = set([field for field, value in node.updates])
+        all_fields = set(node.ak_type.fields.keys())
+        unchanged_fields = all_fields - updated_fields
+        unchanged_fields = [f"{name}: {self.visit(node.var)}.{name}" for name in unchanged_fields]
+        updated_fields = [f"{name}: {self.visit(expr)}" for name, expr in node.updates]
+        all_fields = unchanged_fields + updated_fields
+        fields_go_code = ",\n".join([textwrap.indent(f, "\t") for f in all_fields])
+        go_code = f"{record_type}{{\n" + textwrap.indent(fields_go_code, "\t") + textwrap.dedent("}")
+        return go_code
+
     def visit_BinaryOpExpr(self, node):
         return f"{self.visit(node.left)} {node.op} {self.visit(node.right)}"
 
