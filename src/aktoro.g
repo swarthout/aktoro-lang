@@ -41,6 +41,7 @@ var_usage: NAME ("." NAME)*
         | dict_update
         | "-" primary -> negation_expr
         | index_expr
+        | if_expr
 
 COMP_EQU: "=="
 COMP_NEQU: "!="
@@ -111,6 +112,11 @@ close_block: "}"
 func_call: var_usage "(" _expr_list? ")"
 print_stmt: "print" "(" _expr_list? ")"
 _expr_list: expr ("," expr)*
+
+if_expr: "if" expr "{" if_body "}" else_expr
+if_body: _line*
+else_expr: ("else" "{" _else_body "}")?
+_else_body: _line*
 
 BOOL.2: "true"
       | "false"

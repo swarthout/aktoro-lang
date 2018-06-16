@@ -103,6 +103,10 @@ class RangeIndex(AST):
     _fields = ["low", "high"]
 
 
+class IfExpr(AST):
+    _fields = ["test_expr", "if_body", "else_body", "ak_type"]
+
+
 class NodeVisitor(object):
     def visit(self, node):
         '''

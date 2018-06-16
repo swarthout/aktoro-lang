@@ -131,11 +131,10 @@ class Parser(Transformer):
         return PrimitiveLiteral(args[0], PrimitiveType("string"))
 
     def list_literal(self, args):
-        if len(args) == 2:
-            elems, ak_type = args
-            return ListLiteral(elems, ak_type)
+        elems, *ak_type = args
+        if ak_type:
+            return ListLiteral(elems, ak_type[0])
         else:
-            elems = args[0]
             if not elems:
                 raise TypeError("Must add type annotation to empty list literal")
             elem_type = elems[0].ak_type
@@ -154,12 +153,10 @@ class Parser(Transformer):
         return args
 
     def dict_literal(self, args):
-        if len(args) == 2:
-            key_values = args[0]
-            ak_type = args[1]
-            return DictLiteral(key_values, ak_type)
+        key_values, *ak_type = args
+        if ak_type:
+            return DictLiteral(key_values, ak_type[0])
         else:
-            key_values = args[0]
             if not key_values:
                 raise TypeError("Must add type annotation to empty dict literal")
             first_pair = key_values[0]
@@ -169,8 +166,7 @@ class Parser(Transformer):
             return DictLiteral(key_values, ak_type)
 
     def dict_update(self, args):
-        var = args[0]
-        updates = args[1:]
+        var, *updates = args
         return DictUpdate(var, updates, var.ak_type)
 
     def kv_pair_list(self, args):
@@ -187,6 +183,10 @@ class Parser(Transformer):
     def mult_expr(self, args):
         left, op, right = args
         return BinaryOpExpr(left, op, right, left.ak_type)
+
+    def equality_expr(self, args):
+        left, op, right = args
+        return BinaryOpExpr(left, op, right, PrimitiveType("bool"))
 
     def type_decl(self, args):
         name, (type_kind, fields) = args
@@ -244,8 +244,7 @@ class Parser(Transformer):
         return RecordLiteral(field_dict, record_type)
 
     def record_update(self, args):
-        var = args[0]
-        updates = args[1:]
+        var, *updates = args
         return RecordUpdate(var, updates, var.ak_type)
 
     def field_assignment(self, args):
@@ -291,3 +290,16 @@ class Parser(Transformer):
 
     def print_stmt(self, args):
         return PrintStmt(args)
+
+    def if_expr(self, args):
+        test_expr, if_body, *else_body = args
+        if else_body:
+            else_body = else_body[0]
+        ak_type = if_body[-1].ak_type
+        return IfExpr(test_expr, if_body, else_body, ak_type)
+
+    def if_body(self, args):
+        return args
+
+    def else_expr(self, args):
+        return args

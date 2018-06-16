@@ -1,11 +1,11 @@
 type car = {name string, year int}
 
 let first = fn (cars list car) car => {
-    print(cars)
     cars[0]
 }
 let cars = [{name="Mustang", year=2013}, {name="Wrangler", year=1990}, {name="Corvette", year=1990}]
-print(first(cars))
+let first_car = first(cars)
+print(first_car.year)
 print(cars[..2])
 let numbers = %{
     2 => "two",
@@ -31,3 +31,9 @@ print(more_numbers)
 let mustang = {name="Mustang", year=2013}
 let new_mustang = {mustang | year=2018}
 print(new_mustang)
+
+let age = if new_mustang.year > 2015 {
+    "new"
+    } else { "old" }
+
+#print(age)

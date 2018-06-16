@@ -4,8 +4,10 @@
 ####Todo
 - Function Type Erasure
 - If and Else
+- Dot operator revamp
 - String concatenation
 - Pipe operator
+- enum module
 - Basic Pattern Matching (no arguments)
 - Destructuring
     - Record

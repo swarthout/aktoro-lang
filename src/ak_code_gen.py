@@ -54,6 +54,15 @@ class CodeGenVisitor(NodeVisitor):
         node_name = self.visit_VarUsage(node)
         return f"{node_name} := {self.visit(node.expr)}"
 
+    def visit_VarDeclNoInit(self, node):
+        node_name = self.visit_VarUsage(node)
+        return f"var {node_name} {node.ak_type.go_code()}"
+
+    def visit_VarAssignMut(self, node):
+        node_name = self.visit_VarUsage(node.var)
+        expr = self.visit(node.expr)
+        return f"{node_name} = {expr}"
+
     def visit_RecordDecl(self, node):
         fields = "\n".join([f"{name} {ak_type.go_code()}" for name, ak_type in node.fields.items()])
         fields = textwrap.indent(fields, "\t")
@@ -128,14 +137,13 @@ class CodeGenVisitor(NodeVisitor):
         return f"{snake_to_camel(node.name)} {node.ak_type.go_code()}"
 
     def visit_FuncDef(self, node):
-        param_init = []
-        for i, param in enumerate(node.params.values()):
-            param_init.append(f"{param.name} := _params[{i}].({param.ak_type.go_code()})")
-        param_init = "\n".join(param_init)
-
+        params = []
+        for param in node.params.values():
+            params.append(f"{param.name} {param.ak_type.go_code()}")
+        params = "\n".join(params)
+        return_type = node.return_type.go_code()
         func_body = "\n".join([self.visit(line) for line in node.body])
-        go_code = f"""func(_params ...interface{{}}) interface{{}} {{
-        {param_init}
+        go_code = f"""func({params}) {return_type} {{
         {func_body}
         }}
         """
@@ -165,7 +173,7 @@ class CodeGenVisitor(NodeVisitor):
         if isinstance(node.index_expr, RangeIndex):
             return self.visit_ListRangeIndexExpr(node)
         else:
-            return f"list.At({self.visit(node.var)},{self.visit(node.index_expr)})"
+            return f"list.At({self.visit(node.var)},{self.visit(node.index_expr)}).({node.ak_type.go_code()})"
 
     def visit_ListRangeIndexExpr(self, node):
         low = self.visit(node.index_expr.low) if node.index_expr.low else "0"
@@ -181,3 +189,6 @@ class CodeGenVisitor(NodeVisitor):
 
     def visit_DictIndexExpr(self, node):
         return f"dict.Get({self.visit(node.var)}, {self.visit(node.index_expr)})"
+
+    def visit_IfExpr(self, node):
+        pass

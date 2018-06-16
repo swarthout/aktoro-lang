@@ -266,12 +266,12 @@ let init_counter = fn (args counter_args) actor.pid => {
         total_count=start,
         reset_count=0
     }
-    go (init_state, counter_reducer)
+    Actor.start(init_state, counter_reducer)
 }
 
 let counter = init_counter({start=5})
 
-tell (counter, :add 7)
+Actor.tell(counter, :add 7)
 
 tell (counter, :reset)
 
@@ -294,13 +294,14 @@ module stack = {
     let reducer_ = fn(s state_ 't, m message_, sender option actor.pid) state_ 't => {
         match m {
             :push e => {
-                {s | data = data <> [e]}
+                {s | data=[e | data]}
              },
             :pop => {
-                {s | data=data[..-1]}
+                {s | data=data[1..]}
             },
             :get_top => {
-                actor.reply (sender, s.data[-1])
+                actor.reply (sender, s.data[0])
+                s
             }
         }
     }
