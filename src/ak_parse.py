@@ -80,7 +80,14 @@ class Parser(Transformer):
 
     def var_decl(self, args):
         name, expr = args
-        v = VarDecl(name, expr, expr.ak_type)
+        if isinstance(expr, IfExpr):
+            last_if_expr = expr.if_body[-1]
+            expr.if_body[-1] = VarAssignMut(name, last_if_expr)
+            last_else_expr = expr.else_body[-1]
+            expr.else_body[-1] = VarAssignMut(name, last_else_expr)
+            v = VarIfAssign(name, expr, expr.ak_type)
+        else:
+            v = VarDecl(name, expr, expr.ak_type)
         self.symbol_table.add(name, v)
         return v
 
@@ -102,9 +109,12 @@ class Parser(Transformer):
         var, index_expr = args
         if isinstance(var.ak_type, ListType):
             ak_type = var.ak_type.elem_type
+            if isinstance(index_expr, RangeIndex):
+                return ListRangeIndexExpr(var, index_expr, ak_type)
+            return ListIndexExpr(var, index_expr, ak_type)
         elif isinstance(var.ak_type, DictType):
             ak_type = var.ak_type.val_type
-        return IndexExpr(var, index_expr, ak_type)
+            return DictIndexExpr(var, index_expr, ak_type)
 
     def range_index(self, args):
         low, high = args

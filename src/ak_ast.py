@@ -35,8 +35,12 @@ class VarDecl(Expr):
     _fields = ["name", "expr", "ak_type"]
 
 
+class VarIfAssign(Expr):
+    _fields = ["name", "expr", "ak_type"]
+
+
 class VarAssignMut(AST):
-    _fields = ["var", "expr"]
+    _fields = ["name", "expr"]
 
 
 class RecordDecl(Expr):
@@ -99,7 +103,15 @@ class PrintStmt(AST):
     _fields = ["exprs"]
 
 
-class IndexExpr(Expr):
+class ListIndexExpr(Expr):
+    _fields = ["var", "index_expr", "ak_type"]
+
+
+class ListRangeIndexExpr(Expr):
+    _fields = ["var", "index_expr", "ak_type"]
+
+
+class DictIndexExpr(Expr):
     _fields = ["var", "index_expr", "ak_type"]
 
 

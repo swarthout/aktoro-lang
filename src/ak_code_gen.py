@@ -51,17 +51,12 @@ class CodeGenVisitor(NodeVisitor):
                               imports=imports_go_code)
 
     def visit_VarDecl(self, node):
-        if isinstance(node.expr, IfExpr):
-            return self.visit_IfAssign(node)
         node_name = self.visit_VarUsage(node)
         return f"{node_name} := {self.visit(node.expr)}"
 
-    def visit_IfAssign(self, node):
+    def visit_VarIfAssign(self, node):
         var_decl = self.visit_VarDeclNoInit(node)
-        last_if_expr = node.expr.if_body[-1]
-        node.expr.if_body[-1] = VarAssignMut(node, last_if_expr)
-        last_else_expr = node.expr.else_body[-1]
-        node.expr.else_body[-1] = VarAssignMut(node, last_else_expr)
+
         return var_decl + "\n" + self.visit(node.expr)
 
     def visit_VarDeclNoInit(self, node):
@@ -69,7 +64,7 @@ class CodeGenVisitor(NodeVisitor):
         return f"var {node_name} {node.ak_type.go_code()}"
 
     def visit_VarAssignMut(self, node):
-        node_name = self.visit_VarUsage(node.var)
+        node_name = self.visit_VarUsage(node)
         expr = self.visit(node.expr)
         return f"{node_name} = {expr}"
 
@@ -171,13 +166,6 @@ class CodeGenVisitor(NodeVisitor):
         self.imports.add('"fmt"')
         exprs = ",".join([self.visit(expr) for expr in node.exprs])
         return f"fmt.Println({exprs})"
-
-    def visit_IndexExpr(self, node):
-        var_type = node.var.ak_type
-        if isinstance(var_type, ListType):
-            return self.visit_ListIndexExpr(node)
-        elif isinstance(var_type, DictType):
-            return self.visit_DictIndexExpr(node)
 
     def visit_ListIndexExpr(self, node):
         if isinstance(node.index_expr, RangeIndex):
