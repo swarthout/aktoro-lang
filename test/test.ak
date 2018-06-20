@@ -34,8 +34,6 @@ print(new_mustang)
 
 if new_mustang.year > 2015 {
    print("hello from new mustang")
-} else {
-    print("hello from old mustang")
 }
 
 let month = 3

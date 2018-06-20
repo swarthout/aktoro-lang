@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/othello-lang.iml" filepath="$PROJECT_DIR$/.idea/othello-lang.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/aktoro-lang.iml" filepath="$PROJECT_DIR$/.idea/aktoro-lang.iml" />
     </modules>
   </component>
 </project>

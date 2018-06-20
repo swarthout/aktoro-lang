@@ -192,7 +192,7 @@ class CodeGenVisitor(NodeVisitor):
         test_expr = self.visit(node.test_expr)
         if_body = "\n".join([self.visit(line) for line in node.if_body])
         if node.else_body:
-            else_body = "\n".join([self.visit(line) for line in node.if_body])
+            else_body = "\n".join([self.visit(line) for line in node.else_body])
             else_stmt = f"""else {{
             {else_body} 
             }}"""
