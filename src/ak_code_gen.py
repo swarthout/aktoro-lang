@@ -51,8 +51,18 @@ class CodeGenVisitor(NodeVisitor):
                               imports=imports_go_code)
 
     def visit_VarDecl(self, node):
+        if isinstance(node.expr, IfExpr):
+            return self.visit_IfAssign(node)
         node_name = self.visit_VarUsage(node)
         return f"{node_name} := {self.visit(node.expr)}"
+
+    def visit_IfAssign(self, node):
+        var_decl = self.visit_VarDeclNoInit(node)
+        last_if_expr = node.expr.if_body[-1]
+        node.expr.if_body[-1] = VarAssignMut(node, last_if_expr)
+        last_else_expr = node.expr.else_body[-1]
+        node.expr.else_body[-1] = VarAssignMut(node, last_else_expr)
+        return var_decl + "\n" + self.visit(node.expr)
 
     def visit_VarDeclNoInit(self, node):
         node_name = self.visit_VarUsage(node)
@@ -154,7 +164,7 @@ class CodeGenVisitor(NodeVisitor):
         args = ", ".join([self.visit(arg) for arg in node.args])
         return f"{func_name}({args})"
 
-    def visit_ReturnExpr(self, node):
+    def visit_ReturnStmt(self, node):
         return f"return {self.visit(node.expr)}"
 
     def visit_PrintStmt(self, node):
@@ -191,4 +201,16 @@ class CodeGenVisitor(NodeVisitor):
         return f"dict.Get({self.visit(node.var)}, {self.visit(node.index_expr)})"
 
     def visit_IfExpr(self, node):
-        pass
+        test_expr = self.visit(node.test_expr)
+        if_body = "\n".join([self.visit(line) for line in node.if_body])
+        if node.else_body:
+            else_body = "\n".join([self.visit(line) for line in node.if_body])
+            else_stmt = f"""else {{
+            {else_body} 
+            }}"""
+        else:
+            else_stmt = ""
+        return f"""if {test_expr} {{
+            {if_body}
+        }} {else_stmt}
+        """

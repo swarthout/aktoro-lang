@@ -32,8 +32,13 @@ let mustang = {name="Mustang", year=2013}
 let new_mustang = {mustang | year=2018}
 print(new_mustang)
 
-let age = if new_mustang.year > 2015 {
-    "new"
-    } else { "old" }
+if new_mustang.year > 2015 {
+   print("hello from new mustang")
+} else {
+    print("hello from old mustang")
+}
 
-#print(age)
+let month = 3
+
+let season = if month >= 6 { "spring" } else { "fall" }
+print(season)

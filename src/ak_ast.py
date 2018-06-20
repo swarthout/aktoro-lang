@@ -23,31 +23,39 @@ class AST(object):
         return "<{}: {}>".format(self.__class__.__name__, ", ".join(["{}: {}".format(a[0], a[1]) for a in attrs]))
 
 
+class Expr(AST):
+    pass
+
+
 class Program(AST):
     _fields = ["statements"]
 
 
-class VarDecl(AST):
+class VarDecl(Expr):
     _fields = ["name", "expr", "ak_type"]
 
 
-class RecordDecl(AST):
+class VarAssignMut(AST):
+    _fields = ["var", "expr"]
+
+
+class RecordDecl(Expr):
     _fields = ["name", "type_params", "fields"]
 
 
-class VarUsage(AST):
+class VarUsage(Expr):
     _fields = ["name", "ak_type"]
 
 
-class PrimitiveLiteral(AST):
+class PrimitiveLiteral(Expr):
     _fields = ["value", "ak_type"]
 
 
-class ListLiteral(AST):
+class ListLiteral(Expr):
     _fields = ["values", "ak_type"]
 
 
-class DictLiteral(AST):
+class DictLiteral(Expr):
     _fields = ["key_values", "ak_type"]
 
 
@@ -55,19 +63,19 @@ class KeyValue(AST):
     _fields = ["key", "value"]
 
 
-class DictUpdate(AST):
+class DictUpdate(Expr):
     _fields = ["var", "updates", "ak_type"]
 
 
-class RecordLiteral(AST):
+class RecordLiteral(Expr):
     _fields = ["fields", "ak_type"]
 
 
-class RecordUpdate(AST):
+class RecordUpdate(Expr):
     _fields = ["var", "updates", "ak_type"]
 
 
-class BinaryOpExpr(AST):
+class BinaryOpExpr(Expr):
     _fields = ["left", "op", "right", "ak_type"]
 
 
@@ -75,15 +83,15 @@ class ParamDecl(AST):
     _fields = ["name", "ak_type"]
 
 
-class FuncDef(AST):
+class FuncDef(Expr):
     _fields = ["params", "return_type", "body", "ak_type"]
 
 
-class FuncCall(AST):
+class FuncCall(Expr):
     _fields = ["func_name", "args", "ak_type"]
 
 
-class ReturnExpr(AST):
+class ReturnStmt(AST):
     _fields = ["expr", "ak_type"]
 
 
@@ -91,11 +99,11 @@ class PrintStmt(AST):
     _fields = ["exprs"]
 
 
-class IndexExpr(AST):
+class IndexExpr(Expr):
     _fields = ["var", "index_expr", "ak_type"]
 
 
-class ListConsExpr(AST):
+class ListConsExpr(Expr):
     _fields = ["var", "cons_args", "ak_type"]
 
 
@@ -103,7 +111,7 @@ class RangeIndex(AST):
     _fields = ["low", "high"]
 
 
-class IfExpr(AST):
+class IfExpr(Expr):
     _fields = ["test_expr", "if_body", "else_body", "ak_type"]
 
 

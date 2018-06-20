@@ -280,7 +280,7 @@ class Parser(Transformer):
         return FuncCall(var_usage, arg_exprs, var_usage.ak_type.return_type)
 
     def return_expr(self, args):
-        return ReturnExpr(args, args.ak_type)
+        return ReturnStmt(args, args.ak_type)
 
     def open_params(self, args):
         self.symbol_table.push_scope()
@@ -295,7 +295,11 @@ class Parser(Transformer):
         test_expr, if_body, *else_body = args
         if else_body:
             else_body = else_body[0]
-        ak_type = if_body[-1].ak_type
+        last_if_expr = if_body[-1]
+        if isinstance(last_if_expr, Expr):
+            ak_type = if_body[-1].ak_type
+        else:
+            ak_type = None
         return IfExpr(test_expr, if_body, else_body, ak_type)
 
     def if_body(self, args):
