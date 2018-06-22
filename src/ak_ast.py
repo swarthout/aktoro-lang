@@ -51,6 +51,10 @@ class VarUsage(Expr):
     _fields = ["name", "ak_type"]
 
 
+class FieldAccess(Expr):
+    _fields = ["record_name", "field_name", "ak_type"]
+
+
 class PrimitiveLiteral(Expr):
     _fields = ["value", "ak_type"]
 

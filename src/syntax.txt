@@ -128,7 +128,7 @@ let req_handler = fn (r request) => {
         },
         :post "/hello/{id}" => fn (r request) => {
             let {id} = http.get_vars(r)
-            let response = dict int string {}
+            let response = {} :: dict int string
             json.dump(response)
         },
         :post "/hello/{id int}/{username option string}" => post_handler
@@ -173,18 +173,18 @@ module math = {
 let anonymous_func = fn (a, b) => a + b
 
 module stack = {
-    type state 't = {
-        data list 't,
+    type t 'a = {
+        data list 'a,
         buffer_size int
     }
-    let init = fn (init_list list 't, buffer_size int) state 't => {
+    let init = fn (init_list list 'a, buffer_size int) stack.t 'a => {
         {data = init_list, buffer_size}
     }
 
-    let push = fn (s state 't, e 't) state 't => {
+    let push = fn (s stack.t 'a, e 'a) stack.t 'a => {
         {s | data=[e | data]}
     }
-    let pop = fn (s state 't) state 't => {
+    let pop = fn (s stack.t 'a) stack.t 'a => {
         {s | data=data[1..]}
     }
 }
@@ -203,10 +203,25 @@ s = s |> push (6)
 
 a = stack.pop (s)
 
+
+let reverse = fn (s stack.t 'a) stack.t 'a => {
+    match {
+        stack.empty?(s) => s,
+        _ => {
+            let top = stack.peek_top(s)
+            s
+            |> stack.pop()
+            |> reverse()
+            |> stack.push(top)
+        }
+    }
+
+}
+
 # a int = 6
 
 let map_int_string = fn (l list string, f fn (string) string ) list string => {
-    list.map(l, f)
+    enum.map(l, f)
 }
     
 module enum = {
@@ -224,9 +239,9 @@ use enum.{take, filter, reduce}
 num = l
 
 num
-|> filter(fn (a) => a % 2 == 0)
-|> take(2)
-|> reduce(fn (a, b) => a + b)
+|> enum.filter(fn (a) => a % 2 == 0)
+|> enum.take(2)
+|> enum.reduce(fn (a, b) => a + b)
 
 # num = 10
 

@@ -95,15 +95,16 @@ class Parser(Transformer):
         return str(args[0])
 
     def var_usage(self, args):
-        root_name = args[0]
-        root_var = self.symbol_table.get(root_name)
+        name = args[0]
+        root_var = self.symbol_table.get(name)
         ak_type = root_var.ak_type
-        if len(args) > 1:
-            for arg in args[1:]:
-                record = self.symbol_table.get(ak_type.name)
-                ak_type = record.fields[arg]
-        name = ".".join(args)
         return VarUsage(name, ak_type)
+
+    def field_access(self, args):
+        record_name, field_name = args
+        parent_ak_type = self.symbol_table.get(record_name.ak_type.name)
+        ak_type = parent_ak_type.fields[field_name]
+        return FieldAccess(record_name, str(field_name), ak_type)
 
     def index_expr(self, args):
         var, index_expr = args

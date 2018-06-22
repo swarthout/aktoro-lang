@@ -12,7 +12,7 @@ _line: _NEWLINE
 
 var_decl: "let" var_name "=" expr
 var_name: NAME
-var_usage: NAME ("." NAME)*
+var_usage: NAME
 
 
 ?expr: equality_expr
@@ -42,6 +42,7 @@ var_usage: NAME ("." NAME)*
         | "-" primary -> negation_expr
         | index_expr
         | if_expr
+        | field_access
 
 COMP_EQU: "=="
 COMP_NEQU: "!="
@@ -54,7 +55,7 @@ MINUS: "-"
 MULTIPLY: "*"
 DIVIDE: "/"
 
-list_literal: "[" list_elems "]" ("::" type_usage)?
+list_literal: "[" _NEWLINE? list_elems _NEWLINE? "]" ("::" type_usage)?
 list_elems: (expr ("," expr)*)?
 
 list_cons: "[" cons_args "|" expr "]"
@@ -117,6 +118,12 @@ if_expr: "if" expr "{" if_body "}" else_expr
 if_body: _line*
 else_expr: ("else" "{" _else_body "}")?
 _else_body: _line*
+
+field_access: ( var_usage
+              | func_call
+              | record_literal
+              | record_update
+              | field_access ) ("." NAME)
 
 BOOL.2: "true"
       | "false"

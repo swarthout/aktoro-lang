@@ -51,7 +51,7 @@ class CodeGenVisitor(NodeVisitor):
                               imports=imports_go_code)
 
     def visit_VarDecl(self, node):
-        node_name = self.visit_VarUsage(node)
+        node_name = snake_to_camel(node.name)
         return f"{node_name} := {self.visit(node.expr)}"
 
     def visit_VarIfAssign(self, node):
@@ -60,11 +60,11 @@ class CodeGenVisitor(NodeVisitor):
         return var_decl + "\n" + self.visit(node.expr)
 
     def visit_VarDeclNoInit(self, node):
-        node_name = self.visit_VarUsage(node)
+        node_name = snake_to_camel(node.name)
         return f"var {node_name} {node.ak_type.go_code()}"
 
     def visit_VarAssignMut(self, node):
-        node_name = self.visit_VarUsage(node)
+        node_name = snake_to_camel(node.name)
         expr = self.visit(node.expr)
         return f"{node_name} = {expr}"
 
@@ -79,9 +79,10 @@ class CodeGenVisitor(NodeVisitor):
         return go_code.format(name=node.name, fields=fields)
 
     def visit_VarUsage(self, node):
-        snake_names = [snake_to_camel(name) for name in node.name.split(".")]
-        go_code = ".".join(snake_names)
-        return go_code
+        return snake_to_camel(node.name)
+
+    def visit_FieldAccess(self, node):
+        return f"{self.visit(node.record_name)}.{snake_to_camel(node.field_name)}"
 
     def visit_PrimitiveLiteral(self, node):
         self.imports.add('"github.com/aktoro-lang/types"')
