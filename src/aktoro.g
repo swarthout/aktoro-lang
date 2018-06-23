@@ -103,9 +103,9 @@ field_name: NAME
 
 record_update: "{" expr "|" field_assignment ("," _NEWLINE? field_assignment)* "}"
 
-func_def: "fn" open_params param_list? close_params [type_usage] "=>" func_body
+func_def: "fn" open_params param_list close_params [type_usage] "=>" func_body
 func_body: open_block _line* close_block
-param_list: param ("," param)*
+param_list: (param ("," param)*)?
 param: var_name type_usage
 open_params: "("
 close_params: ")"

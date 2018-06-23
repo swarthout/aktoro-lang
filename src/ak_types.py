@@ -89,12 +89,12 @@ class RecordType(AkType):
 class FuncType(AkType):
     def __init__(self, params, return_type):
         super().__init__("fn")
-        self.params = params
+        self.param_types = params
         self.return_type = return_type
 
     def go_code(self):
-        param_type_usage = ", ".join([p.ak_type.go_code() for p in self.params.values()])
-        return "func({}) {}".format(param_type_usage, self.return_type.go_code())
+        params = ", ".join(["interface{}"] * len(self.param_types))
+        return "func({}) interface{{}}".format(params)
 
 
 class VariantType(AkType):

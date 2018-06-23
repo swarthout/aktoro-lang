@@ -249,6 +249,13 @@ class Parser(Transformer):
         ak_type = self.build_ak_type(args)
         return ak_type
 
+    def func_type(self, args):
+        param_types, return_type = args
+        return FuncType(param_types, return_type)
+
+    def type_list(self, args):
+        return args
+
     def record_literal(self, args):
         field_dict = dict(args)
         field_names = field_dict.keys()
@@ -276,7 +283,8 @@ class Parser(Transformer):
     def func_def(self, args):
         _, params, _, return_type, func_body = args
         params = dict(params)
-        ak_type = FuncType(params, return_type)
+        param_types = list(map(lambda p: p.ak_type, params.values()))
+        ak_type = FuncType(param_types, return_type)
         return FuncDef(params, return_type, func_body, ak_type)
 
     def func_body(self, args):

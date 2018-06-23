@@ -1,3 +1,16 @@
+let add = fn (a int, b int) int => {
+    a + b
+}
+
+let get_add_fn = fn () fn (int, int) int => {
+    add
+}
+
+let also_add = get_add_fn()
+
+print(also_add(3,4))
+
+
 type car = {name string, year int, owners list string}
 
 type person = {first_name string, last_name string, car car}
@@ -56,10 +69,6 @@ print(season)
 
 print("Hello" <> "World")
 
-let add = fn (a int, b int) int => {
-    a + b
-}
-
 let double = fn (x int) int => {
     x * 2
 }
@@ -75,3 +84,4 @@ let ten = 3
 print(ten)
 
 3 |> add(2) |> double() |> print()
+
