@@ -83,6 +83,22 @@ class RecordUpdate(Expr):
     _fields = ["var", "updates", "ak_type"]
 
 
+class EqualityExpr(Expr):
+    _fields = ["left", "op", "right", "ak_type"]
+
+
+class AddExpr(Expr):
+    _fields = ["exprs", "ak_type"]
+
+
+class MultExpr(Expr):
+    _fields = ["exprs", "ak_type"]
+
+
+class ParenExpr(Expr):
+    _fields = ["expr"]
+
+
 class BinaryOpExpr(Expr):
     _fields = ["left", "op", "right", "ak_type"]
 
@@ -104,7 +120,7 @@ class ReturnStmt(AST):
 
 
 class PrintStmt(AST):
-    _fields = ["exprs"]
+    _fields = ["args"]
 
 
 class ListIndexExpr(Expr):
@@ -129,6 +145,10 @@ class RangeIndex(AST):
 
 class IfExpr(Expr):
     _fields = ["test_expr", "if_body", "else_body", "ak_type"]
+
+
+class StringConcat(Expr):
+    _fields = ["left", "right", "ak_type"]
 
 
 class NodeVisitor(object):

@@ -2,15 +2,22 @@ type car = {name string, year int, owners list string}
 
 type person = {first_name string, last_name string, car car}
 
-let me = {first_name="Scott", last_name="Swarthout", car={name="Mustang", year=2013, owners=["Scott"]}}
+let me = {first_name="Scott",
+          last_name="Swarthout",
+          car={name="Mustang",
+               year=2013,
+               owners=["Scott"]
+               }
+          }
 print(me.car.year)
 
 let first = fn (cars list car) car => {
     cars[0]
 }
-let cars = [{name="Mustang", year=2013, owners=["Scott"]}, {name="Wrangler", year=1990, owners=["Zach", "Tim"]}, {name="Corvette", year=1990, owners=["Jack"]}]
-let first_car = first(cars)
-print(first_car.year)
+let cars = [{name="Mustang", year=2013, owners=["Scott"]},
+            {name="Wrangler", year=1990, owners=["Zach", "Tim"]},
+            {name="Corvette", year=1990, owners=["Jack"]}]
+print(first(cars).year)
 print(cars[..2])
 let numbers = %{
     2 => "two",
@@ -46,3 +53,25 @@ let month = 3
 
 let season = if month >= 6 { "spring" } else { "fall" }
 print(season)
+
+print("Hello" <> "World")
+
+let add = fn (a int, b int) int => {
+    a + b
+}
+
+let double = fn (x int) int => {
+    x * 2
+}
+
+print(3 * (4 + 5 * 2))
+
+print(double(add(3, 2)))
+
+let ten = 3
+          |> add(2)
+          |> double()
+
+print(ten)
+
+3 |> add(2) |> double() |> print()

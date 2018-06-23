@@ -188,16 +188,17 @@ class Parser(Transformer):
         return KeyValue(key, val)
 
     def add_expr(self, args):
-        left, op, right = args
-        return BinaryOpExpr(left, op, right, left.ak_type)
+        return AddExpr(args, args[0].ak_type)
 
     def mult_expr(self, args):
-        left, op, right = args
-        return BinaryOpExpr(left, op, right, left.ak_type)
+        return MultExpr(args, args[0].ak_type)
 
     def equality_expr(self, args):
         left, op, right = args
-        return BinaryOpExpr(left, op, right, PrimitiveType("bool"))
+        return EqualityExpr(left, op, right, PrimitiveType("bool"))
+
+    def paren_expr(self, args):
+        return ParenExpr(args[0])
 
     def type_decl(self, args):
         name, (type_kind, fields) = args
@@ -318,3 +319,16 @@ class Parser(Transformer):
 
     def else_expr(self, args):
         return args
+
+    def string_concat(self, args):
+        left, right = args
+        return StringConcat(left, right, left.ak_type)
+
+    def pipe_expr(self, args):
+        prev = args[0]
+        for i in range(1, len(args)):
+            curr = args[i]
+            curr.args.insert(0, prev)
+            prev = curr
+
+        return prev

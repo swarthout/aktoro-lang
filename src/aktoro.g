@@ -15,7 +15,8 @@ var_name: NAME
 var_usage: NAME
 
 
-?expr: equality_expr
+?expr: pipe_expr
+?pipe_expr: equality_expr _NEWLINE? ( _PIPE_FORWARD (func_call | print_stmt) _NEWLINE?)*
 ?equality_expr: add_expr ( ( COMP_EQU
                            | COMP_NEQU
                            | COMP_GTR
@@ -25,12 +26,12 @@ var_usage: NAME
 
 ?add_expr: mult_expr ( ( PLUS | MINUS ) mult_expr )*
 ?mult_expr: primary ( ( MULTIPLY | DIVIDE ) primary )*
-?primary: "(" expr ")"
-        | INT         -> int_literal
-        | FLOAT       -> float_literal
-        | BOOL        -> bool_literal
+?primary: "(" expr ")" -> paren_expr
+        | INT          -> int_literal
+        | FLOAT        -> float_literal
+        | BOOL         -> bool_literal
         | var_usage
-        | STRING      -> string_literal
+        | STRING       -> string_literal
         | list_literal
         | dict_literal
         | func_def
@@ -39,11 +40,12 @@ var_usage: NAME
         | record_update
         | list_cons
         | dict_update
-        | "-" primary -> negation_expr
         | index_expr
         | if_expr
         | field_access
+        | string_concat
 
+_PIPE_FORWARD: "|>"
 COMP_EQU: "=="
 COMP_NEQU: "!="
 COMP_GTR: ">"
@@ -56,10 +58,10 @@ MULTIPLY: "*"
 DIVIDE: "/"
 
 list_literal: "[" _NEWLINE? list_elems _NEWLINE? "]" ("::" type_usage)?
-list_elems: (expr ("," expr)*)?
+list_elems: (expr ("," _NEWLINE? expr)*)?
 
-list_cons: "[" cons_args "|" expr "]"
-cons_args: expr ("," expr)*
+list_cons: "[" _NEWLINE? cons_args "|" expr _NEWLINE? "]"
+cons_args: expr ("," _NEWLINE? expr)*
 
 dict_literal: "%{" _NEWLINE? kv_pair_list _NEWLINE? "}" ("::" type_usage)?
 kv_pair_list:  (kv_pair ("," _NEWLINE? kv_pair)*)?
@@ -111,8 +113,9 @@ open_block: "{"
 close_block: "}"
 
 func_call: var_usage "(" _expr_list? ")"
-print_stmt: "print" "(" _expr_list? ")"
-_expr_list: expr ("," expr)*
+_PRINT.2: "print"
+print_stmt: _PRINT "(" _NEWLINE? _expr_list? ")"
+_expr_list: expr ("," _NEWLINE? expr)*
 
 if_expr: "if" expr "{" if_body "}" else_expr
 if_body: _line*
@@ -125,6 +128,8 @@ field_access: ( var_usage
               | record_update
               | field_access ) ("." NAME)
 
+string_concat: primary "<>" primary
+
 BOOL.2: "true"
       | "false"
 
@@ -132,7 +137,7 @@ _NEWLINE: ( /\r?\n[\t ]*/ | COMMENT )+
 COMMENT: /#[^\n]*/
 
 DECIMAL: UINT "." UINT
-_EXP: ("e"|"E") INT
+_EXP: ("e"|"E") ["+" | "-"] INT
 UFLOAT: INT _EXP | DECIMAL _EXP?
 FLOAT: ["+" | "-"] UFLOAT
 

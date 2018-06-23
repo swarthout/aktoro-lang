@@ -1,4 +1,3 @@
-from collections import namedtuple
 import textwrap
 from ak_ast import *
 from ak_types import *
@@ -136,20 +135,43 @@ class CodeGenVisitor(NodeVisitor):
         go_code = f"{record_type}{{\n" + textwrap.indent(fields_go_code, "\t") + textwrap.dedent("}")
         return go_code
 
-    def visit_BinaryOpExpr(self, node):
+    def visit_EqualityExpr(self, node):
         return f"{self.visit(node.left)} {node.op} {self.visit(node.right)}"
+
+    def visit_AddExpr(self, node):
+        exprs = []
+        for e in node.exprs:
+            if e in ["+", "-"]:
+                exprs.append(e)
+            else:
+                exprs.append(self.visit(e))
+        return " ".join(exprs)
+
+    def visit_MultExpr(self, node):
+        exprs = []
+        for e in node.exprs:
+            if e in ["*", "/"]:
+                exprs.append(e)
+            else:
+                exprs.append(self.visit(e))
+        return " ".join(exprs)
+
+    def visit_ParenExpr(self, node):
+        return f"({self.visit(node.expr)})"
 
     def visit_ParamDecl(self, node):
         return f"{snake_to_camel(node.name)} {node.ak_type.go_code()}"
 
     def visit_FuncDef(self, node):
+        param_interfaces = ", ".join([f"p{i} interface{{}}" for i in range(len(node.params))])
         params = []
-        for param in node.params.values():
-            params.append(f"{param.name} {param.ak_type.go_code()}")
+        for i, param in enumerate(node.params.values()):
+            params.append(f"{param.name} := p{i}.({param.ak_type.go_code()})")
         params = "\n".join(params)
-        return_type = node.return_type.go_code()
+        return_type = "interface{}"
         func_body = "\n".join([self.visit(line) for line in node.body])
-        go_code = f"""func({params}) {return_type} {{
+        go_code = f"""func({param_interfaces}) {return_type} {{
+        {params}
         {func_body}
         }}
         """
@@ -158,14 +180,15 @@ class CodeGenVisitor(NodeVisitor):
     def visit_FuncCall(self, node):
         func_name = self.visit(node.func_name)
         args = ", ".join([self.visit(arg) for arg in node.args])
-        return f"{func_name}({args})"
+        return_type = node.ak_type.go_code()
+        return f"{func_name}({args}).({return_type})"
 
     def visit_ReturnStmt(self, node):
         return f"return {self.visit(node.expr)}"
 
     def visit_PrintStmt(self, node):
         self.imports.add('"fmt"')
-        exprs = ",".join([self.visit(expr) for expr in node.exprs])
+        exprs = ",".join([self.visit(expr) for expr in node.args])
         return f"fmt.Println({exprs})"
 
     def visit_ListIndexExpr(self, node):
@@ -203,3 +226,6 @@ class CodeGenVisitor(NodeVisitor):
             {if_body}
         }} {else_stmt}
         """
+
+    def visit_StringConcat(self, node):
+        return f"{self.visit(node.left)} + {self.visit(node.right)}"
