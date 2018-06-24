@@ -1,8 +1,8 @@
-let add = fn (a int, b int) int => {
+let add = fn (a Int, b Int) Int => {
     a + b
 }
 
-let get_add_fn = fn () fn (int, int) int => {
+let get_add_fn = fn () fn (Int, Int) Int => {
     add
 }
 
@@ -11,9 +11,9 @@ let also_add = get_add_fn()
 print(also_add(3,4))
 
 
-type car = {name string, year int, owners list string}
+type Car = {name String, year Int, owners List String}
 
-type person = {first_name string, last_name string, car car}
+type Person = {first_name String, last_name String, car Car}
 
 let me = {first_name="Scott",
           last_name="Swarthout",
@@ -24,7 +24,7 @@ let me = {first_name="Scott",
           }
 print(me.car.year)
 
-let first = fn (cars list car) car => {
+let first = fn (cars List Car) Car => {
     cars[0]
 }
 let cars = [{name="Mustang", year=2013, owners=["Scott"]},
@@ -69,7 +69,7 @@ print(season)
 
 print("Hello" <> "World")
 
-let double = fn (x int) int => {
+let double = fn (x Int) Int => {
     x * 2
 }
 
@@ -85,3 +85,10 @@ print(ten)
 
 3 |> add(2) |> double() |> print()
 
+let add_three = fn (x Int) Int => (x + 3)
+
+type Thing = {a Int, b String}
+
+let get_thing = fn () Thing => ({a=4, b="hey"})
+print(get_thing())
+print(add_three(6))

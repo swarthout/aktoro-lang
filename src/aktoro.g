@@ -26,24 +26,25 @@ var_usage: NAME
 
 ?add_expr: mult_expr ( ( PLUS | MINUS ) mult_expr )*
 ?mult_expr: primary ( ( MULTIPLY | DIVIDE ) primary )*
+
 ?primary: "(" expr ")" -> paren_expr
-        | INT          -> int_literal
-        | FLOAT        -> float_literal
-        | BOOL         -> bool_literal
-        | var_usage
-        | STRING       -> string_literal
-        | list_literal
-        | dict_literal
-        | func_def
-        | func_call
-        | record_literal
-        | record_update
-        | list_cons
-        | dict_update
-        | index_expr
-        | if_expr
-        | field_access
-        | string_concat
+                | INT          -> int_literal
+                | FLOAT        -> float_literal
+                | BOOL         -> bool_literal
+                | var_usage
+                | STRING       -> string_literal
+                | list_literal
+                | dict_literal
+                | record_literal
+                | record_update
+                | func_def
+                | func_call
+                | list_cons
+                | dict_update
+                | index_expr
+                | if_expr
+                | field_access
+                | string_concat
 
 _PIPE_FORWARD: "|>"
 COMP_EQU: "=="
@@ -104,13 +105,18 @@ field_name: NAME
 record_update: "{" expr "|" field_assignment ("," _NEWLINE? field_assignment)* "}"
 
 func_def: "fn" open_params param_list close_params [type_usage] "=>" func_body
-func_body: open_block _line* close_block
+?func_body: block
+          | "(" expr ")"-> simple_return
+
+block: open_block _line* close_block
+open_block: "{"
+close_block: "}"
+
 param_list: (param ("," param)*)?
 param: var_name type_usage
 open_params: "("
 close_params: ")"
-open_block: "{"
-close_block: "}"
+
 
 func_call: var_usage "(" _expr_list? ")"
 _PRINT.2: "print"

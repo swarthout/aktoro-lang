@@ -86,13 +86,13 @@ class CodeGenVisitor(NodeVisitor):
     def visit_PrimitiveLiteral(self, node):
         self.imports.add('"github.com/aktoro-lang/types"')
         literal_type = node.ak_type.name
-        if literal_type == "string":
+        if literal_type == "String":
             return f"types.AkString({node.value})"
-        elif literal_type == "int":
+        elif literal_type == "Int":
             return f"types.AkInt({node.value})"
-        elif literal_type == "float":
+        elif literal_type == "Float":
             return f"types.AkFloat({node.value})"
-        elif literal_type == "bool":
+        elif literal_type == "Bool":
             return f"types.AkBool({node.value})"
         else:
             raise TypeError("unhandled primitive type")

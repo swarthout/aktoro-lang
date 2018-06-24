@@ -21,7 +21,7 @@ a = 4
 
 let b = "hello"
 
-let add_them = fn (a int, b int) int => {
+let add_them = fn (a Int, b Int) Int => {
     a + b
 }
 
@@ -37,13 +37,13 @@ let list_creator = fn (typ 't) => {
 
 let ignore_second = fn (b int, _) => b + 2
 
-type result 't = :ok 't | :error string
+type Result 't = :Ok 't | :Error String
 
-let private_func = fn (b int, {a, c} user) => {
+let private_func = fn (b Int, {a, c} User) => {
     g = match return_value(a) {
-        :ok v => v,
-        :error "specific message" => "hello",
-        :error message => message
+        :Ok v => v,
+        :Error "specific message" => "hello",
+        :Error message => message
     }
 }
 
@@ -51,6 +51,8 @@ private_func (5, user{a="scott", b="swarthout"})
 
 enum.each(0..10, fn (i) => {
 })
+
+list
 
 
 let mut a = 4
@@ -65,7 +67,7 @@ changes_val(a)
 
 # a = 4
 
-type map 'k 'v = {
+type Map 'k 'v = {
 
 }
 
@@ -75,9 +77,9 @@ let v = %{
     5 => "five"
 }
 
-w = %{v | 6 => "six", 5 => "cinco"}
+w = %{v | 6 => "six", 5 => "cinco"} :: Dict Int String
 
-l list int = [0..17]
+let l = [0..17] :: List Int
 
 l = [0..23]
 
@@ -89,13 +91,13 @@ d = l[2..]
 
 e = l[..4]
 
-type user = {a string, b string}
+type User = {a string, b string}
 
 let u = {a="hello", b="world"}
 
 let r = {u | b="again"}
 
-type heap 't = {
+type Heap 't = {
 
 }
 
@@ -116,31 +118,31 @@ import user, comment from "github.com/scott/blog"
 
 import http from "std/net/http"
 
-let post_handler = fn (r http.request) => {
+let post_handler = fn (r http.Request) => {
     let {id, username} = http.get_vars(r)
 }
 
-use http.{request, get, post}
-let req_handler = fn (r request) => {
+use http.{Request}
+let req_handler = fn (r Request) => {
      let routes = {
-        :get "/hello" => fn (r request) => {
+        :get "/hello" => fn (r http.Request) => {
             "Yo Dawg"
         },
-        :post "/hello/{id}" => fn (r request) => {
+        :post "/hello/{id}" => fn (r http.Request) => {
             let {id} = http.get_vars(r)
-            let response = {} :: dict int string
+            let response = {} :: Dict Int String
             json.dump(response)
         },
-        :post "/hello/{id int}/{username option string}" => post_handler
+        :post "/hello/{id Int}/{username Option String}" => post_handler
         }
     }
 }
 
-let server = http.server{port=3000, router=req_handler}
+let server = http.Server{port=3000, router=req_handler}
 
 http.listen (server)
 
-type comment = {user_id int, comment_id int, text string}
+type Comment = {user_id Int, comment_id Int, text String}
 
 let s = r.b
 
@@ -151,9 +153,9 @@ let a = [3, 4, 5]
 a = b <> "world!"
 
 module math = {
-    let sum = fn (a int, b int) => do_sum_ (a, b)
+    let sum = fn (a int, b int) => (do_sum_ (a, b))
     
-    let do_sum_ = fn (a int, b int) int => a + b
+    let do_sum_ = fn (a int, b int) int => (a + b)
 
     let is_zero = fn (a int) bool => {
         match a {
@@ -258,15 +260,15 @@ else {
 }
 
 
-type state = { total_count int, reset_count int}
+type State = { total_count Int, reset_count Int}
 
-type message = :add int | :reset | :get_count
+type Message = :Add Int | :Reset | :GetCount
 
-let counter_reducer = fn (s state, m message, sender option actor) state => {
+let counter_reducer = fn (s State, m Message, sender Option actor.Actor) State => {
         match m {
-            :add num => ({s | total_count = s.total_count + num}),
-            :reset => ({s | total_count = 0, reset_count = s.reset_count + 1}),
-            :get_count => {
+            :Add num => ({s | total_count = s.total_count + num}),
+            :Reset => ({s | total_count = 0, reset_count = s.reset_count + 1}),
+            :GetCount => {
                 actor.reply (sender, s.total_count)
                 s
             }
@@ -274,34 +276,34 @@ let counter_reducer = fn (s state, m message, sender option actor) state => {
     }
 }
 
-type counter_args = {start int}
+type CounterArgs = {start Int}
 
-let init_counter = fn (args counter_args) actor.pid => {
+let init_counter = fn (args CounterArgs) actor.Pid => {
     let init_state = {
         total_count=start,
         reset_count=0
     }
-    Actor.start(init_state, counter_reducer)
+    actor.start(init_state, counter_reducer)
 }
 
 let counter = init_counter({start=5})
 
-Actor.tell(counter, :add 7)
+actor.tell(counter, :Add 7)
 
-tell (counter, :reset)
+tell (counter, :Reset)
 
-let count = ask (counter, :get_count)
+let count = actor.ask (counter, :GetCount)
 
 num = match count {
-    :ok num => num,
-    :error m => m
+    :Ok num => num,
+    :Error m => m
 }
 
 module stack = {
 
-    type state_ 't = {
-        data list 't,
-        buffer_size int
+    type State_ 't = {
+        data List 't,
+        buffer_size Int
     }
 
     type message_ = :push 't | :pop | :get_top

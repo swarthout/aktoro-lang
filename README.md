@@ -3,8 +3,12 @@
 
 ####Todo
 - Function Type Erasure
-- Improve hashing methods for primitive types
+- Types and Variant Constructors CapitalCamelCase, variables and functions snake_case
 - enum module
+- String indexing
+- Simplify precedence rules (they don't matter)
+- Improve hashing methods for primitive types
+- Logical and/or operators
 - Basic Pattern Matching (no arguments)
 - Destructuring
     - Record

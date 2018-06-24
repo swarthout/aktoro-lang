@@ -26,10 +26,10 @@ class SymbolTable(object):
 
     def __init__(self):
         self.table = [{
-            "int": PrimitiveType("int"),
-            "float": PrimitiveType("float"),
-            "string": PrimitiveType("string"),
-            "bool": PrimitiveType("bool")
+            "Int": PrimitiveType("Int"),
+            "Float": PrimitiveType("Float"),
+            "String": PrimitiveType("String"),
+            "Bool": PrimitiveType("Bool")
         }, {}]
         self.field_table = {}
 
@@ -130,16 +130,16 @@ class Parser(Transformer):
             return args[0]
 
     def int_literal(self, args):
-        return PrimitiveLiteral(args[0], PrimitiveType("int"))
+        return PrimitiveLiteral(args[0], PrimitiveType("Int"))
 
     def float_literal(self, args):
-        return PrimitiveLiteral(args[0], PrimitiveType("float"))
+        return PrimitiveLiteral(args[0], PrimitiveType("Float"))
 
     def bool_literal(self, args):
-        return PrimitiveLiteral(args[0], PrimitiveType("bool"))
+        return PrimitiveLiteral(args[0], PrimitiveType("Bool"))
 
     def string_literal(self, args):
-        return PrimitiveLiteral(args[0], PrimitiveType("string"))
+        return PrimitiveLiteral(args[0], PrimitiveType("String"))
 
     def list_literal(self, args):
         elems, *ak_type = args
@@ -230,10 +230,10 @@ class Parser(Transformer):
         type_name = args[0]
         if isinstance(type_name, AkType):
             return type_name
-        if type_name == "list":
+        if type_name == "List":
             elem_type = self.build_ak_type(args[1:])
             ak_type = ListType(elem_type)
-        elif type_name == "dict":
+        elif type_name == "Dict":
             key_type = self.build_ak_type([args[1]])
             val_type = self.build_ak_type([args[2]])
             ak_type = DictType(key_type, val_type)
@@ -287,7 +287,10 @@ class Parser(Transformer):
         ak_type = FuncType(param_types, return_type)
         return FuncDef(params, return_type, func_body, ak_type)
 
-    def func_body(self, args):
+    def simple_return(self, args):
+        return [self.return_expr(args[0])]
+
+    def block(self, args):
         args.pop(0)  # remove open block instruction
         args.pop()  # remove close block instruction
         last_expr = args[-1]

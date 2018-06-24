@@ -1,8 +1,6 @@
 from enum import Enum
 from abc import ABC, abstractmethod
 
-PRIMITIVE_TYPES = ["int", "float", "string", "bool"]
-
 
 class TypeKind(Enum):
     RECORD = 1
@@ -37,10 +35,10 @@ class ListType(AkType):
 class PrimitiveType(AkType):
     # map primitive aktoro types to their golang equivalents
     primitive_types = {
-        "int": "types.AkInt",
-        "float": "types.AkFloat",
-        "string": "types.AkString",
-        "bool": "types.AkBool"
+        "Int": "types.AkInt",
+        "Float": "types.AkFloat",
+        "String": "types.AkString",
+        "Bool": "types.AkBool"
     }
 
     def __init__(self, name):
@@ -52,13 +50,13 @@ class PrimitiveType(AkType):
     __repr__ = __str__
 
     def go_code(self):
-        if self.name in self.primitive_types:
+        if self.name in self.primitive_types.keys():
             return self.primitive_types[self.name]
 
 
 class DictType(AkType):
     def __init__(self, key_type, val_type):
-        super().__init__("dict")
+        super().__init__("Dict")
         self.key_type = key_type
         self.val_type = val_type
 
@@ -83,7 +81,7 @@ class RecordType(AkType):
     __repr__ = __str__
 
     def go_code(self):
-        return snake_to_camel(self.name)
+        return self.name
 
 
 class FuncType(AkType):
@@ -99,12 +97,3 @@ class FuncType(AkType):
 
 class VariantType(AkType):
     pass
-
-
-def snake_to_camel(name):
-    words = name.split("_")
-    if len(words) > 1:
-        camel_name = words[0] + "".join(map(str.capitalize, words[1:]))
-    else:
-        camel_name = words[0]
-    return camel_name
