@@ -21,11 +21,11 @@ a = 4
 
 let b = "hello"
 
-let add_them = fn (a Int, b Int) Int => {
-    a + b
-}
+add_them :: (Int, Int) -> Int
+add_them (a, b) -> (a + b)
 
-let also_adds = fn (a int, b int) => a + b
+also_adds :: (Int, Int) -> Int
+also_adds = add_them
 
 let add_generic = fn (a 't, b 't) 't => a + b
 
@@ -37,14 +37,16 @@ let list_creator = fn (typ 't) => {
 
 let ignore_second = fn (b int, _) => b + 2
 
-type Result 't = :Ok 't | :Error String
+type Result t = :Ok t | :Error String
 
-let private_func = fn (b Int, {a, c} User) => {
-    g = match return_value(a) {
+private_func :: (Int, User) -> String
+private_func (x, {name}) -> {
+    let g = match return_value(a) {
         :Ok v => v,
         :Error "specific message" => "hello",
         :Error message => message
     }
+    g
 }
 
 private_func (5, user{a="scott", b="swarthout"})
@@ -124,7 +126,7 @@ let post_handler = fn (r http.Request) => {
 
 use http.{Request}
 let req_handler = fn (r Request) => {
-     let routes = {
+     let routes = %{
         :get "/hello" => fn (r http.Request) => {
             "Yo Dawg"
         },
@@ -164,7 +166,8 @@ module math = {
         }
     }
 
-    let positive = fn (x int) bool => {
+    positive :: Int -> Bool
+    positive (x) -> {
         match {
             x < 0 => false,
             x >= 0 => true
@@ -179,11 +182,13 @@ module stack = {
         data list 'a,
         buffer_size int
     }
-    let init = fn (init_list list 'a, buffer_size int) stack.t 'a => {
+    init :: (List a, Int) -> Stack a
+    init (init_list, buffer_size) -> {
         {data = init_list, buffer_size}
     }
 
-    let push = fn (s stack.t 'a, e 'a) stack.t 'a => {
+    push :: (Stack a, a) -> Stack a
+    push (s, e) => {
         {s | data=[e | data]}
     }
     let pop = fn (s stack.t 'a) stack.t 'a => {
@@ -191,9 +196,9 @@ module stack = {
     }
 }
 
-s = stack.init ([] :: list int, 5)
+s = stack.init ([] :: List Int, 5)
 
-let a = 5
+a = 5 :: Int
 
 s = stack.push (s, 4)
 
@@ -201,12 +206,24 @@ use stack.push
 
 s = push (s, 3)
 
+map :: ([a], (a -> b)) -> [b]
+map ([l | ls], f) = [f(l) | map(ls, f)]
+
+%{Int String}
+
+get :: (%{Int String}, Int) -> String
+get (d, key) = d[key]
+
+incr :: Int -> Int
+
 s = s |> push (6) 
 
 a = stack.pop (s)
 
+use stack.Stack
 
-let reverse = fn (s stack.t 'a) stack.t 'a => {
+reverse :: (Stack a) -> Stack a
+reverse (s) -> {
     match {
         stack.empty?(s) => s,
         _ => {
@@ -222,15 +239,28 @@ let reverse = fn (s stack.t 'a) stack.t 'a => {
 
 # a int = 6
 
-let map_int_string = fn (l list string, f fn (string) string ) list string => {
+map_int_string :: ([String], (String -> String)) -> [String]
+map_int_string (l, f) -> {
     enum.map(l, f)
 }
     
 module enum = {
+
+
+
+    map :: ([a], (a -> b)) -> [b]
+    map (l, f) -> {
+
+    }
+
     let map = (l list 'a, f fn ('a) 'b) list 'b => {
 
     }
-    let reduce = (l list 'a, f fn ('a, 'b) 'b) 'b => {
+
+
+
+    reduce :: ([a], ((a, b) -> b)) -> b
+    reduce (l, f) = {
 
     }
 }
@@ -241,9 +271,9 @@ use enum.{take, filter, reduce}
 num = l
 
 num
-|> enum.filter(fn (a) => a % 2 == 0)
+|> enum.filter(\x -> x % 2 == 0)
 |> enum.take(2)
-|> enum.reduce(fn (a, b) => a + b)
+|> enum.reduce(\(x, y) -> x + y)
 
 # num = 10
 
@@ -264,7 +294,8 @@ type State = { total_count Int, reset_count Int}
 
 type Message = :Add Int | :Reset | :GetCount
 
-let counter_reducer = fn (s State, m Message, sender Option actor.Actor) State => {
+counter_reducer :: (State, Message, Option actor.Actor) -> State
+counter_reducer (s, m, sender) -> {
         match m {
             :Add num => ({s | total_count = s.total_count + num}),
             :Reset => ({s | total_count = 0, reset_count = s.reset_count + 1}),

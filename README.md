@@ -2,8 +2,8 @@
 
 
 ####Todo
+- Haskell style function declaration revamp!!
 - Function Type Erasure
-- Types and Variant Constructors CapitalCamelCase, variables and functions snake_case
 - enum module
 - String indexing
 - Simplify precedence rules (they don't matter)

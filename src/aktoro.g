@@ -8,6 +8,7 @@ _line: _NEWLINE
 ?stmt: var_decl
      | expr
      | type_decl
+     | func_def
      | print_stmt
 
 var_decl: "let" var_name "=" expr
@@ -28,23 +29,22 @@ var_usage: NAME
 ?mult_expr: primary ( ( MULTIPLY | DIVIDE ) primary )*
 
 ?primary: "(" expr ")" -> paren_expr
-                | INT          -> int_literal
-                | FLOAT        -> float_literal
-                | BOOL         -> bool_literal
-                | var_usage
-                | STRING       -> string_literal
-                | list_literal
-                | dict_literal
-                | record_literal
-                | record_update
-                | func_def
-                | func_call
-                | list_cons
-                | dict_update
-                | index_expr
-                | if_expr
-                | field_access
-                | string_concat
+        | INT          -> int_literal
+        | FLOAT        -> float_literal
+        | BOOL         -> bool_literal
+        | var_usage
+        | STRING       -> string_literal
+        | list_literal
+        | dict_literal
+        | record_literal
+        | record_update
+        | func_call
+        | list_cons
+        | dict_update
+        | index_expr
+        | if_expr
+        | field_access
+        | string_concat
 
 _PIPE_FORWARD: "|>"
 COMP_EQU: "=="
@@ -77,18 +77,25 @@ high: expr?
 
 type_decl: "type" type_name "=" (record_def | variant_def)
 type_name: NAME
-type_usage: _t
 
+
+type_usage: _t
 _t: NAME
   | _t _t
   | paren_type
   | func_type
+  | list_type
+  | dict_type
 
 paren_type: "(" _t ")" -> type_usage
 
-func_type: "fn" "(" type_list? ")" type_usage
+func_type: "(" "(" type_list? ")" "->" return_type ")"
+         | "(" type_usage "->" return_type ")"
 
 type_list: type_usage ("," type_usage)*
+
+list_type: "[" type_usage "]"
+dict_type: "%{" type_usage "=>" type_usage "}"
 
 record_def: "{" field_list "}"
 field_list: field_decl ("," field_decl)*
@@ -104,7 +111,18 @@ field_name: NAME
 
 record_update: "{" expr "|" field_assignment ("," _NEWLINE? field_assignment)* "}"
 
-func_def: "fn" open_params param_list close_params [type_usage] "=>" func_body
+func_def: func_signature _NEWLINE NAME open_params param_list close_params "->" func_body
+
+func_signature: NAME "::" param_types "->" return_type
+
+param_types: "(" (param_type ("," param_type )*)? ")"
+           | param_type
+
+return_type: param_type
+            | empty_tuple
+
+?param_type: type_usage
+
 ?func_body: block
           | "(" expr ")"-> simple_return
 
@@ -113,12 +131,13 @@ open_block: "{"
 close_block: "}"
 
 param_list: (param ("," param)*)?
-param: var_name type_usage
+param: var_name
 open_params: "("
 close_params: ")"
-
+empty_tuple: "()"
 
 func_call: var_usage "(" _expr_list? ")"
+
 _PRINT.2: "print"
 print_stmt: _PRINT "(" _NEWLINE? _expr_list? ")"
 _expr_list: expr ("," _NEWLINE? expr)*
