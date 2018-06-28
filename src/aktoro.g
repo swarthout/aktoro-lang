@@ -11,7 +11,7 @@ _line: _NEWLINE
      | func_def
      | print_stmt
 
-var_decl: "let" var_name "=" expr
+var_decl: NAME "=" expr
 var_name: NAME
 var_usage: NAME
 
@@ -97,29 +97,29 @@ type_list: type_usage ("," type_usage)*
 list_type: "[" type_usage "]"
 dict_type: "%{" type_usage "=>" type_usage "}"
 
-record_def: "{" field_list "}"
-field_list: field_decl ("," field_decl)*
+record_def: "{" _NEWLINE? field_list _NEWLINE? "}"
+field_list: field_decl ("," _NEWLINE? field_decl)*
 field_decl: NAME type_usage
 
 variant_def: variant_constructor ("|" variant_constructor)+
-variant_constructor: atom_literal type_usage*
-atom_literal: ":" NAME
+variant_constructor: NAME type_usage*
 
 record_literal: "{" _NEWLINE? field_assignment ("," _NEWLINE? field_assignment)* _NEWLINE? "}"
-field_assignment: field_name "=" expr
+field_assignment: field_name ":" expr
 field_name: NAME
 
 record_update: "{" expr "|" field_assignment ("," _NEWLINE? field_assignment)* "}"
 
-func_def: func_signature _NEWLINE NAME open_params param_list close_params "->" func_body
+func_def: func_header "->" func_body
+func_header: func_signature _NEWLINE NAME "(" params ")"
 
 func_signature: NAME "::" param_types "->" return_type
 
 param_types: "(" (param_type ("," param_type )*)? ")"
            | param_type
 
-return_type: param_type
-            | empty_tuple
+?return_type: param_type
+//            | empty_tuple
 
 ?param_type: type_usage
 
@@ -130,11 +130,11 @@ block: open_block _line* close_block
 open_block: "{"
 close_block: "}"
 
-param_list: (param ("," param)*)?
-param: var_name
+params: (param ("," param)*)?
+?param: var_name
 open_params: "("
 close_params: ")"
-empty_tuple: "()"
+// empty_tuple: "()"
 
 func_call: var_usage "(" _expr_list? ")"
 

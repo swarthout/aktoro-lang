@@ -25,14 +25,18 @@ class CodeGenVisitor(NodeVisitor):
     def visit_Program(self, node):
 
         record_decls = []
+        func_defs = []
         main_statements = []
         for line in node.statements:
             if isinstance(line, RecordDecl):
                 record_decls.append(line)
+            elif isinstance(line, FuncDef):
+                func_defs.append(line)
             elif line is not None:
                 main_statements.append(line)
         main_go_code = "\n".join([self.visit(s) for s in main_statements])
         record_decl_go_code = "\n".join([self.visit(r) for r in record_decls])
+        func_def_go_code = "\n".join([self.visit(f) for f in func_defs])
         imports_go_code = "\n".join(list(self.imports))
 
         go_body = textwrap.dedent("""
@@ -41,12 +45,15 @@ class CodeGenVisitor(NodeVisitor):
                     {imports}
                     )
                     {record_decls}
+                    {func_defs}
                     func main() {{
                     {main_code}
                     }}
 
                     """)
-        return go_body.format(main_code=textwrap.indent(main_go_code, "\t"), record_decls=record_decl_go_code,
+        return go_body.format(main_code=textwrap.indent(main_go_code, "\t"),
+                              record_decls=record_decl_go_code,
+                              func_defs=func_def_go_code,
                               imports=imports_go_code)
 
     def visit_VarDecl(self, node):
@@ -169,8 +176,9 @@ class CodeGenVisitor(NodeVisitor):
             params.append(f"{param.name} := p{i}.({param.ak_type.go_code()})")
         params = "\n".join(params)
         return_type = "interface{}"
+        func_name = snake_to_camel(node.name)
         func_body = "\n".join([self.visit(line) for line in node.body])
-        go_code = f"""func({param_interfaces}) {return_type} {{
+        go_code = f"""func {func_name}({param_interfaces}) {return_type} {{
         {params}
         {func_body}
         }}

@@ -13,13 +13,12 @@ variant
 atom
 
 
-let g = [3, 4, 5]
-
-let a = 4
+g = [3, 4, 5]
 
 a = 4
 
-let b = "hello"
+
+b = "hello"
 
 add_them :: (Int, Int) -> Int
 add_them (a, b) -> (a + b)
@@ -27,31 +26,27 @@ add_them (a, b) -> (a + b)
 also_adds :: (Int, Int) -> Int
 also_adds = add_them
 
-let add_generic = fn (a 't, b 't) 't => a + b
 
-let c = add_generic (3, 4)
+\(x, y) -> (x + y)
 
-let list_creator = fn (typ 't) => {
-    let h = heap.init(typ, [])
-}
+ignore_second :: (Int, String) -> Int
+ignore_second (b, _) -> b + 2
 
-let ignore_second = fn (b int, _) => b + 2
-
-type Result t = :Ok t | :Error String
+type Result t = Ok t | Error String
 
 private_func :: (Int, User) -> String
 private_func (x, {name}) -> {
     let g = match return_value(a) {
-        :Ok v => v,
-        :Error "specific message" => "hello",
-        :Error message => message
+        Ok v => v,
+        Error "specific message" => "hello",
+        Error message => message
     }
     g
 }
 
-private_func (5, user{a="scott", b="swarthout"})
+private_func (5, {a: "scott", b: "swarthout"})
 
-enum.each(0..10, fn (i) => {
+enum.each([0..10], \i -> {
 })
 
 list
@@ -95,7 +90,7 @@ e = l[..4]
 
 type User = {a string, b string}
 
-let u = {a="hello", b="world"}
+let u = {a: "hello", b: "world"}
 
 let r = {u | b="again"}
 
@@ -115,10 +110,10 @@ user_id = "Scott",
         name = "Mustang",
         miles = 12345
         }
-import fmt from "std/fmt"
-import user, comment from "github.com/scott/blog"
+import fmt "std/fmt"
+import b "github.com/scott/blog"
 
-import http from "std/net/http"
+import http "std/net/http"
 
 let post_handler = fn (r http.Request) => {
     let {id, username} = http.get_vars(r)
@@ -127,15 +122,19 @@ let post_handler = fn (r http.Request) => {
 use http.{Request}
 let req_handler = fn (r Request) => {
      let routes = %{
-        :get "/hello" => fn (r http.Request) => {
+        Get "/hello" => fn (r http.Request) => {
             "Yo Dawg"
         },
-        :post "/hello/{id}" => fn (r http.Request) => {
-            let {id} = http.get_vars(r)
-            let response = {} :: Dict Int String
+        Post "/hello/{id}" => fn (r http.Request) => {
+            %{"id" => id} = http.get_vars(r)
+            response = %{} :: %{Int => String}
             json.dump(response)
         },
-        :post "/hello/{id Int}/{username Option String}" => post_handler
+        Post "/hello/{id}/{username}" => post_handler
+            %{ "id" => id, "username" => username } = http.get_vars(r)
+            u = string.parse_int(username)
+            response = %{} :: %{Int => String}
+            json.dump(response)
         }
     }
 }
@@ -211,7 +210,7 @@ map ([l | ls], f) = [f(l) | map(ls, f)]
 
 %{Int String}
 
-get :: (%{Int String}, Int) -> String
+get :: (%{Int => String}, Int) -> String
 get (d, key) = d[key]
 
 incr :: Int -> Int
@@ -292,14 +291,14 @@ else {
 
 type State = { total_count Int, reset_count Int}
 
-type Message = :Add Int | :Reset | :GetCount
+type Message = Add Int | Reset | GetCount
 
 counter_reducer :: (State, Message, Option actor.Actor) -> State
 counter_reducer (s, m, sender) -> {
         match m {
-            :Add num => ({s | total_count = s.total_count + num}),
-            :Reset => ({s | total_count = 0, reset_count = s.reset_count + 1}),
-            :GetCount => {
+            Add num => ({s | total_count: s.total_count + num}),
+            Reset => ({s | total_count: 0, reset_count: s.reset_count + 1}),
+            GetCount => {
                 actor.reply (sender, s.total_count)
                 s
             }
@@ -310,24 +309,24 @@ counter_reducer (s, m, sender) -> {
 type CounterArgs = {start Int}
 
 let init_counter = fn (args CounterArgs) actor.Pid => {
-    let init_state = {
-        total_count=start,
-        reset_count=0
+    init_state = {
+        total_count: start,
+        reset_count: 0
     }
     actor.start(init_state, counter_reducer)
 }
 
-let counter = init_counter({start=5})
+let counter = init_counter({start: 5})
 
-actor.tell(counter, :Add 7)
+actor.tell(counter, Add 7)
 
-tell (counter, :Reset)
+tell (counter, Reset)
 
-let count = actor.ask (counter, :GetCount)
+let count = actor.ask (counter, GetCount)
 
 num = match count {
-    :Ok num => num,
-    :Error m => m
+    Ok num => num,
+    Error m => m
 }
 
 module stack = {
@@ -384,3 +383,17 @@ stack.push (s, 3)
 stack.pop (s)
 
 let top = stack.get_top (s)
+
+list = go.import("container/list")
+
+l = go.func(list, "New")
+
+go.func(l, "PushBack", 4)
+go.func(l, "PushFront, 1)
+
+front = go.func(l, "Front")
+val = go.var(front, "Val") :: Int
+
+
+
+

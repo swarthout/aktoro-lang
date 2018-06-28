@@ -2,7 +2,6 @@
 
 
 ####Todo
-- Haskell style function declaration revamp!!
 - Function Type Erasure
 - enum module
 - String indexing
@@ -13,6 +12,7 @@
 - Destructuring
     - Record
     - List
+- Better printing with reflection
 - Variants
 - Generics
 - Option type

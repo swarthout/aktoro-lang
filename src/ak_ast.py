@@ -108,7 +108,7 @@ class ParamDecl(AST):
 
 
 class FuncDef(Expr):
-    _fields = ["params", "return_type", "body", "ak_type"]
+    _fields = ["name", "params", "return_type", "body", "ak_type"]
 
 
 class FuncCall(Expr):

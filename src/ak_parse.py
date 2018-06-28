@@ -220,10 +220,11 @@ class Parser(Transformer):
         return args
 
     def param(self, args):
-        name, ak_type = args
-        param_decl = ParamDecl(name, ak_type)
-        self.symbol_table.add(name, param_decl)
-        return name, param_decl
+        # name, ak_type = args
+        # param_decl = ParamDecl(name, ak_type)
+        # self.symbol_table.add(name, param_decl)
+        # return name, param_decl
+        return args[0]
 
     def build_ak_type(self, args):
         ak_type = None
@@ -249,8 +250,18 @@ class Parser(Transformer):
         ak_type = self.build_ak_type(args)
         return ak_type
 
+    def list_type(self, args):
+        elem_type = args[0]
+        return ListType(elem_type)
+
+    def dict_type(self, args):
+        key_type, val_type = args
+        return DictType(key_type, val_type)
+
     def func_type(self, args):
         param_types, return_type = args
+        if not isinstance(param_types, list):
+            param_types = [param_types]
         return FuncType(param_types, return_type)
 
     def type_list(self, args):
@@ -281,14 +292,38 @@ class Parser(Transformer):
         return str(args[0])
 
     def func_def(self, args):
-        _, params, _, return_type, func_body = args
-        params = dict(params)
-        param_types = list(map(lambda p: p.ak_type, params.values()))
+        func_name, params, return_type, ak_type = args[0]
+        func_body = args[1]
+        return FuncDef(func_name, params, return_type, func_body, ak_type)
+
+    def func_header(self, args):
+        func_name, param_types, return_type = args[0]  # func_signature
+        func_name = str(func_name)
         ak_type = FuncType(param_types, return_type)
-        return FuncDef(params, return_type, func_body, ak_type)
+        self.symbol_table.add(func_name, VarUsage(func_name, ak_type))
+        self.symbol_table.push_scope()
+        param_names = args[2]
+        params = {}
+        for p_name, p_type in zip(param_names, param_types):
+            p_decl = ParamDecl(p_name, p_type)
+            params[p_name] = p_decl
+            self.symbol_table.add(p_name, p_decl)
+
+        return func_name, params, return_type, ak_type
+
+    def param_types(self, args):
+        return args
+
+    def params(self, args):
+        return args
+
+    def func_signature(self, args):
+        return args
 
     def simple_return(self, args):
-        return [self.return_expr(args[0])]
+        expr = self.return_expr(args[0])
+        self.symbol_table.pop_scope()
+        return [expr]
 
     def block(self, args):
         args.pop(0)  # remove open block instruction
@@ -306,7 +341,8 @@ class Parser(Transformer):
         return ReturnStmt(args, args.ak_type)
 
     def open_params(self, args):
-        self.symbol_table.push_scope()
+        # self.symbol_table.push_scope()
+        pass
 
     def close_block(self, args):
         self.symbol_table.pop_scope()

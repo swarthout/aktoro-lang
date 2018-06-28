@@ -90,6 +90,11 @@ class FuncType(AkType):
         self.param_types = params
         self.return_type = return_type
 
+    def __str__(self):
+        return "FuncType({} -> {})".format(self.param_types, self.return_type)
+
+    __repr__ = __str__
+
     def go_code(self):
         params = ", ".join(["interface{}"] * len(self.param_types))
         return "func({}) interface{{}}".format(params)
