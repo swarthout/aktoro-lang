@@ -1,7 +1,6 @@
 import textwrap
-from ak_ast import *
-from ak_types import *
-from ak_parse import snake_to_camel
+from aktoro.ast import *
+from aktoro.parser import snake_to_camel
 
 
 class CodeGenVisitor(NodeVisitor):

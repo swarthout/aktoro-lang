@@ -1,33 +1,14 @@
 #!/usr/bin/env python3
-from lark import Lark
-from ak_code_gen import CodeGenVisitor
-from ak_check import TypeCheckVisitor
-from ak_parse import Parser
 import argparse
 import os.path
 import subprocess
-import time
 from io import open
+from aktoro.compiler import compile_ak, AK_GRAMMAR
 
 __path__ = os.path.dirname(__file__)
 
 cli = argparse.ArgumentParser()
 subparsers = cli.add_subparsers(dest="subcommand")
-
-AK_GRAMMAR_FILENAME = os.path.join(__path__, "aktoro.g")
-
-with open(AK_GRAMMAR_FILENAME) as f:
-    AK_GRAMMAR = Lark(f, parser="lalr", start="program")
-
-
-def compile_ak(ak_source):
-    parse_tree = AK_GRAMMAR.parse(ak_source)
-    ast = Parser().transform(parse_tree)
-    check = TypeCheckVisitor()
-    checked_ast = check.visit(ast)
-    code_gen = CodeGenVisitor()
-    go_code = code_gen.visit(checked_ast)
-    return go_code
 
 
 def sub_command(args=None, parent=subparsers):

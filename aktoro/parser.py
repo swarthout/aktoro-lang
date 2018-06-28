@@ -1,6 +1,6 @@
 from lark import Transformer
-from ak_ast import *
-from ak_types import *
+from aktoro.ast import *
+from aktoro.types import *
 
 
 class TypeKind(Enum):
@@ -220,10 +220,6 @@ class Parser(Transformer):
         return args
 
     def param(self, args):
-        # name, ak_type = args
-        # param_decl = ParamDecl(name, ak_type)
-        # self.symbol_table.add(name, param_decl)
-        # return name, param_decl
         return args[0]
 
     def build_ak_type(self, args):
