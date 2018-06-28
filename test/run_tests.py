@@ -23,15 +23,14 @@ class TestAktoro(unittest.TestCase):
         return output
 
     def test(self):
-        self.assertEqual('foo'.upper(), 'FOO')
-        test_ak_files = glob.glob("test_*/*.ak")
+        test_ak_files = glob.glob("*/*.ak")
         for filename in test_ak_files:
             result = self.run_file(filename)
             test_path = Path(filename)
-            expected_file = test_path.parent / "correct_output.txt"
+            expected_file = test_path.parent / "correct.txt"
             with open(expected_file, "r") as e:
                 expected = e.read()
-            self.assertEqual(result, expected)
+            self.assertEqual(result.strip(), expected.strip())
 
 
 if __name__ == '__main__':
