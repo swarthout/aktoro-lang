@@ -88,6 +88,7 @@ ten = 3
       |> add(2)
       |> double()
 
+
 print(ten)
 
 3 |> add(2) |> double() |> print()
@@ -97,3 +98,14 @@ type Thing = {a Int, b String}
 get_thing :: () -> Thing
 get_thing () -> ({ a: 4, b: "hey" })
 print(get_thing())
+
+xs = [0, 1, 2, 3, 4, 5, 6]
+
+is_even :: Int -> Bool
+is_even (x) -> (x % 2 == 0)
+
+evens = xs |> list.filter(is_even)
+print(evens)
+
+twice = list.map(xs, double)
+print(twice)

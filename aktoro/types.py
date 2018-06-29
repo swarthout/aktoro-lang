@@ -85,9 +85,9 @@ class RecordType(AkType):
 
 
 class FuncType(AkType):
-    def __init__(self, params, return_type):
+    def __init__(self, param_types, return_type):
         super().__init__("fn")
-        self.param_types = params
+        self.param_types = param_types
         self.return_type = return_type
 
     def __str__(self):
@@ -102,3 +102,30 @@ class FuncType(AkType):
 
 class VariantType(AkType):
     pass
+
+
+class TypeParameter(AkType):
+    def __init__(self, param):
+        super().__init__("TypeParameter")
+        self.param = param
+
+    def __str__(self):
+        return "TypeParameter({})".format(self.param)
+
+    __repr__ = __str__
+
+    def go_code(self):
+        return "interface{}"
+
+
+class EmptyTuple(AkType):
+    def __init__(self):
+        super().__init__("empty")
+
+    def __str__(self):
+        return "EmptyTuple"
+
+    __repr__ = __str__
+
+    def go_code(self):
+        return "interface{}"

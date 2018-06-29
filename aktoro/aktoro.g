@@ -17,7 +17,7 @@ var_usage: NAME
 
 
 ?expr: pipe_expr
-?pipe_expr: equality_expr _NEWLINE? ( _PIPE_FORWARD (func_call | print_stmt) _NEWLINE?)*
+?pipe_expr: equality_expr _NEWLINE? ( _PIPE_FORWARD caller _NEWLINE?)*
 ?equality_expr: add_expr ( ( COMP_EQU
                            | COMP_NEQU
                            | COMP_GTR
@@ -26,7 +26,7 @@ var_usage: NAME
                            | COMP_LTE ) add_expr )*
 
 ?add_expr: mult_expr ( ( PLUS | MINUS ) mult_expr )*
-?mult_expr: primary ( ( MULTIPLY | DIVIDE ) primary )*
+?mult_expr: primary ( ( MULTIPLY | DIVIDE | REMAINDER) primary )*
 
 ?primary: "(" expr ")" -> paren_expr
         | INT          -> int_literal
@@ -45,6 +45,7 @@ var_usage: NAME
         | if_expr
         | field_access
         | string_concat
+        | builtin_func_call
 
 _PIPE_FORWARD: "|>"
 COMP_EQU: "=="
@@ -57,6 +58,11 @@ PLUS: "+"
 MINUS: "-"
 MULTIPLY: "*"
 DIVIDE: "/"
+REMAINDER: "%"
+
+?caller: func_call
+       | print_stmt
+       | builtin_func_call
 
 list_literal: "[" _NEWLINE? list_elems _NEWLINE? "]" ("::" type_usage)?
 list_elems: (expr ("," _NEWLINE? expr)*)?
@@ -137,6 +143,11 @@ close_params: ")"
 // empty_tuple: "()"
 
 func_call: var_usage "(" _expr_list? ")"
+
+LIST.2: "list"
+DICT.2: "dict"
+?builtin_module_name: LIST | DICT
+builtin_func_call: builtin_module_name "." NAME "(" _expr_list? ")"
 
 _PRINT.2: "print"
 print_stmt: _PRINT "(" _NEWLINE? _expr_list? ")"

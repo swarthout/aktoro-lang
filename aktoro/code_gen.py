@@ -3,10 +3,9 @@ from aktoro.ast import *
 from aktoro.parser import snake_to_camel
 
 
-class CodeGenVisitor(NodeVisitor):
+class CodeGenVisitor():
 
     def __init__(self):
-        super(CodeGenVisitor, self).__init__()
         self.imports = set()
 
     def visit(self, node):
@@ -16,7 +15,7 @@ class CodeGenVisitor(NodeVisitor):
         '''
         if node:
             method = 'visit_' + node.__class__.__name__
-            visitor = getattr(self, method, self.generic_visit)
+            visitor = getattr(self, method)
             return visitor(node)
         else:
             return None
@@ -85,6 +84,9 @@ class CodeGenVisitor(NodeVisitor):
 
     def visit_VarUsage(self, node):
         return snake_to_camel(node.name)
+
+    def visit_PackageVarUsage(self, node):
+        return f"{node.package_name}.{snake_to_camel(node.func_name).capitalize()}"
 
     def visit_FieldAccess(self, node):
         return f"{self.visit(node.record_name)}.{snake_to_camel(node.field_name)}"
@@ -156,7 +158,7 @@ class CodeGenVisitor(NodeVisitor):
     def visit_MultExpr(self, node):
         exprs = []
         for e in node.exprs:
-            if e in ["*", "/"]:
+            if e in ["*", "/", "%"]:
                 exprs.append(e)
             else:
                 exprs.append(self.visit(e))

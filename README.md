@@ -3,7 +3,7 @@
 
 ####Todo
 - Function Type Erasure
-- enum module
+- list module functional combinators
 - String indexing
 - Simplify precedence rules (they don't matter)
 - Improve hashing methods for primitive types
@@ -22,4 +22,4 @@
 - With Expressions
 - Imports
 - Use Statements
--
+- Go compatibility
