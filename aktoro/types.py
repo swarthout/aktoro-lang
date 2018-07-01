@@ -24,7 +24,7 @@ class ListType(AkType):
         self.elem_type = elem_type
 
     def __str__(self):
-        return "ListType({})".format(self.elem_type)
+        return "[{}]".format(self.elem_type)
 
     __repr__ = __str__
 
@@ -45,7 +45,7 @@ class PrimitiveType(AkType):
         super().__init__(name)
 
     def __str__(self):
-        return "PrimitiveType({})".format(self.name)
+        return self.name
 
     __repr__ = __str__
 
@@ -61,7 +61,7 @@ class DictType(AkType):
         self.val_type = val_type
 
     def __str__(self):
-        return "DictType({} => {})".format(self.key_type, self.val_type)
+        return "%{{{} => {}}})".format(self.key_type, self.val_type)
 
     __repr__ = __str__
 
@@ -76,7 +76,7 @@ class RecordType(AkType):
         self.fields = fields
 
     def __str__(self):
-        return "RecordType({})".format(self.name)
+        return self.name
 
     __repr__ = __str__
 
@@ -91,7 +91,7 @@ class FuncType(AkType):
         self.return_type = return_type
 
     def __str__(self):
-        return "FuncType({} -> {})".format(self.param_types, self.return_type)
+        return "({} -> {})".format(self.param_types, self.return_type)
 
     __repr__ = __str__
 
@@ -110,7 +110,7 @@ class TypeParameter(AkType):
         self.param = param
 
     def __str__(self):
-        return "TypeParameter({})".format(self.param)
+        return self.param
 
     __repr__ = __str__
 
@@ -123,7 +123,7 @@ class EmptyTuple(AkType):
         super().__init__("empty")
 
     def __str__(self):
-        return "EmptyTuple"
+        return "()"
 
     __repr__ = __str__
 

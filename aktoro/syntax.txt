@@ -373,8 +373,11 @@ module stack = {
     } 
 
 }
-
-
+# list.filter :: ([a], (a -> Bool)) -> [a]
+# pred_func :: (c -> Bool)
+# filter_args: ([Int], (c -> Bool))
+# pred_func_args: Int
+list.filter([1, 2, 3], \x -> (x % 2 == 0))
 
 let s = stack.init (int, 5)
 

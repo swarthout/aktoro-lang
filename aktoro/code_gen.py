@@ -1,6 +1,7 @@
 import textwrap
 from aktoro.ast import *
 from aktoro.parser import snake_to_camel
+import aktoro.types as types
 
 
 class CodeGenVisitor():
@@ -189,8 +190,10 @@ class CodeGenVisitor():
     def visit_FuncCall(self, node):
         func_name = self.visit(node.func_name)
         args = ", ".join([self.visit(arg) for arg in node.args])
-        return_type = node.ak_type.go_code()
-        return f"{func_name}({args}).({return_type})"
+        return_cast = ""
+        if not isinstance(node.ak_type, types.EmptyTuple):
+            return_cast = f".({node.ak_type.go_code()})"
+        return f"{func_name}({args}){return_cast}"
 
     def visit_ReturnStmt(self, node):
         return f"return {self.visit(node.expr)}"
@@ -199,6 +202,10 @@ class CodeGenVisitor():
         self.imports.add('"fmt"')
         exprs = ",".join([self.visit(expr) for expr in node.args])
         return f"fmt.Println({exprs})"
+
+    def visit_PrintFunc(self, node):
+        self.imports.add('"fmt"')
+        return "func (x interface{}) interface{} { fmt.Println(x); return nil}"
 
     def visit_ListIndexExpr(self, node):
         if isinstance(node.index_expr, RangeIndex):

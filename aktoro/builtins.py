@@ -16,8 +16,19 @@ BUILTIN_PACKAGES = {
                                                           types.PrimitiveType("Bool"))
                                                       ],
                                                      types.ListType(types.TypeParameter("a")))),
-        # "reduce": BuiltInFunc(ak_type=None),
-        # "each": BuiltInFunc(ak_type=None),
+        "reduce": BuiltInFunc(ak_type=types.FuncType([types.ListType(types.TypeParameter("a")),
+                                                      types.TypeParameter("b"),
+                                                      types.FuncType(
+                                                          [types.TypeParameter("b"),
+                                                           types.TypeParameter("a")],
+                                                          types.TypeParameter("b"))
+                                                      ],
+                                                     types.TypeParameter("b"))),
+        "each": BuiltInFunc(ak_type=types.FuncType([types.ListType(types.TypeParameter("a")),
+                                                    types.FuncType(
+                                                        [types.TypeParameter("a")],
+                                                        types.EmptyTuple())],
+                                                   types.EmptyTuple())),
         # "reverse": BuiltInFunc(ak_type=None)
     }
 }

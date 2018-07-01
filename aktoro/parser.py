@@ -358,17 +358,17 @@ class Parser(Transformer):
         func_name = ast.PackageVarUsage(package_name, func_name, func_type)
         return ast.FuncCall(func_name, arg_exprs, func_type.return_type)
 
+    def print_func(self, args):
+        return ast.PrintFunc(types.FuncType([types.TypeParameter('a')], types.EmptyTuple))
+
     def return_expr(self, args):
         return ast.ReturnStmt(args, args.ak_type)
-
-    def open_params(self, args):
-        # self.symbol_table.push_scope()
-        pass
 
     def close_block(self, args):
         self.symbol_table.pop_scope()
 
     def print_stmt(self, args):
+        print_str, *args = args
         return ast.PrintStmt(args)
 
     def if_expr(self, args):

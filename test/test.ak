@@ -107,5 +107,16 @@ is_even (x) -> (x % 2 == 0)
 evens = xs |> list.filter(is_even)
 print(evens)
 
+empty_list = [] :: [Int]
+empty_list |> list.filter(is_even) |> print()
+
+empty_list |> list.map(double) |> print()
+
 twice = list.map(xs, double)
-print(twice)
+print("twice: ", twice)
+
+list.each([1, 2, 3], print)
+
+print(xs[2..])
+print(xs[1..4])
+print(xs[..3])

@@ -115,6 +115,10 @@ class FuncCall(Expr):
     _fields = ["func_name", "args", "ak_type"]
 
 
+class PrintFunc(Expr):
+    _fields = ["ak_type"]
+
+
 class PackageVarUsage(Expr):
     _fields = ["package_name", "func_name", "ak_type"]
 

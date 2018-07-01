@@ -32,6 +32,7 @@ var_usage: NAME
         | INT          -> int_literal
         | FLOAT        -> float_literal
         | BOOL         -> bool_literal
+        | PRINT        -> print_func
         | var_usage
         | STRING       -> string_literal
         | list_literal
@@ -149,8 +150,8 @@ DICT.2: "dict"
 ?builtin_module_name: LIST | DICT
 builtin_func_call: builtin_module_name "." NAME "(" _expr_list? ")"
 
-_PRINT.2: "print"
-print_stmt: _PRINT "(" _NEWLINE? _expr_list? ")"
+PRINT.2: "print"
+print_stmt: PRINT "(" _NEWLINE? _expr_list? ")"
 _expr_list: expr ("," _NEWLINE? expr)*
 
 if_expr: "if" expr "{" if_body "}" else_expr
