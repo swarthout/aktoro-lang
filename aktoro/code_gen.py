@@ -309,3 +309,25 @@ class CodeGenVisitor():
         }}
         """
         return res
+
+    def visit_ListDestructDecl(self, node):
+        self.imports.add('"github.com/aktoro-lang/container/list"')
+        var_inits = [self.visit_VarDeclNoInit(var_decl) for var_decl in node.var_decls]
+        if node.rest_decl:
+            var_inits.append(self.visit_VarDeclNoInit(node.rest_decl))
+        var_inits = "\n".join(var_inits)
+        root_var_decl = self.visit(node.root_var)
+        root_name = node.root_var.name
+        var_assigns = [f"{var.name} = list.At({root_name}, types.AkInt({i})).({var.ak_type.go_code()})" for i, var in
+                       enumerate(node.var_decls)]
+        if node.rest_decl:
+            var_assigns.append(
+                f"{node.rest_decl.name} = list.Drop({root_name}, types.AkInt({len(node.var_decls)})).({node.rest_decl.ak_type.go_code()})")
+        var_assigns = "\n".join(var_assigns)
+        res = f"""{var_inits}
+        {{
+        {root_var_decl}
+        {var_assigns}
+        }}
+        """
+        return res

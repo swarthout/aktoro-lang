@@ -191,6 +191,10 @@ class RecordDestructDecl(AST):
     _fields = ["root_var", "var_decls"]
 
 
+class ListDestructDecl(AST):
+    _fields = ["root_var", "var_decls", "rest_decl"]
+
+
 class NodeVisitor(object):
     def visit(self, node):
         '''

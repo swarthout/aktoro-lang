@@ -147,5 +147,8 @@ print(value)
 
 {name, year} = mustang
 print(name, year)
-#[ x, y | rest ] = xs
-#print(x, y, rest)
+[x, y | rest] = xs
+print(x, y, rest)
+
+[a | b] = [1]
+print(a, b)

@@ -2,14 +2,14 @@
 
 
 ####Todo
-- Basic Pattern Matching (no arguments and primitive type arguments)
 - Destructuring
-    - Record
     - List
-    - Dict
 - Generics
-- Better printing with reflection
 - Variants
+    - Definition
+    - Declaration
+    - Match expression
+- Better printing with reflection
 - Anonymous Functions (restricted to function arguments)
 - Improve hashing methods for primitive types
 - Option type

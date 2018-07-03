@@ -127,6 +127,25 @@ class Parser(Transformer):
             self.symbol_table.add(var, var_decl)
         return ast.RecordDestructDecl(v, var_decls)
 
+    def list_destruct_decl(self, args):
+        vars = args[:-1]
+        vars = list(map(str, vars))
+        expr = args[-1]
+        v = parse_var_decl("res", expr)
+        elem_type = v.ak_type.elem_type
+        rest_decl = None
+        if "|" in vars:
+            rest = vars[-1]
+            vars = vars[:-2]
+            rest_decl = ast.VarDecl(rest, None, v.ak_type)
+            self.symbol_table.add(rest, rest_decl)
+        var_decls = []
+        for var in vars:
+            var_decl = ast.VarDecl(var, None, elem_type)
+            var_decls.append(var_decl)
+            self.symbol_table.add(var, var_decl)
+        return ast.ListDestructDecl(v, var_decls, rest_decl)
+
     def var_name(self, args):
         return str(args[0])
 
