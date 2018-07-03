@@ -2,12 +2,7 @@
 
 
 ####Todo
-- String indexing
-- list module functions
-    - drop_while
-    - take_while
-- Logical and/or operators
-- Basic Pattern Matching (no arguments)
+- Basic Pattern Matching (no arguments and primitive type arguments)
 - Destructuring
     - Record
     - List
@@ -17,7 +12,6 @@
 - Variants
 - Anonymous Functions (restricted to function arguments)
 - Improve hashing methods for primitive types
-- Simplify precedence rules (they don't matter)
 - Option type
 - Result type (result and option are magic types, not just variants)
 - Advanced Pattern Matching

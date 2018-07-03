@@ -39,6 +39,10 @@ class VarIfAssign(Expr):
     _fields = ["name", "expr", "ak_type"]
 
 
+class VarMatchAssign(Expr):
+    _fields = ["name", "expr", "ak_type"]
+
+
 class VarAssignMut(AST):
     _fields = ["name", "expr"]
 
@@ -99,8 +103,12 @@ class ParenExpr(Expr):
     _fields = ["expr"]
 
 
-class BinaryOpExpr(Expr):
-    _fields = ["left", "op", "right", "ak_type"]
+class NotExpr(Expr):
+    _fields = ["expr", "ak_type"]
+
+
+class LogicalExpr(Expr):
+    _fields = ["exprs", "ak_type"]
 
 
 class ParamDecl(AST):
@@ -139,6 +147,14 @@ class ListRangeIndexExpr(Expr):
     _fields = ["var", "index_expr", "ak_type"]
 
 
+class StringIndexExpr(Expr):
+    _fields = ["var", "index_expr", "ak_type"]
+
+
+class StringRangeIndexExpr(Expr):
+    _fields = ["var", "index_expr", "ak_type"]
+
+
 class DictIndexExpr(Expr):
     _fields = ["var", "index_expr", "ak_type"]
 
@@ -155,8 +171,24 @@ class IfExpr(Expr):
     _fields = ["test_expr", "if_body", "else_body", "ak_type"]
 
 
+class MatchExpr(Expr):
+    _fields = ["test_expr", "patterns", "ak_type"]
+
+
+class Pattern(Expr):
+    _fields = ["test_expr", "body", "ak_type"]
+
+
+class DefaultPattern(Expr):
+    _fields = ["body", "ak_type"]
+
+
 class StringConcat(Expr):
     _fields = ["left", "right", "ak_type"]
+
+
+class RecordDestructDecl(AST):
+    _fields = ["root_var", "var_decls"]
 
 
 class NodeVisitor(object):

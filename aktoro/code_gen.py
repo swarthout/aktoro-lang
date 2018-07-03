@@ -64,6 +64,11 @@ class CodeGenVisitor():
 
         return var_decl + "\n" + self.visit(node.expr)
 
+    def visit_VarMatchAssign(self, node):
+        var_decl = self.visit_VarDeclNoInit(node)
+
+        return var_decl + "\n" + self.visit(node.expr)
+
     def visit_VarDeclNoInit(self, node):
         node_name = snake_to_camel(node.name)
         return f"var {node_name} {node.ak_type.go_code()}"
@@ -87,7 +92,9 @@ class CodeGenVisitor():
         return snake_to_camel(node.name)
 
     def visit_PackageVarUsage(self, node):
-        return f"{node.package_name}.{snake_to_camel(node.func_name).capitalize()}"
+        name = snake_to_camel(node.func_name)
+        name = name[:1].upper() + name[1:]
+        return f"{node.package_name}.{name}"
 
     def visit_FieldAccess(self, node):
         return f"{self.visit(node.record_name)}.{snake_to_camel(node.field_name)}"
@@ -145,7 +152,7 @@ class CodeGenVisitor():
         return go_code
 
     def visit_EqualityExpr(self, node):
-        return f"{self.visit(node.left)} {node.op} {self.visit(node.right)}"
+        return f"types.AkBool({self.visit(node.left)} {node.op} {self.visit(node.right)})"
 
     def visit_AddExpr(self, node):
         exprs = []
@@ -164,6 +171,22 @@ class CodeGenVisitor():
             else:
                 exprs.append(self.visit(e))
         return " ".join(exprs)
+
+    def visit_LogicalExpr(self, node):
+        operators = {
+            "and": "&&",
+            "or": "||"
+        }
+        exprs = []
+        for e in node.exprs:
+            if e in operators.keys():
+                exprs.append(operators[e])
+            else:
+                exprs.append(self.visit(e))
+        return " ".join(exprs)
+
+    def visit_NotExpr(self, node):
+        return f"types.AkBool(!{self.visit(node.expr)})"
 
     def visit_ParenExpr(self, node):
         return f"({self.visit(node.expr)})"
@@ -208,10 +231,7 @@ class CodeGenVisitor():
         return "func (x interface{}) interface{} { fmt.Println(x); return nil}"
 
     def visit_ListIndexExpr(self, node):
-        if isinstance(node.index_expr, RangeIndex):
-            return self.visit_ListRangeIndexExpr(node)
-        else:
-            return f"list.At({self.visit(node.var)},{self.visit(node.index_expr)}).({node.ak_type.go_code()})"
+        return f"list.At({self.visit(node.var)},{self.visit(node.index_expr)}).({node.ak_type.go_code()})"
 
     def visit_ListRangeIndexExpr(self, node):
         low = self.visit(node.index_expr.low) if node.index_expr.low else "0"
@@ -220,6 +240,18 @@ class CodeGenVisitor():
             return f"list.GetRange({self.visit(node.var)}, {low}, {high})"
         else:
             return f"list.Drop({self.visit(node.var)}, {low})"
+
+    def visit_StringIndexExpr(self, node):
+        index_expr = self.visit(node.index_expr)
+        return f"{self.visit(node.var)}[{index_expr}:{index_expr}+ types.AkInt(1)]"
+
+    def visit_StringRangeIndexExpr(self, node):
+        low = self.visit(node.index_expr.low) if node.index_expr.low else "0"
+        if node.index_expr.high:
+            high = self.visit(node.index_expr.high)
+            return f"{self.visit(node.var)}[{low}:{high}])"
+        else:
+            return f"{self.visit(node.var)}[{low}:]"
 
     def visit_ListConsExpr(self, node):
         cons_args_go_code = ",".join([self.visit(arg) for arg in node.cons_args])
@@ -243,5 +275,37 @@ class CodeGenVisitor():
         }} {else_stmt}
         """
 
+    def visit_MatchExpr(self, node):
+        if node.test_expr:
+            test_expr = self.visit(node.test_expr)
+        else:
+            test_expr = ""
+        case_stmts = ""
+        for pattern in node.patterns:
+            case_body = "\n".join([self.visit(line) for line in pattern.body])
+            if isinstance(pattern, Pattern):
+                if node.test_expr:
+                    case_stmt = f"\ncase {self.visit(pattern.test_expr)}:\n"
+                else:
+                    case_stmt = f"\ncase bool({self.visit(pattern.test_expr)}):\n"
+            else:
+                case_stmt = "\ndefault:\n"
+            case_stmts += case_stmt + case_body
+
+        return f"switch {test_expr} {{{case_stmts}}}"
+
     def visit_StringConcat(self, node):
         return f"{self.visit(node.left)} + {self.visit(node.right)}"
+
+    def visit_RecordDestructDecl(self, node):
+        var_inits = "\n".join([self.visit_VarDeclNoInit(var_decl) for var_decl in node.var_decls.values()])
+        root_var_decl = self.visit(node.root_var)
+        root_name = node.root_var.name
+        var_assigns = "\n".join(f"{var} = {root_name}.{var}" for var in node.var_decls.keys())
+        res = f"""{var_inits}
+        {{
+        {root_var_decl}
+        {var_assigns}
+        }}
+        """
+        return res

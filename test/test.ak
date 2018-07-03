@@ -3,8 +3,7 @@ add (a, b) -> (a + b)
 
 type Car = {
     name String,
-    year Int,
-    owners [String]
+    year Int
 }
 
 type Person = {
@@ -37,8 +36,7 @@ me = {
   last_name: "Swarthout",
   car: {
     name: "Mustang",
-    year: 2013,
-    owners: ["Scott"]
+    year: 2013
   }
 }
 
@@ -49,9 +47,9 @@ numbers = %{
 }
 
 cars = [
-  { name: "Mustang", year: 2013, owners: ["Scott"] },
-  { name: "Wrangler", year: 1990, owners: ["Zach", "Tim"] },
-  { name: "Corvette", year: 1990, owners: ["Jack"] }
+  { name: "Mustang", year: 2013 },
+  { name: "Wrangler", year: 1990 },
+  { name: "Corvette", year: 1991 }
 ]
 
 print(apply_first(["Hello", "Waynes"], append_string))
@@ -60,11 +58,10 @@ print(me.car.year)
 print(first(cars).year)
 print(add(3, 4))
 
-mustang = { name: "Mustang", year: 2013, owners: ["Jake", "Amir"] }
+mustang = { name: "Mustang", year: 2013 }
 
 new_mustang = { mustang | year: 2018 }
 print(new_mustang)
-print(new_mustang.owners)
 
 if new_mustang.year > 2015 {
    print("hello from new mustang")
@@ -99,11 +96,13 @@ get_thing :: () -> Thing
 get_thing () -> ({ a: 4, b: "hey" })
 print(get_thing())
 
-xs = [0, 1, 2, 3, 4, 5, 6]
-
 is_even :: Int -> Bool
 is_even (x) -> (x % 2 == 0)
 
+
+new_car :: Car -> Bool
+new_car (c) -> (c.year >= 2000)
+xs = [0, 1, 2, 3, 4, 5, 6]
 evens = xs |> list.filter(is_even)
 print(evens)
 
@@ -120,3 +119,33 @@ list.each([1, 2, 3], print)
 print(xs[2..])
 print(xs[1..4])
 print(xs[..3])
+
+cars |> list.filter(new_car) |> print()
+
+
+cars |> list.drop_while(new_car) |> print()
+print(not new_car({ name: "Mustang", year: 2013 }) and true)
+
+print("hello"[0])
+print("hello"[1..])
+n = "Mustang"
+match {
+    n == "Corvette" => print("n is Corvette"),
+    20 > 18 => {
+        print("20 > 18")
+    }
+}
+
+number = "five"
+value = match number {
+    "three" => 3,
+    "four"  => 4,
+    "five"  => 5,
+    _       => 0
+}
+print(value)
+
+{name, year} = mustang
+print(name, year)
+#[ x, y | rest ] = xs
+#print(x, y, rest)

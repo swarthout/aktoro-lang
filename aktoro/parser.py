@@ -85,6 +85,22 @@ class PipelineRewriter(Visitor):
         tree.children = prev.children
 
 
+def parse_var_decl(name, expr):
+    if isinstance(expr, ast.IfExpr):
+        last_if_expr = expr.if_body[-1]
+        expr.if_body[-1] = ast.VarAssignMut(name, last_if_expr)
+        last_else_expr = expr.else_body[-1]
+        expr.else_body[-1] = ast.VarAssignMut(name, last_else_expr)
+        v = ast.VarIfAssign(name, expr, expr.ak_type)
+    elif isinstance(expr, ast.MatchExpr):
+        for i in range(len(expr.patterns)):
+            expr.patterns[i].body[-1] = ast.VarAssignMut(name, expr.patterns[i].body[-1])
+        v = ast.VarMatchAssign(name, expr, expr.ak_type)
+    else:
+        v = ast.VarDecl(name, expr, expr.ak_type)
+    return v
+
+
 class Parser(Transformer):
     def __init__(self):
         self.symbol_table = SymbolTable()
@@ -96,16 +112,20 @@ class Parser(Transformer):
 
     def var_decl(self, args):
         name, expr = args
-        if isinstance(expr, ast.IfExpr):
-            last_if_expr = expr.if_body[-1]
-            expr.if_body[-1] = ast.VarAssignMut(name, last_if_expr)
-            last_else_expr = expr.else_body[-1]
-            expr.else_body[-1] = ast.VarAssignMut(name, last_else_expr)
-            v = ast.VarIfAssign(name, expr, expr.ak_type)
-        else:
-            v = ast.VarDecl(name, expr, expr.ak_type)
+        v = parse_var_decl(name, expr)
         self.symbol_table.add(name, v)
         return v
+
+    def record_destruct_decl(self, args):
+        vars = args[:-1]
+        vars = map(str, vars)
+        expr = args[-1]
+        v = parse_var_decl("res", expr)
+        expr_fields = v.ak_type.fields
+        var_decls = {var: ast.VarDecl(var, None, expr_fields[var]) for var in vars}
+        for var, var_decl in var_decls.items():
+            self.symbol_table.add(var, var_decl)
+        return ast.RecordDestructDecl(v, var_decls)
 
     def var_name(self, args):
         return str(args[0])
@@ -132,6 +152,11 @@ class Parser(Transformer):
         elif isinstance(var.ak_type, types.DictType):
             ak_type = var.ak_type.val_type
             return ast.DictIndexExpr(var, index_expr, ak_type)
+        elif isinstance(var.ak_type, types.PrimitiveType) and var.ak_type.name == "String":
+            ak_type = types.PrimitiveType("String")
+            if isinstance(index_expr, ast.RangeIndex):
+                return ast.StringRangeIndexExpr(var, index_expr, ak_type)
+            return ast.StringIndexExpr(var, index_expr, ak_type)
 
     def range_index(self, args):
         low, high = args
@@ -213,6 +238,13 @@ class Parser(Transformer):
         left, op, right = args
         return ast.EqualityExpr(left, op, right, types.PrimitiveType("bool"))
 
+    def not_expr(self, args):
+        _, expr = args
+        return ast.NotExpr(expr, expr.ak_type)
+
+    def logical_expr(self, args):
+        return ast.LogicalExpr(args, types.PrimitiveType("bool"))
+
     def paren_expr(self, args):
         return ast.ParenExpr(args[0])
 
@@ -286,7 +318,7 @@ class Parser(Transformer):
         return ast.RecordLiteral(field_dict, record_type)
 
     def record_update(self, args):
-        var, *updates = args
+        var, _, *updates = args
         return ast.RecordUpdate(var, updates, var.ak_type)
 
     def field_assignment(self, args):
@@ -386,6 +418,41 @@ class Parser(Transformer):
         return args
 
     def else_expr(self, args):
+        return args
+
+    def match_expr(self, args):
+        if len(args) == 2:
+            test_expr, patterns = args
+            return ast.MatchExpr(test_expr, patterns, patterns[0].ak_type)
+        else:
+            patterns = args[0]
+            return ast.MatchExpr(None, patterns, patterns[0].ak_type)
+
+    def test_expr(self, args):
+        return args[0]
+
+    def match_patterns(self, args):
+        return args
+
+    def pattern(self, args):
+        expr, body = args
+        last_expr = body[-1]
+        if isinstance(last_expr, ast.Expr):
+            ak_type = last_expr.ak_type
+        else:
+            ak_type = None
+        return ast.Pattern(expr, body, ak_type)
+
+    def pattern_default(self, args):
+        underscore, body = args
+        last_expr = body[-1]
+        if isinstance(last_expr, ast.Expr):
+            ak_type = last_expr.ak_type
+        else:
+            ak_type = None
+        return ast.DefaultPattern(body, ak_type)
+
+    def pattern_body(self, args):
         return args
 
     def string_concat(self, args):

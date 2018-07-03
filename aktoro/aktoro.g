@@ -11,13 +11,20 @@ _line: _NEWLINE
      | func_def
      | print_stmt
 
-var_decl: NAME "=" expr
+var_decl: NAME "=" expr                                   -> var_decl
+        | "{" NAME ("," NAME)* "}" "=" expr               -> record_destruct_decl
+        | "[" NAME ("," NAME)* (SINGLE_PIPE NAME )? "]" "=" expr  -> list_destruct_decl
+
+SINGLE_PIPE: "|"
 var_name: NAME
 var_usage: NAME
 
 
 ?expr: pipe_expr
-?pipe_expr: equality_expr _NEWLINE? ( _PIPE_FORWARD caller _NEWLINE?)*
+?pipe_expr: logical_expr _NEWLINE? ( _PIPE_FORWARD caller _NEWLINE?)*
+
+?logical_expr: equality_expr ( ( AND | OR ) equality_expr)*
+
 ?equality_expr: add_expr ( ( COMP_EQU
                            | COMP_NEQU
                            | COMP_GTR
@@ -34,7 +41,7 @@ var_usage: NAME
         | BOOL         -> bool_literal
         | PRINT        -> print_func
         | var_usage
-        | STRING       -> string_literal
+        | string_literal
         | list_literal
         | dict_literal
         | record_literal
@@ -47,6 +54,10 @@ var_usage: NAME
         | field_access
         | string_concat
         | builtin_func_call
+        | NOT expr     -> not_expr
+        | match_expr
+
+string_literal: STRING
 
 _PIPE_FORWARD: "|>"
 COMP_EQU: "=="
@@ -60,6 +71,9 @@ MINUS: "-"
 MULTIPLY: "*"
 DIVIDE: "/"
 REMAINDER: "%"
+NOT.2: "not"
+AND.2: "and"
+OR.2: "or"
 
 ?caller: func_call
        | print_stmt
@@ -77,7 +91,13 @@ kv_pair: expr "=>" expr
 
 dict_update: "%{" expr "|" kv_pair ("," _NEWLINE? kv_pair)* "}"
 
-index_expr: var_usage "[" ( expr | range_index ) "]"
+index_expr: ( var_usage
+            | list_literal
+            | dict_literal
+            | string_literal
+            | func_call
+            | field_access ) "[" ( expr | range_index ) "]"
+
 range_index: low ".." high
 low: expr?
 high: expr?
@@ -158,6 +178,17 @@ if_expr: "if" expr "{" if_body "}" else_expr
 if_body: _line*
 else_expr: ("else" "{" _else_body "}")?
 _else_body: _line*
+
+match_expr: "match" test_expr? "{" _NEWLINE? match_patterns _NEWLINE? "}"
+test_expr: expr
+match_patterns:  (pattern ("," _NEWLINE? pattern)*)
+pattern: expr "=>" pattern_body
+       | UNDERSCORE "=>" pattern_body -> pattern_default
+
+UNDERSCORE: "_"
+pattern_body: expr | print_stmt
+            | "{" _line* "}"
+
 
 field_access: ( var_usage
               | func_call
