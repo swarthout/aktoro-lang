@@ -29,8 +29,8 @@ class TypeMapperVisitor():
         self.visit(node.val_type, arg_type.val_type)
 
     def visit_RecordType(self, node, arg_type):
-        for n_field, a_field in zip(node.fields, arg_type.fields):
-            self.visit(n_field.ak_type, n_field.ak_type)
+        for n_field, a_field in zip(node.fields.values(), arg_type.fields.values()):
+            self.visit(n_field, a_field)
 
     def visit_FuncType(self, node, arg_type):
         for n_param, a_param in zip(node.param_types, arg_type.param_types):
@@ -74,8 +74,8 @@ class TypeResolverVisitor():
         return node
 
     def visit_RecordType(self, node):
-        for i, field in enumerate(node.fields):
-            node.fields[i].ak_type = self.visit(field.ak_type)
+        for field_name, ak_type in node.fields.items():
+            node.fields[field_name] = self.visit(ak_type)
         return node
 
     def visit_FuncType(self, node):
@@ -85,7 +85,8 @@ class TypeResolverVisitor():
         return node
 
     def visit_TypeParameter(self, node):
-        return self.param_map[node.param]
+        type_param = self.param_map[node.param]
+        return type_param
 
     def visit_EmptyTuple(self, node):
         return node

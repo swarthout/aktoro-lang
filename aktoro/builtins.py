@@ -91,6 +91,8 @@ BUILTIN_PACKAGES = {
                                                     types.TypeParameter("a"))),
         "rest": BuiltInFunc(ak_type=types.FuncType([types.ListType(types.TypeParameter("a"))],
                                                    types.ListType(types.TypeParameter("a")))),
+        "empty": BuiltInFunc(ak_type=types.FuncType([types.ListType(types.TypeParameter("a"))],
+                                                    types.PrimitiveType("Bool")))
 
     }
 }

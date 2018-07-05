@@ -2,8 +2,6 @@
 
 
 ####Todo
-- Destructuring
-    - List
 - Generics
 - Variants
     - Definition

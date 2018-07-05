@@ -34,6 +34,14 @@ ignore_second (b, _) -> b + 2
 
 type Result t = Ok t | Error String
 
+type Stack a = {data [a], buffer_size Int}
+
+first :: [a] -> a
+first (xs) -> {
+    [x | rest] = xs
+    x
+}
+
 private_func :: (Int, User) -> String
 private_func (x, {name}) -> {
     let g = match return_value(a) {
@@ -397,6 +405,9 @@ go.func(l, "PushFront, 1)
 front = go.func(l, "Front")
 val = go.var(front, "Val") :: Int
 
+package main
 
+import list from "std/list"
+import stack from "../ak_packages/stack/stack.ak"
 
 

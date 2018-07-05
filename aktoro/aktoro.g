@@ -10,6 +10,7 @@ _line: _NEWLINE
      | type_decl
      | func_def
      | print_stmt
+     | return_stmt
 
 var_decl: NAME "=" expr                                   -> var_decl
         | "{" NAME ("," NAME)* "}" "=" expr               -> record_destruct_decl
@@ -102,9 +103,9 @@ range_index: low ".." high
 low: expr?
 high: expr?
 
-type_decl: "type" type_name "=" (record_def | variant_def)
+type_decl: "type" type_name type_params "=" (record_def | variant_def)
 type_name: NAME
-
+type_params: NAME*
 
 type_usage: _t
 _t: NAME
@@ -174,6 +175,8 @@ PRINT.2: "print"
 print_stmt: PRINT "(" _NEWLINE? _expr_list? ")"
 _expr_list: expr ("," _NEWLINE? expr)*
 
+return_stmt: "return" expr
+
 if_expr: "if" expr "{" if_body "}" else_expr
 if_body: _line*
 else_expr: ("else" "{" _else_body "}")?
@@ -186,7 +189,7 @@ pattern: expr "=>" pattern_body
        | UNDERSCORE "=>" pattern_body -> pattern_default
 
 UNDERSCORE: "_"
-pattern_body: expr | print_stmt
+pattern_body: expr | print_stmt | return_stmt
             | "{" _line* "}"
 
 

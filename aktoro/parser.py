@@ -44,7 +44,7 @@ class SymbolTable(object):
         for scope in reversed(self.table):
             if name in scope.keys():
                 return scope[name]
-        raise KeyError(name)
+        return None
 
     def push_scope(self):
         self.table.append({})
@@ -116,6 +116,10 @@ class Parser(Transformer):
         self.symbol_table.add(name, v)
         return v
 
+    def return_stmt(self, args):
+        expr = args[0]
+        return ast.ReturnStmt(expr, expr.ak_type)
+
     def record_destruct_decl(self, args):
         vars = args[:-1]
         vars = map(str, vars)
@@ -157,17 +161,17 @@ class Parser(Transformer):
 
     def field_access(self, args):
         record_name, field_name = args
-        parent_ak_type = self.symbol_table.get(record_name.ak_type.name)
+        # parent_ak_type = self.symbol_table.get(record_name.ak_type.name)
+        parent_ak_type = record_name.ak_type
         ak_type = parent_ak_type.fields[field_name]
         return ast.FieldAccess(record_name, str(field_name), ak_type)
 
     def index_expr(self, args):
         var, index_expr = args
         if isinstance(var.ak_type, types.ListType):
-            ak_type = var.ak_type.elem_type
             if isinstance(index_expr, ast.RangeIndex):
-                return ast.ListRangeIndexExpr(var, index_expr, ak_type)
-            return ast.ListIndexExpr(var, index_expr, ak_type)
+                return ast.ListRangeIndexExpr(var, index_expr, var.ak_type)
+            return ast.ListIndexExpr(var, index_expr, var.ak_type.elem_type)
         elif isinstance(var.ak_type, types.DictType):
             ak_type = var.ak_type.val_type
             return ast.DictIndexExpr(var, index_expr, ak_type)
@@ -216,7 +220,7 @@ class Parser(Transformer):
         return args
 
     def list_cons(self, args):
-        cons_args, var = args
+        cons_args, _, var = args
         ak_type = var.ak_type
         return ast.ListConsExpr(var, cons_args, ak_type)
 
@@ -237,7 +241,7 @@ class Parser(Transformer):
             return ast.DictLiteral(key_values, ak_type)
 
     def dict_update(self, args):
-        var, *updates = args
+        var, _, *updates = args
         return ast.DictUpdate(var, updates, var.ak_type)
 
     def kv_pair_list(self, args):
@@ -268,17 +272,31 @@ class Parser(Transformer):
         return ast.ParenExpr(args[0])
 
     def type_decl(self, args):
-        name, (type_kind, fields) = args
+        name, type_params, (type_kind, fields) = args
         if type_kind == TypeKind.RECORD:
             fields = dict(fields)
-            record_decl = ast.RecordDecl(name, [], fields)
-            record_type = types.RecordType(name, [], fields)
+            record_decl = ast.RecordDecl(name, type_params, fields)
+            record_type = types.RecordType(name, type_params, fields)
             self.symbol_table.add_record(name, record_type)
             return record_decl
         raise NotImplemented("variants not implemented!")
 
     def record_def(self, args):
         return TypeKind.RECORD, args[0]
+
+    def type_params(self, args):
+        params = map(str, args)
+        return list(map(types.TypeParameter, params))
+
+    def field_decl(self, args):
+        name, type_name = args
+        return str(name), type_name
+
+    def field_list(self, args):
+        return args
+
+    def field_name(self, args):
+        return str(args[0])
 
     def type_name(self, args):
         return str(args[0])
@@ -289,28 +307,16 @@ class Parser(Transformer):
     def param(self, args):
         return args[0]
 
-    def build_ak_type(self, args):
-        ak_type = None
+    def type_usage(self, args):
         type_name = args[0]
         if isinstance(type_name, types.AkType):
             return type_name
-        if type_name == "List":
-            elem_type = self.build_ak_type(args[1:])
-            ak_type = types.ListType(elem_type)
-        elif type_name == "Dict":
-            key_type = self.build_ak_type([args[1]])
-            val_type = self.build_ak_type([args[2]])
-            ak_type = types.DictType(key_type, val_type)
         else:
             symbol_entry = self.symbol_table.get(type_name)
-            if isinstance(symbol_entry, types.PrimitiveType):
-                ak_type = symbol_entry
+            if not symbol_entry:
+                ak_type = types.TypeParameter(type_name)
             else:
-                ak_type = types.RecordType(type_name, [], {})
-        return ak_type
-
-    def type_usage(self, args):
-        ak_type = self.build_ak_type(args)
+                ak_type = symbol_entry
         return ak_type
 
     def list_type(self, args):
@@ -334,6 +340,10 @@ class Parser(Transformer):
         field_dict = dict(args)
         field_names = field_dict.keys()
         record_type = self.symbol_table.get_record_by_field_names(field_names)
+        if record_type.type_params:
+            field_types = {name: field.ak_type for name, field in field_dict.items()}
+            concrete_type = types.RecordType(record_type.name, record_type.type_params, field_types)
+            return ast.RecordLiteral(field_dict, concrete_type)
         return ast.RecordLiteral(field_dict, record_type)
 
     def record_update(self, args):
@@ -343,16 +353,6 @@ class Parser(Transformer):
     def field_assignment(self, args):
         name, expr = args
         return name, expr
-
-    def field_decl(self, args):
-        name, type_name = args
-        return str(name), type_name
-
-    def field_list(self, args):
-        return args
-
-    def field_name(self, args):
-        return str(args[0])
 
     def func_def(self, args):
         func_name, params, return_type, ak_type = args[0]
@@ -397,8 +397,9 @@ class Parser(Transformer):
         return args
 
     def func_call(self, args):
-        var_usage, *arg_exprs = args
-        return ast.FuncCall(var_usage, arg_exprs, var_usage.ak_type.return_type)
+        func, *arg_exprs = args
+        func_type = resolve_func_type(func.ak_type, arg_exprs)
+        return ast.FuncCall(func, arg_exprs, func_type.return_type)
 
     def builtin_func_call(self, args):
         package_name, func_name, *arg_exprs = args
@@ -497,5 +498,5 @@ def resolve_func_type(func_type, args):
     type_resolver = TypeResolverVisitor(param_map)
     for f_type in func_type.param_types:
         type_resolver.visit(f_type)
-    type_resolver.visit(func_type.return_type)
+    func_type.return_type = type_resolver.visit(func_type.return_type)
     return func_type
