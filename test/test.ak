@@ -16,7 +16,7 @@ first (xs) -> {
     xs[0]
 }
 
-first_hashmap :: HashMap k v -> k
+first_hashmap :: HashMap a b -> a
 first_hashmap (h) -> {
     first (h.keys)
 }

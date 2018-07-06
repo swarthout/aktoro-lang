@@ -317,6 +317,15 @@ class Parser(Transformer):
                 ak_type = types.TypeParameter(type_name)
             else:
                 ak_type = symbol_entry
+                if isinstance(ak_type, types.RecordType):
+                    if ak_type.type_params:
+                        arg_params = list(map(types.TypeParameter, args[1:]))
+                        type_params = ak_type.type_params
+                        type_resolver = TypeResolverVisitor(
+                            {param.param: arg for param, arg in zip(type_params, arg_params)})
+                        ak_type = type_resolver.visit(ak_type)
+                        ak_type.typ_params = arg_params
+
         return ak_type
 
     def list_type(self, args):
