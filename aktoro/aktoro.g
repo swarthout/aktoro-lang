@@ -80,13 +80,13 @@ OR.2: "or"
        | print_stmt
        | builtin_func_call
 
-list_literal: "[" _NEWLINE? list_elems _NEWLINE? "]" ("::" type_usage)?
+list_literal: "[" _NEWLINE? list_elems _NEWLINE? "]" (":" type_usage)?
 list_elems: (expr ("," _NEWLINE? expr)*)?
 
 list_cons: "[" _NEWLINE? cons_args "|" expr _NEWLINE? "]"
 cons_args: expr ("," _NEWLINE? expr)*
 
-dict_literal: "%{" _NEWLINE? kv_pair_list _NEWLINE? "}" ("::" type_usage)?
+dict_literal: "%{" _NEWLINE? kv_pair_list _NEWLINE? "}" (":" type_usage)?
 kv_pair_list:  (kv_pair ("," _NEWLINE? kv_pair)*)?
 kv_pair: expr "=>" expr
 
@@ -127,7 +127,7 @@ dict_type: "%{" type_usage "=>" type_usage "}"
 
 record_def: "{" _NEWLINE? field_list _NEWLINE? "}"
 field_list: field_decl ("," _NEWLINE? field_decl)*
-field_decl: NAME type_usage
+field_decl: NAME ":" type_usage
 
 variant_def: variant_constructor ("|" variant_constructor)+
 variant_constructor: NAME type_usage*
@@ -141,7 +141,7 @@ record_update: "{" expr "|" field_assignment ("," _NEWLINE? field_assignment)* "
 func_def: func_header "->" func_body
 func_header: func_signature _NEWLINE NAME "(" params ")"
 
-func_signature: NAME "::" param_types "->" return_type
+func_signature: NAME ":" param_types "->" return_type
 
 param_types: "(" (param_type ("," param_type )*)? ")"
            | param_type

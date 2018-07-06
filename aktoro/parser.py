@@ -5,6 +5,7 @@ import aktoro.types as types
 import aktoro.builtins as builtins
 from aktoro.type_resolver import TypeMapperVisitor, TypeResolverVisitor
 from enum import Enum
+import copy
 
 
 class TypeKind(Enum):
@@ -316,10 +317,11 @@ class Parser(Transformer):
             if not symbol_entry:
                 ak_type = types.TypeParameter(type_name)
             else:
-                ak_type = symbol_entry
+                ak_type = copy.deepcopy(symbol_entry)
                 if isinstance(ak_type, types.RecordType):
                     if ak_type.type_params:
-                        arg_params = list(map(types.TypeParameter, args[1:]))
+                        # arg_params = list(map(types.TypeParameter, args[1:]))
+                        arg_params = [self.type_usage([arg]) for arg in args[1:]]
                         type_params = ak_type.type_params
                         type_resolver = TypeResolverVisitor(
                             {param.param: arg for param, arg in zip(type_params, arg_params)})
@@ -407,7 +409,7 @@ class Parser(Transformer):
 
     def func_call(self, args):
         func, *arg_exprs = args
-        func_type = resolve_func_type(func.ak_type, arg_exprs)
+        func_type = resolve_func_type(copy.deepcopy(func.ak_type), arg_exprs)
         return ast.FuncCall(func, arg_exprs, func_type.return_type)
 
     def builtin_func_call(self, args):

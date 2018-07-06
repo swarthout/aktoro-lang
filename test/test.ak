@@ -1,4 +1,9 @@
-type HashMap k v = { keys [k], val v }
+type HashMap k v = {keys: [k], val: v}
+
+type Car = {
+    name: String,
+    year: Int
+}
 
 numbers = %{
     2 => "two",
@@ -11,22 +16,22 @@ print(more_numbers)
 
 h = {keys: ["Hello", "Everyone"], val: 4}
 
-first :: [a] -> a
+first : [a] -> a
 first (xs) -> {
     xs[0]
 }
 
-first_hashmap :: HashMap a b -> a
+first_hashmap : HashMap a Int -> a
 first_hashmap (h) -> {
     first (h.keys)
 }
 
 print(first_hashmap(h))
 
-filter :: ([a], (a -> Bool)) -> [a]
+filter : ([a], (a -> Bool)) -> [a]
 filter (xs, f) -> {
     if list.empty(xs) {
-        return xs
+        return [] : [a]
     }
     [x | rest] = xs
     res = match {
@@ -39,7 +44,7 @@ xs = [1, 2, 3, 4]
 x = first(xs)
 print(x)
 
-is_even :: Int -> Bool
+is_even : Int -> Bool
 is_even (x) -> (x % 2 == 0)
 
 print(xs |> filter(is_even))
