@@ -174,7 +174,7 @@ params: (param ("," param)*)?
 ?param: var_name
 open_params: "("
 close_params: ")"
-empty_tuple: "()"
+empty_tuple: "(" ")"
 
 func_call: var_usage "(" _expr_list? ")"
 
@@ -201,7 +201,10 @@ pattern: expr "=>" pattern_body
        | UNDERSCORE "=>" pattern_body -> pattern_default
 
 UNDERSCORE: "_"
-pattern_body:  expr | print_stmt | return_stmt
+pattern_body: non_record_expr
+            | "(" record_expr ")"
+            | print_stmt
+            | return_stmt
             | "{" _line* "}"
 
 

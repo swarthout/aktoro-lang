@@ -21,9 +21,32 @@ first (xs) -> {
     xs[0]
 }
 
+get_hashmap : () -> HashMap String Int
+get_hashmap () -> ({keys: ["Hello", "Everyone"], val: 4})
+
 first_hashmap : HashMap a Int -> a
 first_hashmap (h) -> first(h.keys)
 
 print(first_hashmap(h))
 
 print({keys: ["Hello", "Everyone"], val: 4}.val)
+print(get_hashmap().val)
+
+type BinaryTree = Node BinaryTree BinaryTree | Leaf Int
+
+type Result t = Ok t | Error String
+
+print_tree : BinaryTree -> ()
+print_tree (t) -> {
+    match t {
+        Node left right => {
+            print_tree(left)
+            print_tree(right)
+        },
+        Leaf val => print(val)
+    }
+}
+
+t = Node (Leaf 3) (Leaf 4)
+
+print_tree(t)
