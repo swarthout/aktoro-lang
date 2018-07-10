@@ -12,17 +12,18 @@ _line: _NEWLINE
      | print_stmt
      | return_stmt
 
-var_decl: NAME "=" expr                                   -> var_decl
-        | "{" NAME ("," NAME)* "}" "=" expr               -> record_destruct_decl
-        | "[" NAME ("," NAME)* (SINGLE_PIPE NAME )? "]" "=" expr  -> list_destruct_decl
+var_decl: VAR_NAME "=" expr                          -> var_decl
+        | "{" VAR_NAME ("," VAR_NAME)* "}" "=" expr  -> record_destruct_decl
+        | "[" VAR_NAME ("," VAR_NAME)* (SINGLE_PIPE VAR_NAME )? "]" "=" expr  -> list_destruct_decl
 
 SINGLE_PIPE: "|"
-var_name: NAME
-var_usage: NAME
+var_name: VAR_NAME
+var_usage: VAR_NAME
 
-
-?expr: pipe_expr
-?pipe_expr: logical_expr _NEWLINE? ( _PIPE_FORWARD caller _NEWLINE?)*
+?non_record_expr: pipe_expr
+?record_expr: pipe_record_expr
+?expr: record_expr | non_record_expr
+?pipe_expr: logical_expr ( _PIPE_FORWARD caller _NEWLINE?)*
 
 ?logical_expr: equality_expr ( ( AND | OR ) equality_expr)*
 
@@ -45,8 +46,7 @@ var_usage: NAME
         | string_literal
         | list_literal
         | dict_literal
-        | record_literal
-        | record_update
+        | variant_literal
         | func_call
         | list_cons
         | dict_update
@@ -57,6 +57,13 @@ var_usage: NAME
         | builtin_func_call
         | NOT expr     -> not_expr
         | match_expr
+
+?pipe_record_expr: equality_record_expr ( _PIPE_FORWARD caller _NEWLINE?)*
+?equality_record_expr: record_literal_expr ( ( COMP_EQU | COMP_NEQU )  record_literal_expr )*
+
+?record_literal_expr: record_literal
+                    | record_update
+                    | literal_field_access
 
 string_literal: STRING
 
@@ -104,11 +111,12 @@ low: expr?
 high: expr?
 
 type_decl: "type" type_name type_params "=" (record_def | variant_def)
-type_name: NAME
-type_params: NAME*
+type_name: TYPE_NAME
+type_params: _name*
+_name: VAR_NAME | TYPE_NAME
 
 type_usage: _t
-_t: NAME
+_t: _name
   | _t _t
   | paren_type
   | func_type
@@ -127,34 +135,38 @@ dict_type: "%{" type_usage "=>" type_usage "}"
 
 record_def: "{" _NEWLINE? field_list _NEWLINE? "}"
 field_list: field_decl ("," _NEWLINE? field_decl)*
-field_decl: NAME ":" type_usage
+field_decl: VAR_NAME ":" type_usage
 
 variant_def: variant_constructor ("|" variant_constructor)+
-variant_constructor: NAME type_usage*
+variant_constructor: TYPE_NAME type_usage*
+
+variant_literal: TYPE_NAME expr*
 
 record_literal: "{" _NEWLINE? field_assignment ("," _NEWLINE? field_assignment)* _NEWLINE? "}"
 field_assignment: field_name ":" expr
-field_name: NAME
+field_name: VAR_NAME
 
 record_update: "{" expr "|" field_assignment ("," _NEWLINE? field_assignment)* "}"
 
 func_def: func_header "->" func_body
-func_header: func_signature _NEWLINE NAME "(" params ")"
+func_header: func_signature _NEWLINE VAR_NAME "(" params ")"
 
-func_signature: NAME ":" param_types "->" return_type
+func_signature: VAR_NAME ":" param_types "->" return_type
 
 param_types: "(" (param_type ("," param_type )*)? ")"
            | param_type
 
 ?return_type: param_type
-//            | empty_tuple
+            | empty_tuple
 
 ?param_type: type_usage
 
 ?func_body: block
-          | "(" expr ")"-> simple_return
+           | non_record_expr     -> simple_return
+           | "(" record_expr ")" -> simple_return
 
-block: open_block _line* close_block
+
+block: open_block _NEWLINE? _line* close_block
 open_block: "{"
 close_block: "}"
 
@@ -162,14 +174,14 @@ params: (param ("," param)*)?
 ?param: var_name
 open_params: "("
 close_params: ")"
-// empty_tuple: "()"
+empty_tuple: "()"
 
 func_call: var_usage "(" _expr_list? ")"
 
 LIST.2: "list"
 DICT.2: "dict"
 ?builtin_module_name: LIST | DICT
-builtin_func_call: builtin_module_name "." NAME "(" _expr_list? ")"
+builtin_func_call: builtin_module_name "." VAR_NAME "(" _expr_list? ")"
 
 PRINT.2: "print"
 print_stmt: PRINT "(" _NEWLINE? _expr_list? ")"
@@ -189,15 +201,15 @@ pattern: expr "=>" pattern_body
        | UNDERSCORE "=>" pattern_body -> pattern_default
 
 UNDERSCORE: "_"
-pattern_body: expr | print_stmt | return_stmt
+pattern_body:  expr | print_stmt | return_stmt
             | "{" _line* "}"
 
 
 field_access: ( var_usage
               | func_call
-              | record_literal
-              | record_update
-              | field_access ) ("." NAME)
+              | field_access ) "." VAR_NAME
+
+literal_field_access: ( record_literal| record_update ) "." VAR_NAME -> field_access
 
 string_concat: primary "<>" primary
 
@@ -212,7 +224,16 @@ _EXP: ("e"|"E") ["+" | "-"] INT
 UFLOAT: INT _EXP | DECIMAL _EXP?
 FLOAT: ["+" | "-"] UFLOAT
 
-%import common.CNAME -> NAME
+LCASE_LETTER: "a".."z"
+UCASE_LETTER: "A".."Z"
+DIGIT: "0".."9"
+
+LETTER: UCASE_LETTER | LCASE_LETTER
+
+TYPE_NAME: (UCASE_LETTER) (LETTER|DIGIT)*
+
+VAR_NAME: (LCASE_LETTER) ("_"|LCASE_LETTER|DIGIT)*
+
 %import common.INT -> UINT
 %import common.SIGNED_INT -> INT
 %import common.WS_INLINE

@@ -88,3 +88,44 @@ type Thing = {a Int, b String}
 let get_thing = fn () Thing => ({a=4, b="hey"})
 print(get_thing())
 print(add_three(6))
+
+filter : ([a], (a -> Bool)) -> [a]
+filter (xs, f) -> {
+    if list.empty(xs) {
+        return [] : [a]
+    }
+    [x | rest] = xs
+    res = match {
+        f(x) => [x | filter(rest, f)],
+        _    => filter(rest, f)
+    }
+    res
+}
+xs = [1, 2, 3, 4]
+x = first(xs)
+print(x)
+
+is_even : Int -> Bool
+is_even (x) -> (x % 2 == 0)
+
+print(xs |> filter(is_even))
+
+type BinaryTree = Node BinaryTree BinaryTree | Leaf Int
+
+type Result t = Ok t | Error String
+
+print_tree : BinaryTree -> ()
+print_tree (t) -> {
+    match t {
+        Node left right => {
+#        print_tree(left)
+#        print_tree(right)
+        print("hi")
+        },
+        Leaf val => 1
+    }
+}
+
+t = Node (Leaf 3) (Leaf 4)
+
+print_tree(t)

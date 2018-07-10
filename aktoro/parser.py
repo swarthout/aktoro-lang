@@ -85,6 +85,9 @@ class PipelineRewriter(Visitor):
         tree.data = prev.data
         tree.children = prev.children
 
+    def pipe_record_expr(self, tree):
+        self.pipe_expr(tree)
+
 
 def parse_var_decl(name, expr):
     if isinstance(expr, ast.IfExpr):
@@ -261,6 +264,9 @@ class Parser(Transformer):
     def equality_expr(self, args):
         left, op, right = args
         return ast.EqualityExpr(left, op, right, types.PrimitiveType("bool"))
+
+    def equality_record_expr(self, args):
+        return self.equality_expr(args)
 
     def not_expr(self, args):
         _, expr = args
