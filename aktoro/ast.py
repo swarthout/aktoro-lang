@@ -87,6 +87,10 @@ class RecordLiteral(Expr):
     _fields = ["fields", "ak_type"]
 
 
+class VariantLiteral(Expr):
+    _fields = ["constructor", "values", "ak_type"]
+
+
 class RecordUpdate(Expr):
     _fields = ["var", "updates", "ak_type"]
 

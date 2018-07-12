@@ -34,3 +34,6 @@ print(get_hashmap().val)
 
 type BinaryTree = Node BinaryTree BinaryTree | Leaf Int
 
+t = Node (Leaf 3) (Leaf 4)
+
+print(t)

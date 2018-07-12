@@ -111,6 +111,12 @@ class CodeGenVisitor():
             """))
         return variant_go_code + "\n".join(constructor_go_code)
 
+    def visit_VariantLiteral(self, node):
+        vals = [self.visit(val) for val in node.values]
+        vals = ",\n".join([textwrap.indent(f, "\t") for f in vals])
+        go_code = f"{node.constructor}{{\n" + textwrap.indent(vals, "\t") + textwrap.dedent("}")
+        return go_code
+
     def visit_VarUsage(self, node):
 
         return snake_to_camel(node.name)

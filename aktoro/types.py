@@ -117,11 +117,12 @@ class VariantType(AkType):
 
 
 class VariantConstructor:
-    def __init__(self, name, params):
+    def __init__(self, name, params, variant_type):
         self.name = name
         if not isinstance(params, list):
             params = [params]
         self.params = params
+        self.variant_type = variant_type
 
     def __str__(self):
         return f"{self.name} {self.params}"

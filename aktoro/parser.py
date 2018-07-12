@@ -293,6 +293,7 @@ class Parser(Transformer):
             variant_type = types.VariantType(name, constructors)
             self.symbol_table.add(name, variant_type)
             for constructor in constructors:
+                constructor.variant_type = variant_type
                 self.symbol_table.add(constructor.name, constructor)
             return variant_decl
 
@@ -304,7 +305,13 @@ class Parser(Transformer):
 
     def variant_constructor(self, args):
         name, params = args
-        return types.VariantConstructor(str(name), params)
+        return types.VariantConstructor(str(name), params, None)
+
+    def variant_literal(self, args):
+        name, *vars = args
+        constructor = self.symbol_table.get(name)
+        ak_type = constructor.variant_type
+        return ast.VariantLiteral(name, vars, ak_type)
 
     def type_params(self, args):
         params = map(str, args)
