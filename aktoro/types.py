@@ -91,7 +91,8 @@ class FuncType(AkType):
         self.return_type = return_type
 
     def __str__(self):
-        return "({} -> {})".format(self.param_types, self.return_type)
+        return "(({}) -> {})".format(
+            ", ".join(map(str, self.param_types)), self.return_type)
 
     __repr__ = __str__
 
@@ -101,7 +102,31 @@ class FuncType(AkType):
 
 
 class VariantType(AkType):
-    pass
+    def __init__(self, name, constructors):
+        super().__init__("VariantType")
+        self.name = name
+        self.constructors = constructors
+
+    def __str__(self):
+        return self.name
+
+    __repr__ = __str__
+
+    def go_code(self):
+        return self.name
+
+
+class VariantConstructor:
+    def __init__(self, name, params):
+        self.name = name
+        if not isinstance(params, list):
+            params = [params]
+        self.params = params
+
+    def __str__(self):
+        return f"{self.name} {self.params}"
+
+    __repr__ = __str__
 
 
 class TypeParameter(AkType):

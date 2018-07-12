@@ -27,7 +27,7 @@ class CodeGenVisitor():
         func_defs = []
         main_statements = []
         for line in node.statements:
-            if isinstance(line, RecordDecl):
+            if isinstance(line, RecordDecl) or isinstance(line, VariantDecl):
                 record_decls.append(line)
             elif isinstance(line, FuncDef):
                 func_defs.append(line)
@@ -88,7 +88,31 @@ class CodeGenVisitor():
         """)
         return go_code.format(name=node.name, fields=fields)
 
+    def visit_VariantDecl(self, node):
+        variant_go_code = textwrap.dedent(f""" 
+        type {node.name} interface {{ 
+            {node.name}()
+        }}
+        """)
+
+        constructor_go_code = []
+        for constructor in node.constructors:
+            constructor_params = "; ".join([
+                f"p{i} {param.go_code()}"
+                for i, param in enumerate(constructor.params)
+            ])
+            constructor_params = textwrap.indent(constructor_params, "\t")
+            constructor_go_code.append(textwrap.dedent(f"""
+            type {constructor.name} struct {{ 
+            {constructor_params}
+            }}
+            
+            func ({constructor.name}) {node.name}() {{}}
+            """))
+        return variant_go_code + "\n".join(constructor_go_code)
+
     def visit_VarUsage(self, node):
+
         return snake_to_camel(node.name)
 
     def visit_PackageVarUsage(self, node):

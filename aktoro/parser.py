@@ -165,7 +165,6 @@ class Parser(Transformer):
 
     def field_access(self, args):
         record_name, field_name = args
-        # parent_ak_type = self.symbol_table.get(record_name.ak_type.name)
         parent_ak_type = record_name.ak_type
         ak_type = parent_ak_type.fields[field_name]
         return ast.FieldAccess(record_name, str(field_name), ak_type)
@@ -279,17 +278,33 @@ class Parser(Transformer):
         return ast.ParenExpr(args[0])
 
     def type_decl(self, args):
-        name, type_params, (type_kind, fields) = args
+        name, type_params, (type_kind, params) = args
         if type_kind == TypeKind.RECORD:
-            fields = dict(fields)
+            fields = dict(params)
             record_decl = ast.RecordDecl(name, type_params, fields)
             record_type = types.RecordType(name, type_params, fields)
             self.symbol_table.add_record(name, record_type)
             return record_decl
-        raise NotImplemented("variants not implemented!")
+        else:
+            constructors = params
+            if not isinstance(constructors, list):
+                constructors = [constructors]
+            variant_decl = ast.VariantDecl(name, type_params, constructors)
+            variant_type = types.VariantType(name, constructors)
+            self.symbol_table.add(name, variant_type)
+            for constructor in constructors:
+                self.symbol_table.add(constructor.name, constructor)
+            return variant_decl
 
     def record_def(self, args):
         return TypeKind.RECORD, args[0]
+
+    def variant_def(self, args):
+        return TypeKind.VARIANT, list(filter(lambda arg: arg != "|", args))
+
+    def variant_constructor(self, args):
+        name, params = args
+        return types.VariantConstructor(str(name), params)
 
     def type_params(self, args):
         params = map(str, args)
@@ -318,22 +333,24 @@ class Parser(Transformer):
         type_name = args[0]
         if isinstance(type_name, types.AkType):
             return type_name
-        else:
-            symbol_entry = self.symbol_table.get(type_name)
-            if not symbol_entry:
-                ak_type = types.TypeParameter(type_name)
-            else:
-                ak_type = copy.deepcopy(symbol_entry)
-                if isinstance(ak_type, types.RecordType):
-                    if ak_type.type_params:
-                        # arg_params = list(map(types.TypeParameter, args[1:]))
-                        arg_params = [self.type_usage([arg]) for arg in args[1:]]
-                        type_params = ak_type.type_params
-                        type_resolver = TypeResolverVisitor(
-                            {param.param: arg for param, arg in zip(type_params, arg_params)})
-                        ak_type = type_resolver.visit(ak_type)
-                        ak_type.typ_params = arg_params
 
+        symbol_entry = self.symbol_table.get(type_name)
+        if not symbol_entry:
+            if type_name == type_name.lower():
+                return types.TypeParameter(type_name)
+            else:
+                if len(args) > 1:
+                    return [self.type_usage([arg]) for arg in args]
+                return types.VariantType(type_name, [])
+
+        ak_type = copy.deepcopy(symbol_entry)
+        if isinstance(ak_type, types.RecordType) and ak_type.type_params:
+            arg_params = [self.type_usage([arg]) for arg in args[1:]]
+            type_params = ak_type.type_params
+            type_resolver = TypeResolverVisitor(
+                {param.param: arg for param, arg in zip(type_params, arg_params)})
+            ak_type = type_resolver.visit(ak_type)
+            ak_type.type_params = arg_params
         return ak_type
 
     def list_type(self, args):

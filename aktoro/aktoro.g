@@ -212,7 +212,7 @@ field_access: ( var_usage
               | func_call
               | field_access ) "." VAR_NAME
 
-literal_field_access: ( record_literal| record_update ) "." VAR_NAME -> field_access
+literal_field_access: ( record_literal | record_update ) "." VAR_NAME -> field_access
 
 string_concat: primary "<>" primary
 
@@ -233,9 +233,9 @@ DIGIT: "0".."9"
 
 LETTER: UCASE_LETTER | LCASE_LETTER
 
-TYPE_NAME: (UCASE_LETTER) (LETTER|DIGIT)*
+TYPE_NAME: UCASE_LETTER (LETTER|DIGIT)*
 
-VAR_NAME: (LCASE_LETTER) ("_"|LCASE_LETTER|DIGIT)*
+VAR_NAME: LCASE_LETTER ("_"|LCASE_LETTER|DIGIT)*
 
 %import common.INT -> UINT
 %import common.SIGNED_INT -> INT

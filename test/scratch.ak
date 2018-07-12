@@ -118,11 +118,10 @@ print_tree : BinaryTree -> ()
 print_tree (t) -> {
     match t {
         Node left right => {
-#        print_tree(left)
-#        print_tree(right)
-        print("hi")
+            print_tree(left)
+            print_tree(right)
         },
-        Leaf val => 1
+        Leaf val => print(val)
     }
 }
 

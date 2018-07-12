@@ -2,9 +2,8 @@
 
 
 ####Todo
-- Generics
 - Variants
-    - Definition
+    - Definition (basic and generic)
     - Declaration
     - Match expression
 - Better printing with reflection

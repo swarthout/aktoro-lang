@@ -47,8 +47,12 @@ class VarAssignMut(AST):
     _fields = ["name", "expr"]
 
 
-class RecordDecl(Expr):
+class RecordDecl(AST):
     _fields = ["name", "type_params", "fields"]
+
+
+class VariantDecl(Expr):
+    _fields = ["name", 'type_params', "constructors"]
 
 
 class VarUsage(Expr):

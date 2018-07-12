@@ -34,19 +34,3 @@ print(get_hashmap().val)
 
 type BinaryTree = Node BinaryTree BinaryTree | Leaf Int
 
-type Result t = Ok t | Error String
-
-print_tree : BinaryTree -> ()
-print_tree (t) -> {
-    match t {
-        Node left right => {
-            print_tree(left)
-            print_tree(right)
-        },
-        Leaf val => print(val)
-    }
-}
-
-t = Node (Leaf 3) (Leaf 4)
-
-print_tree(t)
