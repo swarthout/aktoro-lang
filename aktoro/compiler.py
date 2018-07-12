@@ -2,7 +2,7 @@ from pathlib import Path
 from lark import Lark
 from aktoro.code_gen import CodeGenVisitor
 from aktoro.type_checker import TypeCheckVisitor
-from aktoro.parser import Parser, PipelineRewriter
+from aktoro.parser import Parser, PipelineRewriter, VariantPatternRewriter
 import os
 
 current_dir = os.path.dirname(__file__)
@@ -15,8 +15,9 @@ with open(AK_GRAMMAR_FILENAME) as f:
 
 def compile_ak(ak_source):
     parse_tree = AK_GRAMMAR.parse(ak_source)
-    parse_tree_no_pipeline = PipelineRewriter().visit(parse_tree)
-    ast = Parser().transform(parse_tree_no_pipeline)
+    parse_tree = PipelineRewriter().visit(parse_tree)
+    parse_tree = VariantPatternRewriter().visit(parse_tree)
+    ast = Parser().transform(parse_tree)
     check = TypeCheckVisitor()
     checked_ast = check.visit(ast)
     code_gen = CodeGenVisitor()

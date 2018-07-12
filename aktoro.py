@@ -4,6 +4,7 @@ import os.path
 import subprocess
 from io import open
 from aktoro.compiler import compile_ak, AK_GRAMMAR
+from aktoro.parser import PipelineRewriter, VariantPatternRewriter
 
 __path__ = os.path.dirname(__file__)
 
@@ -74,6 +75,8 @@ def parse(args):
         program = ak.read()
 
     parse_tree = AK_GRAMMAR.parse(program)
+    parse_tree = PipelineRewriter().visit(parse_tree)
+    parse_tree = VariantPatternRewriter().visit(parse_tree)
     print(parse_tree.pretty())
 
 

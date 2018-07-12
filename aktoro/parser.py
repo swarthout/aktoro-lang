@@ -15,6 +15,8 @@ class TypeKind(Enum):
 
 
 def snake_to_camel(name):
+    if name[0] == "_":
+        return name
     words = name.split("_")
     if len(words) > 1:
         camel_name = words[0] + "".join(map(str.capitalize, words[1:]))
@@ -86,6 +88,23 @@ class PipelineRewriter(Visitor):
         self.pipe_expr(tree)
 
 
+class VariantPatternRewriter(Visitor):
+    def pattern(self, tree):
+        test_expr, pattern_body = tree.children
+        if test_expr.data == "variant_literal":
+            test_expr.data = "variant_pattern"
+            for i in range(1, len(test_expr.children)):
+                param = test_expr.children[i]
+                if param.data == "var_usage":
+                    param.data = "variant_param_decl"
+                    param.children.insert(0, test_expr.children[0])
+                    param.children.insert(1, i - 1)
+                pattern_body.children.insert(0, param)
+            test_expr.children = test_expr.children[:1]
+        tree.children[0] = test_expr
+        tree.children[1] = pattern_body
+
+
 def parse_var_decl(name, expr):
     if isinstance(expr, ast.IfExpr):
         last_if_expr = expr.if_body[-1]
@@ -99,6 +118,16 @@ def parse_var_decl(name, expr):
         return ast.VarMatchAssign(name, expr, expr.ak_type)
 
     return ast.VarDecl(name, expr, expr.ak_type)
+
+
+def resolve_variant_param_decls(patterns, test_expr):
+    for pattern in patterns:
+        for i, stmt in enumerate(pattern.body):
+            if isinstance(stmt, ast.VariantParamDecl):
+                expr = ast.FieldAccess(test_expr, f"p{stmt.index}", stmt.ak_type)
+                pattern.body[i] = ast.VarDecl(stmt.name, expr, stmt.ak_type)
+
+    return patterns
 
 
 class Parser(Transformer):
@@ -156,8 +185,11 @@ class Parser(Transformer):
     def var_usage(self, args):
         name = args[0]
         root_var = self.symbol_table.get(name)
-        ak_type = root_var.ak_type
-        return ast.VarUsage(name, ak_type)
+        if root_var:
+            ak_type = root_var.ak_type
+            return ast.VarUsage(name, ak_type)
+        else:
+            raise NameError(f"name {name} is not defined")
 
     def field_access(self, args):
         record_name, field_name = args
@@ -310,6 +342,20 @@ class Parser(Transformer):
         ak_type = constructor.variant_type
         return ast.VariantLiteral(name, vars, ak_type)
 
+    def variant_pattern(self, args):
+        name = args[0]
+        constructor = self.symbol_table.get(name)
+        ak_type = constructor.variant_type
+        return ast.VariantPattern(str(name), ak_type)
+
+    def variant_param_decl(self, args):
+        constructor_name, index, var_name = args
+        constructor = self.symbol_table.get(constructor_name)
+        param_type = constructor.params[index]
+        decl = ast.VariantParamDecl(var_name, index, param_type)
+        self.symbol_table.add(var_name, decl)
+        return decl
+
     def type_params(self, args):
         params = map(str, args)
         return list(map(types.TypeParameter, params))
@@ -395,6 +441,11 @@ class Parser(Transformer):
     def func_def(self, args):
         func_name, params, return_type, ak_type = args[0]
         func_body = args[1]
+
+        if isinstance(return_type, types.EmptyTuple):
+            func_body.append(ast.ReturnNil())
+        elif not isinstance(func_body[-1], ast.ReturnStmt):
+            func_body[-1] = self.return_expr(func_body[-1])
         return ast.FuncDef(func_name, params, return_type, func_body, ak_type)
 
     def func_header(self, args):
@@ -429,9 +480,6 @@ class Parser(Transformer):
     def block(self, args):
         args.pop(0)  # remove open block instruction
         args.pop()  # remove close block instruction
-        last_expr = args[-1]
-        last_expr = self.return_expr(last_expr)
-        args[-1] = last_expr
         return args
 
     def func_call(self, args):
@@ -481,6 +529,10 @@ class Parser(Transformer):
     def match_expr(self, args):
         if len(args) == 2:
             test_expr, patterns = args
+            if isinstance(test_expr.ak_type, types.VariantType):
+                var_name = "_v"
+                patterns = resolve_variant_param_decls(patterns, ast.VarUsage(var_name, test_expr.ak_type))
+                test_expr = ast.VariantTestExpr(var_name, test_expr)
             return ast.MatchExpr(test_expr, patterns, patterns[0].ak_type)
         else:
             patterns = args[0]
@@ -517,14 +569,8 @@ class Parser(Transformer):
         left, right = args
         return ast.StringConcat(left, right, left.ak_type)
 
-    def pipe_expr(self, args):
-        prev = args[0]
-        for i in range(1, len(args)):
-            curr = args[i]
-            curr.args.insert(0, prev)
-            prev = curr
-
-        return prev
+    def empty_tuple(self, args):
+        return types.EmptyTuple()
 
 
 def resolve_func_type(func_type, args):

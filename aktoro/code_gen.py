@@ -81,12 +81,12 @@ class CodeGenVisitor():
     def visit_RecordDecl(self, node):
         fields = "\n".join([f"{name} {ak_type.go_code()}" for name, ak_type in node.fields.items()])
         fields = textwrap.indent(fields, "\t")
-        go_code = textwrap.dedent("""
-        type {name} struct {{
+        go_code = textwrap.dedent(f"""
+        type {node.name} struct {{
         {fields}
         }}
         """)
-        return go_code.format(name=node.name, fields=fields)
+        return go_code
 
     def visit_VariantDecl(self, node):
         variant_go_code = textwrap.dedent(f""" 
@@ -114,12 +114,18 @@ class CodeGenVisitor():
     def visit_VariantLiteral(self, node):
         vals = [self.visit(val) for val in node.values]
         vals = ",\n".join([textwrap.indent(f, "\t") for f in vals])
-        go_code = f"{node.constructor}{{\n" + textwrap.indent(vals, "\t") + textwrap.dedent("}")
+        go_code = f"{node.ak_type.go_code()}({node.constructor}{{\n" + textwrap.indent(vals, "\t") + textwrap.dedent(
+            "})")
         return go_code
 
-    def visit_VarUsage(self, node):
+    def visit_VariantPattern(self, node):
+        return node.constructor
 
+    def visit_VarUsage(self, node):
         return snake_to_camel(node.name)
+
+    def visit_VariantTestExpr(self, node):
+        return f"{node.name} := {self.visit(node.expr)}.(type)"
 
     def visit_PackageVarUsage(self, node):
         name = snake_to_camel(node.func_name)
@@ -250,6 +256,9 @@ class CodeGenVisitor():
 
     def visit_ReturnStmt(self, node):
         return f"return {self.visit(node.expr)}"
+
+    def visit_ReturnNil(self, node):
+        return "return nil"
 
     def visit_PrintStmt(self, node):
         self.imports.add('"fmt"')

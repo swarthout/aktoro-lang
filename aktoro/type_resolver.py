@@ -43,6 +43,14 @@ class TypeMapperVisitor():
     def visit_EmptyTuple(self, node, arg_type):
         pass
 
+    def visit_VariantType(self, node, arg_type):
+        for n_cons, a_cons in zip(node.constructors, arg_type.constructors):
+            self.visit(n_cons, a_cons)
+
+    def visit_VariantConstructor(self, node, arg_type):
+        for n_param, a_param in zip(node.params, arg_type.params):
+            self.visit(n_param, a_param)
+
 
 class TypeResolverVisitor():
 
@@ -90,3 +98,11 @@ class TypeResolverVisitor():
 
     def visit_EmptyTuple(self, node):
         return node
+
+    def visit_VariantType(self, node):
+        for i, constructor in enumerate(node.constructors):
+            node.constructors[i] = self.visit(constructor)
+
+    def visit_VariantConstructor(self, node):
+        for i, param in enumerate(node.params):
+            node.params[i] = self.visit(param)

@@ -35,6 +35,10 @@ class VarDecl(Expr):
     _fields = ["name", "expr", "ak_type"]
 
 
+class VariantParamDecl(Expr):
+    _fields = ["name", "index", "ak_type"]
+
+
 class VarIfAssign(Expr):
     _fields = ["name", "expr", "ak_type"]
 
@@ -91,6 +95,14 @@ class VariantLiteral(Expr):
     _fields = ["constructor", "values", "ak_type"]
 
 
+class VariantPattern(Expr):
+    _fields = ['constructor', "ak_type"]
+
+
+class VariantTestExpr(Expr):
+    _fields = ["name", "expr"]
+
+
 class RecordUpdate(Expr):
     _fields = ["var", "updates", "ak_type"]
 
@@ -141,6 +153,10 @@ class PackageVarUsage(Expr):
 
 class ReturnStmt(AST):
     _fields = ["expr", "ak_type"]
+
+
+class ReturnNil(AST):
+    _fields = []
 
 
 class PrintStmt(AST):
