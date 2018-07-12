@@ -70,9 +70,6 @@ class SymbolTable(object):
         self.add(name, record)
         self.field_table[field_hash] = name
 
-    def get_variant_by_constructor(self, constructor):
-        pass
-
 
 class PipelineRewriter(Visitor):
     def pipe_expr(self, tree):
@@ -95,14 +92,13 @@ def parse_var_decl(name, expr):
         expr.if_body[-1] = ast.VarAssignMut(name, last_if_expr)
         last_else_expr = expr.else_body[-1]
         expr.else_body[-1] = ast.VarAssignMut(name, last_else_expr)
-        v = ast.VarIfAssign(name, expr, expr.ak_type)
-    elif isinstance(expr, ast.MatchExpr):
+        return ast.VarIfAssign(name, expr, expr.ak_type)
+    if isinstance(expr, ast.MatchExpr):
         for i in range(len(expr.patterns)):
             expr.patterns[i].body[-1] = ast.VarAssignMut(name, expr.patterns[i].body[-1])
-        v = ast.VarMatchAssign(name, expr, expr.ak_type)
-    else:
-        v = ast.VarDecl(name, expr, expr.ak_type)
-    return v
+        return ast.VarMatchAssign(name, expr, expr.ak_type)
+
+    return ast.VarDecl(name, expr, expr.ak_type)
 
 
 class Parser(Transformer):
@@ -183,6 +179,7 @@ class Parser(Transformer):
             if isinstance(index_expr, ast.RangeIndex):
                 return ast.StringRangeIndexExpr(var, index_expr, ak_type)
             return ast.StringIndexExpr(var, index_expr, ak_type)
+        raise SyntaxError(f"indexing not supported on {var.ak_type}")
 
     def range_index(self, args):
         low, high = args
@@ -212,12 +209,12 @@ class Parser(Transformer):
         elems, *ak_type = args
         if ak_type:
             return ast.ListLiteral(elems, ak_type[0])
-        else:
-            if not elems:
-                raise TypeError("Must add type annotation to empty list literal")
-            elem_type = elems[0].ak_type
-            ak_type = types.ListType(elem_type)
-            return ast.ListLiteral(elems, ak_type)
+
+        if not elems:
+            raise TypeError("Must add type annotation to empty list literal")
+        elem_type = elems[0].ak_type
+        ak_type = types.ListType(elem_type)
+        return ast.ListLiteral(elems, ak_type)
 
     def list_elems(self, args):
         return args
@@ -345,10 +342,10 @@ class Parser(Transformer):
         if not symbol_entry:
             if type_name == type_name.lower():
                 return types.TypeParameter(type_name)
-            else:
-                if len(args) > 1:
-                    return [self.type_usage([arg]) for arg in args]
-                return types.VariantType(type_name, [])
+
+            if len(args) > 1:
+                return [self.type_usage([arg]) for arg in args]
+            return types.VariantType(type_name, [])
 
         ak_type = copy.deepcopy(symbol_entry)
         if isinstance(ak_type, types.RecordType) and ak_type.type_params:
