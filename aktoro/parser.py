@@ -304,7 +304,7 @@ class Parser(Transformer):
         return ast.LogicalExpr(args, types.PrimitiveType("bool"))
 
     def paren_expr(self, args):
-        return ast.ParenExpr(args[0])
+        return ast.ParenExpr(args[0], args[0].ak_type)
 
     def type_decl(self, args):
         name, type_params, (type_kind, params) = args

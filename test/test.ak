@@ -50,3 +50,25 @@ print_tree (t) -> {
 }
 
 print_tree(t)
+
+filter : ([a], (a -> Bool)) -> [a]
+filter (xs, f) -> {
+    if list.empty(xs) {
+        return [] : [a]
+    }
+    [x | rest] = xs
+    res = match {
+        f(x) => [x | filter(rest, f)],
+        _    => filter(rest, f)
+    }
+    res
+}
+
+xs = [1, 2, 3, 4]
+x = first(xs)
+print(x)
+
+is_even : Int -> Bool
+is_even (x) -> (x % 2 == 0)
+
+print(xs |> filter(is_even))

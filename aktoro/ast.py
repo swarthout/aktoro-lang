@@ -120,7 +120,7 @@ class MultExpr(Expr):
 
 
 class ParenExpr(Expr):
-    _fields = ["expr"]
+    _fields = ["expr", "ak_type"]
 
 
 class NotExpr(Expr):
