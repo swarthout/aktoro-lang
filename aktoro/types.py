@@ -18,6 +18,10 @@ class AkType(ABC):
         pass
 
 
+class ParameterizedType(ABC):
+    pass
+
+
 class ListType(AkType):
     def __init__(self, elem_type):
         super().__init__("list")
@@ -69,7 +73,7 @@ class DictType(AkType):
         return "dict.Dict"
 
 
-class RecordType(AkType):
+class RecordType(AkType, ParameterizedType):
     def __init__(self, name, type_params, fields):
         super().__init__(name)
         self.type_params = type_params
@@ -101,10 +105,11 @@ class FuncType(AkType):
         return "func({}) interface{{}}".format(params)
 
 
-class VariantType(AkType):
-    def __init__(self, name, constructors):
+class VariantType(AkType, ParameterizedType):
+    def __init__(self, name, type_params, constructors):
         super().__init__("VariantType")
         self.name = name
+        self.type_params = type_params
         self.constructors = constructors
 
     def __str__(self):

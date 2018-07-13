@@ -102,7 +102,9 @@ class TypeResolverVisitor():
     def visit_VariantType(self, node):
         for i, constructor in enumerate(node.constructors):
             node.constructors[i] = self.visit(constructor)
+        return node
 
     def visit_VariantConstructor(self, node):
         for i, param in enumerate(node.params):
             node.params[i] = self.visit(param)
+        return node

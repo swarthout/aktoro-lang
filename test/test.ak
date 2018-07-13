@@ -34,6 +34,8 @@ print(get_hashmap().val)
 
 type BinaryTree = Node BinaryTree BinaryTree | Leaf Int
 
+type Result t = Ok t | Error String
+
 t = Node (Leaf 3) (Leaf 4)
 
 print(t)
@@ -54,7 +56,7 @@ print_tree(t)
 filter : ([a], (a -> Bool)) -> [a]
 filter (xs, f) -> {
     if list.empty(xs) {
-        return [] : [a]
+        return xs
     }
     [x | rest] = xs
     res = match {
@@ -69,6 +71,36 @@ x = first(xs)
 print(x)
 
 is_even : Int -> Bool
-is_even (x) -> (x % 2 == 0)
+is_even (x) -> x % 2 == 0
 
 print(xs |> filter(is_even))
+
+month = 3
+
+season = if month >= 6 { "spring" } else { "fall" }
+print(season)
+
+r = Ok "success"
+
+unwrap : Result a -> ()
+unwrap (r) -> {
+   match r {
+       Ok res => print(res),
+       Error _ => print("failure")
+   }
+}
+
+unwrap(r)
+
+type Option t = Some t | None
+
+safe_divide : (Int, Int) -> Option Int
+safe_divide (a, b) -> {
+    if b == 0 {
+        return None
+    }
+    Some a / b
+}
+
+print(safe_divide(3, 2))
+print(safe_divide(4, 0))

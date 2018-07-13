@@ -33,6 +33,7 @@ def argument(*name_or_flags, **kwargs):
               argument('-o', type=str, help="output")])
 def build(args):
     input_filename = os.path.join(__path__, args.filename)
+    output_filename = os.path.join(__path__, args.o)
     with open(input_filename) as ak:
         program = ak.read()
 
@@ -46,7 +47,7 @@ def build(args):
         go_file.write(generated)
     build_str = f"cd {input_path} && go build"
     if args.o:
-        build_str += f" -o {args.o}"
+        build_str += f" -o {output_filename}"
     subprocess.check_output(build_str, shell=True, )
     os.remove(temp_go_filename)
 

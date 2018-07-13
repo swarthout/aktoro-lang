@@ -95,6 +95,8 @@ class VariantPatternRewriter(Visitor):
             test_expr.data = "variant_pattern"
             for i in range(1, len(test_expr.children)):
                 param = test_expr.children[i]
+                if param == "_":
+                    continue
                 if param.data == "var_usage":
                     param.data = "variant_param_decl"
                     param.children.insert(0, test_expr.children[0])
@@ -319,7 +321,7 @@ class Parser(Transformer):
             if not isinstance(constructors, list):
                 constructors = [constructors]
             variant_decl = ast.VariantDecl(name, type_params, constructors)
-            variant_type = types.VariantType(name, constructors)
+            variant_type = types.VariantType(name, type_params, constructors)
             self.symbol_table.add(name, variant_type)
             for constructor in constructors:
                 constructor.variant_type = variant_type
@@ -333,7 +335,8 @@ class Parser(Transformer):
         return TypeKind.VARIANT, list(filter(lambda arg: arg != "|", args))
 
     def variant_constructor(self, args):
-        name, params = args
+        name, *params = args
+        params = params[0] if params else []
         return types.VariantConstructor(str(name), params, None)
 
     def variant_literal(self, args):
@@ -385,16 +388,16 @@ class Parser(Transformer):
             return type_name
 
         symbol_entry = self.symbol_table.get(type_name)
-        if not symbol_entry:
+        if not symbol_entry or not isinstance(symbol_entry, types.AkType):
             if type_name == type_name.lower():
                 return types.TypeParameter(type_name)
 
             if len(args) > 1:
                 return [self.type_usage([arg]) for arg in args]
-            return types.VariantType(type_name, [])
+            return types.VariantType(type_name, [], [])
 
         ak_type = copy.deepcopy(symbol_entry)
-        if isinstance(ak_type, types.RecordType) and ak_type.type_params:
+        if isinstance(ak_type, types.ParameterizedType) and ak_type.type_params:
             arg_params = [self.type_usage([arg]) for arg in args[1:]]
             type_params = ak_type.type_params
             type_resolver = TypeResolverVisitor(

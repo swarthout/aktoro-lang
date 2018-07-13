@@ -140,7 +140,7 @@ field_decl: VAR_NAME ":" type_usage
 variant_def: variant_constructor ("|" variant_constructor)+
 variant_constructor: TYPE_NAME type_usage*
 
-variant_literal: TYPE_NAME expr*
+variant_literal: TYPE_NAME ( expr | "_")*
 
 record_literal: "{" _NEWLINE? field_assignment ("," _NEWLINE? field_assignment)* _NEWLINE? "}"
 field_assignment: field_name ":" expr

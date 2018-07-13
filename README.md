@@ -7,13 +7,13 @@
     - Declaration
     - Match expression
 - Better printing with reflection
-- Anonymous Functions (restricted to function arguments)
-- Improve hashing methods for primitive types
 - Option type
 - Result type (result and option are magic types, not just variants)
+- Basic Actor System
+- Anonymous Functions (restricted to function arguments)
+- Improve hashing methods for primitive types
 - Advanced Pattern Matching
-- Modules
+- Packages
 - With Expressions
 - Imports
-- Use Statements
 - Go compatibility

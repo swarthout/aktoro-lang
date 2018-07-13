@@ -73,9 +73,8 @@ print(3 * (4 + 5 * 2))
 
 print(double(add(3, 2)))
 
-let ten = 3
-          |> add(2)
-          |> double()
+let ten = 3 |> add(2)
+            |> double()
 
 print(ten)
 
@@ -106,13 +105,22 @@ x = first(xs)
 print(x)
 
 is_even : Int -> Bool
-is_even (x) -> (x % 2 == 0)
+is_even (x) -> x % 2 == 0
 
-print(xs |> filter(is_even))
+fmt.println (xs |> filter(\x -> x % 2 == 0)
 
 type BinaryTree = Node BinaryTree BinaryTree | Leaf Int
 
 type Result t = Ok t | Error String
+
+unwrap : Result t -> t
+unwrap (r) -> {
+    res = match r {
+        Ok t => t
+        Error message => log.fatal(message)
+    }
+    res
+}
 
 print_tree : BinaryTree -> ()
 print_tree (t) -> {
@@ -128,3 +136,5 @@ print_tree (t) -> {
 t = Node (Leaf 3) (Leaf 4)
 
 print_tree(t)
+
+r = Ok 4
