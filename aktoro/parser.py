@@ -242,7 +242,8 @@ class Parser(Transformer):
     def list_literal(self, args):
         elems, *ak_type = args
         if ak_type:
-            return ast.ListLiteral(elems, ak_type[0])
+            ak_type = self.type_usage(ak_type)
+            return ast.ListLiteral(elems, ak_type)
 
         if not elems:
             raise TypeError("Must add type annotation to empty list literal")
@@ -264,7 +265,8 @@ class Parser(Transformer):
     def dict_literal(self, args):
         key_values, *ak_type = args
         if ak_type:
-            return ast.DictLiteral(key_values, ak_type[0])
+            ak_type = self.type_usage(ak_type)
+            return ast.DictLiteral(key_values, ak_type)
         else:
             if not key_values:
                 raise TypeError("Must add type annotation to empty dict literal")
@@ -336,7 +338,7 @@ class Parser(Transformer):
 
     def variant_constructor(self, args):
         name, *params = args
-        params = params[0] if params else []
+        params = [self.type_usage([param]) for param in params] if params else []
         return types.VariantConstructor(str(name), params, None)
 
     def variant_literal(self, args):
@@ -364,8 +366,9 @@ class Parser(Transformer):
         return list(map(types.TypeParameter, params))
 
     def field_decl(self, args):
-        name, type_name = args
-        return str(name), type_name
+        name, *ak_type = args
+        ak_type = self.type_usage(ak_type)
+        return str(name), ak_type
 
     def field_list(self, args):
         return args
@@ -383,22 +386,23 @@ class Parser(Transformer):
         return args[0]
 
     def type_usage(self, args):
-        type_name = args[0]
+        type_name, *arg_params = args
+
         if isinstance(type_name, types.AkType):
             return type_name
 
+        if arg_params:
+            arg_params = [self.type_usage([param]) for param in arg_params]
+
         symbol_entry = self.symbol_table.get(type_name)
+        ak_type = copy.deepcopy(symbol_entry)
         if not symbol_entry or not isinstance(symbol_entry, types.AkType):
             if type_name == type_name.lower():
                 return types.TypeParameter(type_name)
 
-            if len(args) > 1:
-                return [self.type_usage([arg]) for arg in args]
             return types.VariantType(type_name, [], [])
 
-        ak_type = copy.deepcopy(symbol_entry)
         if isinstance(ak_type, types.ParameterizedType) and ak_type.type_params:
-            arg_params = [self.type_usage([arg]) for arg in args[1:]]
             type_params = ak_type.type_params
             type_resolver = TypeResolverVisitor(
                 {param.param: arg for param, arg in zip(type_params, arg_params)})
@@ -406,12 +410,17 @@ class Parser(Transformer):
             ak_type.type_params = arg_params
         return ak_type
 
+    def paren_type(self, args):
+        return self.type_usage(args)
+
     def list_type(self, args):
-        elem_type = args[0]
+        elem_type = self.type_usage(args)
         return types.ListType(elem_type)
 
     def dict_type(self, args):
         key_type, val_type = args
+        key_type = self.type_usage([key_type])
+        val_type = self.type_usage([val_type])
         return types.DictType(key_type, val_type)
 
     def func_type(self, args):
@@ -419,6 +428,12 @@ class Parser(Transformer):
         if not isinstance(param_types, list):
             param_types = [param_types]
         return types.FuncType(param_types, return_type)
+
+    def param_types(self, args):
+        return [self.type_usage([param]) for param in args]
+
+    def param_type(self, args):
+        return self.type_usage(args)
 
     def type_list(self, args):
         return args
@@ -466,9 +481,6 @@ class Parser(Transformer):
 
         return func_name, params, return_type, ak_type
 
-    def param_types(self, args):
-        return args
-
     def params(self, args):
         return args
 
@@ -476,9 +488,14 @@ class Parser(Transformer):
         return args
 
     def simple_return(self, args):
-        expr = self.return_expr(args[0])
+        expr = args[0]
+        if isinstance(expr, ast.PrintStmt):
+            func_body = [expr]
+        else:
+            expr = self.return_expr(args[0])
+            func_body = [expr]
         self.symbol_table.pop_scope()
-        return [expr]
+        return func_body
 
     def block(self, args):
         args.pop(0)  # remove open block instruction

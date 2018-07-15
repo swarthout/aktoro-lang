@@ -41,7 +41,6 @@ var_usage: VAR_NAME
         | INT          -> int_literal
         | FLOAT        -> float_literal
         | BOOL         -> bool_literal
-        | PRINT        -> print_func
         | var_usage
         | string_literal
         | list_literal
@@ -87,13 +86,13 @@ OR.2: "or"
        | print_stmt
        | builtin_func_call
 
-list_literal: "[" _NEWLINE? list_elems _NEWLINE? "]" (":" type_usage)?
+list_literal: "[" _NEWLINE? list_elems _NEWLINE? "]" (":" _type_usage)?
 list_elems: (expr ("," _NEWLINE? expr)*)?
 
 list_cons: "[" _NEWLINE? cons_args "|" expr _NEWLINE? "]"
 cons_args: expr ("," _NEWLINE? expr)*
 
-dict_literal: "%{" _NEWLINE? kv_pair_list _NEWLINE? "}" (":" type_usage)?
+dict_literal: "%{" _NEWLINE? kv_pair_list _NEWLINE? "}" (":" _type_usage)?
 kv_pair_list:  (kv_pair ("," _NEWLINE? kv_pair)*)?
 kv_pair: expr "=>" expr
 
@@ -115,30 +114,30 @@ type_name: TYPE_NAME
 type_params: _name*
 _name: VAR_NAME | TYPE_NAME
 
-type_usage: _t
-_t: _name
-  | _t _t
-  | paren_type
-  | func_type
-  | list_type
-  | dict_type
+_type_usage: _name
+           | _type_usage _type_usage
+           |  paren_type
+           | func_type
+           | list_type
+           | dict_type
 
-paren_type: "(" _t ")" -> type_usage
+paren_type: "(" _type_usage ")"
 
-func_type: "(" "(" type_list? ")" "->" return_type ")"
-         | "(" type_usage "->" return_type ")"
+func_type: "(" param_types "->" return_type ")"
 
-type_list: type_usage ("," type_usage)*
+?return_type: param_type
+            | empty_tuple
 
-list_type: "[" type_usage "]"
-dict_type: "%{" type_usage "=>" type_usage "}"
+list_type: "[" _type_usage "]"
+dict_type: "%{" param_type "=>" param_type "}"
 
 record_def: "{" _NEWLINE? field_list _NEWLINE? "}"
 field_list: field_decl ("," _NEWLINE? field_decl)*
-field_decl: VAR_NAME ":" type_usage
+field_decl: VAR_NAME ":" _type_usage
 
 variant_def: variant_constructor ("|" variant_constructor)+
-variant_constructor: TYPE_NAME type_usage*
+variant_constructor: TYPE_NAME _type_usage*
+
 
 variant_literal: TYPE_NAME ( expr | "_")*
 
@@ -156,13 +155,10 @@ func_signature: VAR_NAME ":" param_types "->" return_type
 param_types: "(" (param_type ("," param_type )*)? ")"
            | param_type
 
-?return_type: param_type
-            | empty_tuple
-
-?param_type: type_usage
+?param_type: _type_usage
 
 ?func_body: block
-           | non_record_expr     -> simple_return
+           | non_record_expr | print_stmt  -> simple_return
            | "(" record_expr ")" -> simple_return
 
 

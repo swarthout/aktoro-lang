@@ -109,20 +109,17 @@ is_even (x) -> x % 2 == 0
 
 fmt.println (xs |> filter(\x -> x % 2 == 0)
 
+# type BinaryTree a = Node (BinaryTree a) (BinaryTree a) | Leaf a
+
 type BinaryTree = Node BinaryTree BinaryTree | Leaf Int
 
 type Result t = Ok t | Error String
 
-unwrap : Result t -> t
-unwrap (r) -> {
-    res = match r {
-        Ok t => t
-        Error message => log.fatal(message)
-    }
-    res
-}
+t = Node (Leaf 3) (Leaf 4)
 
-print_tree : BinaryTree -> ()
+print(t)
+
+print_tree : BinaryTree a -> ()
 print_tree (t) -> {
     match t {
         Node left right => {
@@ -133,8 +130,138 @@ print_tree (t) -> {
     }
 }
 
-t = Node (Leaf 3) (Leaf 4)
-
 print_tree(t)
 
-r = Ok 4
+filter : ([a], (a -> Bool)) -> [a]
+filter (xs, f) -> {
+    if list.empty(xs) {
+        return xs
+    }
+    [x | rest] = xs
+    res = match {
+        f(x) => [x | filter(rest, f)],
+        _    => filter(rest, f)
+    }
+    res
+}
+
+xs = [1, 2, 3, 4]
+x = first(xs)
+print(x)
+
+is_even : Int -> Bool
+is_even (x) -> x % 2 == 0
+
+print(xs |> filter(is_even))
+
+month = 3
+
+season = if month >= 6 { "spring" } else { "fall" }
+print(season)
+
+r = Ok "success"
+
+unwrap : Result a -> ()
+unwrap (r) -> {
+   match r {
+       Ok res => print(res),
+       Error _ => print("failure")
+   }
+}
+
+unwrap(r)
+
+type Option t = Some t | None
+
+safe_divide : (Int, Int) -> Option Int
+safe_divide (a, b) -> {
+    if b == 0 {
+        return None
+    }
+    Some a / b
+}
+
+print(safe_divide(3, 2))
+print(safe_divide(4, 0))
+
+type HashMap k v = {keys: [k], val: v}
+
+get_hashmap : () -> HashMap String Int
+get_hashmap () -> ({keys: ["Hello", "Everyone"], val: 4})
+
+type Car = {
+    name: String,
+    year: Int
+}
+
+numbers = %{
+    2 => "two",
+    3 => "three",
+    4 => "four"
+}
+
+more_numbers = %{ numbers | 5 => "five"}
+print(more_numbers)
+
+h = {keys: ["Hello", "Everyone"], val: 4}
+
+first : [a] -> a
+first (xs) -> {
+    xs[0]
+}
+
+
+
+first_hashmap : HashMap a Int -> a
+first_hashmap (h) -> first(h.keys)
+
+print(first_hashmap(h))
+
+print({keys: ["Hello", "Everyone"], val: 4}.val)
+print(get_hashmap().val)
+type Car = {
+    name: String,
+    year: Int
+}
+
+numbers = %{
+    2 => "two",
+    3 => "three",
+    4 => "four"
+}
+
+more_numbers = %{ numbers | 5 => "five"}
+print(more_numbers)
+
+h = {keys: ["Hello", "Everyone"], val: 4}
+
+first : [a] -> a
+first (xs) -> {
+    xs[0]
+}
+
+
+
+first_hashmap : HashMap a Int -> a
+first_hashmap (h) -> first(h.keys)
+
+print(first_hashmap(h))
+
+type_usage: _t
+
+_t: _name
+   | _t _t
+   | paren_type
+   | func_type
+   | list_type
+   | dict_type
+
+type Car = {
+    name: String,
+    year: BinaryTree (BinaryTree Int)
+}
+
+f: (Option Car, Int, BinaryTree Int) -> Int
+f (c, n, b) -> n
+
+type BinaryTree a = Node (BinaryTree a) (BinaryTree a) | Leaf a
