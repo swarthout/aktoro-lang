@@ -1,5 +1,5 @@
 from lark import Transformer
-from lark.tree import Visitor
+from lark import Visitor
 import aktoro.ast as ast
 import aktoro.types as types
 import aktoro.builtins as builtins
@@ -141,7 +141,7 @@ class Parser(Transformer):
         args = list(filter(None, args))
         return ast.Program(args)
 
-    def var_decl(self, args):
+    def simple_var_decl(self, args):
         name, expr = args
         v = parse_var_decl(name, expr)
         self.symbol_table.add(name, v)

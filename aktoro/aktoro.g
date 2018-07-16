@@ -12,9 +12,15 @@ _line: _NEWLINE
      | print_stmt
      | return_stmt
 
-var_decl: VAR_NAME "=" expr                          -> var_decl
-        | "{" VAR_NAME ("," VAR_NAME)* "}" "=" expr  -> record_destruct_decl
-        | "[" VAR_NAME ("," VAR_NAME)* (SINGLE_PIPE VAR_NAME )? "]" "=" expr  -> list_destruct_decl
+?var_decl: simple_var_decl
+         | list_destruct_decl
+         | record_destruct_decl
+
+list_destruct_decl: "[" VAR_NAME ("," VAR_NAME)* (SINGLE_PIPE VAR_NAME )? "]" "=" expr
+
+record_destruct_decl: "{" VAR_NAME ("," VAR_NAME)* "}" "=" expr
+
+simple_var_decl: VAR_NAME "=" expr
 
 SINGLE_PIPE: "|"
 var_name: VAR_NAME
