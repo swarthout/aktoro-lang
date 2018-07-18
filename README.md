@@ -2,13 +2,10 @@
 
 
 ####Todo
-- Variants
-    - Definition (basic and generic)
-    - Declaration
-    - Match expression
+- destructuring in function params
 - Better printing with reflection
-- Option type
-- Result type (result and option are magic types, not just variants)
+- Option type (add to symbol table)
+- Result type (add to symbol table)
 - Basic Actor System
 - Anonymous Functions (restricted to function arguments)
 - Improve hashing methods for primitive types
@@ -17,3 +14,18 @@
 - With Expressions
 - Imports
 - Go compatibility
+- Standard Library
+    - fmt
+    - log
+    - os
+    - file
+    - arg_parse
+    - net/http
+    - actor
+    - list
+    - string
+    - dict
+    - stream
+    - time
+    - math
+    - testing

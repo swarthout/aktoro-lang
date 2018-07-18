@@ -98,7 +98,7 @@ class CodeGenVisitor():
         constructor_go_code = []
         for constructor in node.constructors:
             constructor_params = "; ".join([
-                f"p{i} {param.go_code()}"
+                f"P{i} {param.go_code()}"
                 for i, param in enumerate(constructor.params)
             ])
             constructor_params = textwrap.indent(constructor_params, "\t")

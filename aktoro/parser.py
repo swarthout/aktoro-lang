@@ -37,6 +37,13 @@ class SymbolTable(object):
             "Float": types.PrimitiveType("Float"),
             "String": types.PrimitiveType("String"),
             "Bool": types.PrimitiveType("Bool")
+        }, {
+            "Option": builtins.OptionType,
+            "Result": builtins.ResultType,
+            "Some": builtins.OptionType.constructors[0],
+            "None": builtins.OptionType.constructors[1],
+            "Ok": builtins.ResultType.constructors[0],
+            "Err": builtins.ResultType.constructors[1]
         }, {}]
         self.field_table = {}
 
@@ -126,7 +133,7 @@ def resolve_variant_param_decls(patterns, test_expr):
     for pattern in patterns:
         for i, stmt in enumerate(pattern.body):
             if isinstance(stmt, ast.VariantParamDecl):
-                expr = ast.FieldAccess(test_expr, f"p{stmt.index}", stmt.ak_type)
+                expr = ast.FieldAccess(test_expr, f"P{stmt.index}", stmt.ak_type)
                 pattern.body[i] = ast.VarDecl(stmt.name, expr, stmt.ak_type)
 
     return patterns
@@ -318,7 +325,7 @@ class Parser(Transformer):
             record_type = types.RecordType(name, type_params, fields)
             self.symbol_table.add_record(name, record_type)
             return record_decl
-        else:
+        if type_kind == TypeKind.VARIANT:
             constructors = params
             if not isinstance(constructors, list):
                 constructors = [constructors]
@@ -338,13 +345,14 @@ class Parser(Transformer):
 
     def variant_constructor(self, args):
         name, *params = args
-        params = [self.type_usage([param]) for param in params] if params else []
-        return types.VariantConstructor(str(name), params, None)
+        type_params = [self.type_usage([param]) for param in params] if params else []
+        return types.VariantConstructor(str(name), type_params, None)
 
     def variant_literal(self, args):
         name, *vars = args
         constructor = self.symbol_table.get(name)
         ak_type = constructor.variant_type
+        name = constructor.name
         return ast.VariantLiteral(name, vars, ak_type)
 
     def variant_pattern(self, args):
@@ -400,7 +408,7 @@ class Parser(Transformer):
             if type_name == type_name.lower():
                 return types.TypeParameter(type_name)
 
-            return types.VariantType(type_name, [], [])
+            return types.VariantType(type_name, arg_params, [])
 
         if isinstance(ak_type, types.ParameterizedType) and ak_type.type_params:
             type_params = ak_type.type_params
@@ -594,7 +602,7 @@ class Parser(Transformer):
 
 
 def resolve_func_type(func_type, args):
-    arg_types = map(lambda arg: arg.ak_type, args)
+    arg_types = list(map(lambda arg: arg.ak_type, args))
     type_mapper = TypeMapperVisitor()
     for f_type, a_type in zip(func_type.param_types, arg_types):
         type_mapper.visit(f_type, a_type)

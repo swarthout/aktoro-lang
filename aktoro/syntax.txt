@@ -21,7 +21,7 @@ a = 4
 b = "hello"
 
 add_them :: (Int, Int) -> Int
-add_them (a, b) -> (a + b)
+add_them (a, b) -> a + b
 
 also_adds :: (Int, Int) -> Int
 also_adds = add_them
@@ -54,7 +54,7 @@ private_func (x, {name}) -> {
 
 private_func (5, {a: "scott", b: "swarthout"})
 
-enum.each([0..10], \i -> {
+list.each([0..10], \i -> {
 })
 
 list
@@ -118,17 +118,17 @@ user_id = "Scott",
         name = "Mustang",
         miles = 12345
         }
-import fmt "std/fmt"
-import b "github.com/scott/blog"
+import fmt from "std/fmt"
+import blog as b from "github.com/scott/blog"
 
-import http "std/net/http"
+import http from "std/net/http"
 
 let post_handler = fn (r http.Request) => {
     let {id, username} = http.get_vars(r)
 }
 
 use http.{Request}
-let req_handler = fn (r Request) => {
+let req_handler = fn (r http.Request) => {
      let routes = %{
         Get "/hello" => fn (r http.Request) => {
             "Yo Dawg"
@@ -173,7 +173,7 @@ module math = {
         }
     }
 
-    positive :: Int -> Bool
+    positive : Int -> Bool
     positive (x) -> {
         match {
             x < 0 => false,
@@ -235,10 +235,9 @@ reverse (s) -> {
         stack.empty?(s) => s,
         _ => {
             let top = stack.peek_top(s)
-            s
-            |> stack.pop()
-            |> reverse()
-            |> stack.push(top)
+            s |> stack.pop()
+              |> reverse()
+              |> stack.push(top)
         }
     }
 
@@ -326,7 +325,7 @@ let init_counter = fn (args CounterArgs) actor.Pid => {
 
 let counter = init_counter({start: 5})
 
-actor.tell(counter, Add 7)
+actor.send(counter, Add 7)
 
 tell (counter, Reset)
 
@@ -385,7 +384,7 @@ module stack = {
 # pred_func :: (c -> Bool)
 # filter_args: ([Int], (c -> Bool))
 # pred_func_args: Int
-list.filter([1, 2, 3], \x -> (x % 2 == 0))
+list.filter([1, 2, 3], \x -> x % 2 == 0)
 
 let s = stack.init (int, 5)
 
@@ -403,11 +402,12 @@ go.func(l, "PushBack", 4)
 go.func(l, "PushFront, 1)
 
 front = go.func(l, "Front")
-val = go.var(front, "Val") :: Int
+val = go.var(front, "Val") : Int
 
 package main
 
 import list from "std/list"
-import stack from "../ak_packages/stack/stack.ak"
+import stack from "../stack/stack.ak"
+import protobuf as pb from "github.com/google/protobuf/aktoro"
 
 

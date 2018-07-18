@@ -44,8 +44,8 @@ class TypeMapperVisitor():
         pass
 
     def visit_VariantType(self, node, arg_type):
-        for n_cons, a_cons in zip(node.constructors, arg_type.constructors):
-            self.visit(n_cons, a_cons)
+        for n_param, a_param in zip(node.type_params, arg_type.type_params):
+            self.visit(n_param, a_param)
 
     def visit_VariantConstructor(self, node, arg_type):
         for n_param, a_param in zip(node.params, arg_type.params):
@@ -100,6 +100,7 @@ class TypeResolverVisitor():
         return node
 
     def visit_VariantType(self, node):
+
         for i, constructor in enumerate(node.constructors):
             node.constructors[i] = self.visit(constructor)
         return node

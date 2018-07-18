@@ -185,7 +185,7 @@ DICT.2: "dict"
 ?builtin_module_name: LIST | DICT
 builtin_func_call: builtin_module_name "." VAR_NAME "(" _expr_list? ")"
 
-PRINT.2: "print"
+PRINT: "print"
 print_stmt: PRINT "(" _NEWLINE? _expr_list? ")"
 _expr_list: expr ("," _NEWLINE? expr)*
 

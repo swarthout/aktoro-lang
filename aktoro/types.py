@@ -85,7 +85,7 @@ class RecordType(AkType, ParameterizedType):
     __repr__ = __str__
 
     def go_code(self):
-        return self.name
+        return f"{self.name} {' '.join([str(param) for param in self.type_params])}"
 
 
 class FuncType(AkType):
@@ -113,7 +113,7 @@ class VariantType(AkType, ParameterizedType):
         self.constructors = constructors
 
     def __str__(self):
-        return self.name
+        return f"{self.name} {' '.join([str(param) for param in self.type_params])}"
 
     __repr__ = __str__
 

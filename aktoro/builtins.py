@@ -96,3 +96,16 @@ BUILTIN_PACKAGES = {
 
     }
 }
+OptionType = types.VariantType("types.AkOption", [types.TypeParameter("t")], [])
+OptionType.constructors.extend([
+    types.VariantConstructor("types.Some", [types.TypeParameter("t")], OptionType),
+    types.VariantConstructor("types.None", [], OptionType)
+])
+
+ResultType = types.VariantType("types.AkResult", [types.TypeParameter("t")], [])
+ResultType.constructors.extend([
+    types.VariantConstructor("types.Ok", [types.TypeParameter("t")], ResultType),
+    types.VariantConstructor("types.Err", [types.PrimitiveType("String")], ResultType)
+])
+
+
