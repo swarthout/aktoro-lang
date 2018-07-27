@@ -6,6 +6,7 @@ import aktoro.builtins as builtins
 from aktoro.type_resolver import TypeMapperVisitor, TypeResolverVisitor
 from enum import Enum
 import copy
+from itertools import count
 
 
 class TypeKind(Enum):
@@ -393,6 +394,9 @@ class Parser(Transformer):
     def param(self, args):
         return args[0]
 
+    def record_destruct_param(self, args):
+        return ast.RecordDestructParam(0, args, None)
+
     def type_usage(self, args):
         type_name, *arg_params = args
 
@@ -481,11 +485,21 @@ class Parser(Transformer):
         self.symbol_table.add(func_name, ast.VarUsage(func_name, ak_type))
         self.symbol_table.push_scope()
         param_names = args[2]
-        params = {}
-        for p_name, p_type in zip(param_names, param_types):
-            p_decl = ast.ParamDecl(p_name, p_type)
-            params[p_name] = p_decl
-            self.symbol_table.add(p_name, p_decl)
+        params = []
+        for i, p_name, p_type in zip(count(), param_names, param_types):
+            if isinstance(p_name, ast.RecordDestructParam):
+                parent_type = p_type
+                p_name.parent_type = parent_type
+                p_name.index = i
+                for j, name in enumerate(p_name.params):
+                    p_type = parent_type.fields[name]
+                    self.symbol_table.add(name, ast.ParamDecl(i, name, p_type))
+                    p_name.params[j] = ast.ParamDecl(i, name, p_type)
+                params.append(p_name)
+            else:
+                p_decl = ast.ParamDecl(i, p_name, p_type)
+                params.append(p_decl)
+                self.symbol_table.add(p_name, p_decl)
 
         return func_name, params, return_type, ak_type
 

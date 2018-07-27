@@ -228,13 +228,21 @@ class CodeGenVisitor():
         return f"({self.visit(node.expr)})"
 
     def visit_ParamDecl(self, node):
-        return f"{snake_to_camel(node.name)} {node.ak_type.go_code()}"
+        return f"{node.name} := p{node.index}.({node.ak_type.go_code()})"
+
+    def visit_RecordDestructParam(self, node):
+        go_code = []
+        for param in node.params:
+            go_code.append(
+                f"{param.name} := p{node.index}.({node.parent_type.go_code()}).{param.name}")
+        return "\n".join(go_code)
 
     def visit_FuncDef(self, node):
         param_interfaces = ", ".join([f"p{i} interface{{}}" for i in range(len(node.params))])
-        params = []
-        for i, param in enumerate(node.params.values()):
-            params.append(f"{param.name} := p{i}.({param.ak_type.go_code()})")
+        # params = []
+        # for i, param in enumerate(node.params):
+        #     params.append(f"{param.name} := p{i}.({param.ak_type.go_code()})")
+        params = [self.visit(param) for param in node.params]
         params = "\n".join(params)
         return_type = "interface{}"
         func_name = snake_to_camel(node.name)

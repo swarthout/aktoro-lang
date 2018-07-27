@@ -154,17 +154,17 @@ field_name: VAR_NAME
 record_update: "{" expr "|" field_assignment ("," _NEWLINE? field_assignment)* "}"
 
 func_def: func_header "->" func_body
-func_header: func_signature _NEWLINE VAR_NAME "(" params ")"
+func_header: func_signature _NEWLINE VAR_NAME params
 
 func_signature: VAR_NAME ":" param_types "->" return_type
 
 param_types: "(" (param_type ("," param_type )*)? ")"
            | param_type
 
-?param_type: _type_usage
+param_type: _type_usage
 
 ?func_body: block
-           | non_record_expr | print_stmt  -> simple_return
+           | ( non_record_expr | print_stmt )  -> simple_return
            | "(" record_expr ")" -> simple_return
 
 
@@ -172,8 +172,11 @@ block: open_block _NEWLINE? _line* close_block
 open_block: "{"
 close_block: "}"
 
-params: (param ("," param)*)?
+params: "(" (param ("," param)*)? ")"
+      | param
+
 ?param: var_name
+      | "{" param ("," param)* "}" -> record_destruct_param
 open_params: "("
 close_params: ")"
 empty_tuple: "(" ")"

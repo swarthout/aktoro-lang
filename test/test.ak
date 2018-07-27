@@ -5,13 +5,29 @@ type Car = {
     year: Option Int
 }
 
+d = %{
+    2 => "two"
+}
+e = %{d | 3 => "three"}
+print(e)
+
 c = {name: "Mustang", year: Some 2013}
-print(c)
+
+
+
+get_name: Car -> String
+get_name c -> c.name
+
+get_name_destruct: Car -> String
+get_name {name} -> name
+
+print(get_name(c))
+print(get_name_destruct(c))
 
 a = Node (Leaf "Hi") (Leaf "Bye")
 
 print_tree : BinaryTree a -> ()
-print_tree (t) -> {
+print_tree t -> {
     match t {
         Node left right => {
             print_tree(left)

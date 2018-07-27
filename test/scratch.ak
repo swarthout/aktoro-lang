@@ -105,7 +105,7 @@ x = first(xs)
 print(x)
 
 is_even : Int -> Bool
-is_even (x) -> x % 2 == 0
+is_even x -> x % 2 == 0
 
 fmt.println (xs |> filter(\x -> x % 2 == 0)
 

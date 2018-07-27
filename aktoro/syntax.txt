@@ -20,10 +20,10 @@ a = 4
 
 b = "hello"
 
-add_them :: (Int, Int) -> Int
+add_them : (Int, Int) -> Int
 add_them (a, b) -> a + b
 
-also_adds :: (Int, Int) -> Int
+also_adds : (Int, Int) -> Int
 also_adds = add_them
 
 
@@ -37,12 +37,12 @@ type Result t = Ok t | Error String
 type Stack a = {data [a], buffer_size Int}
 
 first :: [a] -> a
-first (xs) -> {
+first xs -> {
     [x | rest] = xs
     x
 }
 
-private_func :: (Int, User) -> String
+private_func : (Int, User) -> String
 private_func (x, {name}) -> {
     let g = match return_value(a) {
         Ok v => v,
@@ -147,11 +147,11 @@ let req_handler = fn (r http.Request) => {
     }
 }
 
-let server = http.Server{port=3000, router=req_handler}
+let server = http.Server{port: 3000, router: req_handler}
 
-http.listen (server)
+http.listen(server)
 
-type Comment = {user_id Int, comment_id Int, text String}
+type Comment = {user_id: Int, comment_id: Int, text: String}
 
 let s = r.b
 
@@ -276,10 +276,9 @@ use enum.{take, filter, reduce}
 
 num = l
 
-num
-|> enum.filter(\x -> x % 2 == 0)
-|> enum.take(2)
-|> enum.reduce(\(x, y) -> x + y)
+num |> list.filter(\x -> x % 2 == 0)
+    |> list.take(2)
+    |> list.reduce(\(x, y) -> x + y)
 
 # num = 10
 
@@ -407,6 +406,7 @@ val = go.var(front, "Val") : Int
 package main
 
 import list from "std/list"
+import assert from "std/testing/assert"
 import stack from "../stack/stack.ak"
 import protobuf as pb from "github.com/google/protobuf/aktoro"
 

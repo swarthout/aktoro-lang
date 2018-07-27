@@ -1,3 +1,8 @@
+from dataclasses import dataclass
+import aktoro.types as types
+from abc import ABC
+
+
 class AST(object):
     '''
     Base class for all of the AST nodes.  Each node is expected to
@@ -27,64 +32,101 @@ class Expr(AST):
     pass
 
 
-class Program(AST):
-    _fields = ["statements"]
+@dataclass
+class Program:
+    statements: list
 
 
+@dataclass
 class VarDecl(Expr):
-    _fields = ["name", "expr", "ak_type"]
+    name: str
+    expr: Expr
+    ak_type: types.AkType
 
 
+@dataclass
 class VariantParamDecl(Expr):
-    _fields = ["name", "index", "ak_type"]
+    name: str
+    index: int
+    ak_type: types.AkType
 
 
+@dataclass
 class VarIfAssign(Expr):
-    _fields = ["name", "expr", "ak_type"]
+    name: str
+    expr: Expr
+    ak_type: types.AkType
 
 
+@dataclass
 class VarMatchAssign(Expr):
-    _fields = ["name", "expr", "ak_type"]
+    name: str
+    expr: Expr
+    ak_type: types.AkType
 
 
-class VarAssignMut(AST):
-    _fields = ["name", "expr"]
+@dataclass
+class VarAssignMut:
+    name: str
+    expr: Expr
 
 
-class RecordDecl(AST):
-    _fields = ["name", "type_params", "fields"]
+@dataclass
+class RecordDecl:
+    name: str
+    type_params: list
+    fields: dict
 
 
-class VariantDecl(Expr):
-    _fields = ["name", 'type_params', "constructors"]
+@dataclass
+class VariantDecl:
+    name: str
+    type_params: list
+    constructors: list
 
 
+@dataclass
 class VarUsage(Expr):
-    _fields = ["name", "ak_type"]
+    name: str
+    ak_type: types.AkType
 
 
+@dataclass
 class FieldAccess(Expr):
-    _fields = ["record_name", "field_name", "ak_type"]
+    record_name: str
+    field_name: str
+    ak_type: types.AkType
 
 
+@dataclass
 class PrimitiveLiteral(Expr):
-    _fields = ["value", "ak_type"]
+    value: str
+    ak_type: types.AkType
 
 
+@dataclass
 class ListLiteral(Expr):
-    _fields = ["values", "ak_type"]
+    values: list
+    ak_type: types.AkType
 
 
+@dataclass
 class DictLiteral(Expr):
-    _fields = ["key_values", "ak_type"]
+    key_values: list
+    ak_type: types.AkType
 
 
-class KeyValue(AST):
-    _fields = ["key", "value"]
+@dataclass
+class KeyValue:
+    key: Expr
+    value: Expr
 
 
+@dataclass
 class DictUpdate(Expr):
-    _fields = ["var", "updates", "ak_type"]
+    var: Expr
+    updates: list
+    ak_type: types.AkType
 
 
 class RecordLiteral(Expr):
@@ -132,7 +174,14 @@ class LogicalExpr(Expr):
 
 
 class ParamDecl(AST):
-    _fields = ["name", "ak_type"]
+    _fields = ["index", "name", "ak_type"]
+
+
+@dataclass
+class RecordDestructParam:
+    index: int
+    params: list
+    parent_type: types.AkType
 
 
 class FuncDef(Expr):
