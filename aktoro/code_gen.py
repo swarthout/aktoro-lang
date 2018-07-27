@@ -1,7 +1,25 @@
 import textwrap
 from aktoro.ast import *
-from aktoro.parser import snake_to_camel
 import aktoro.types as types
+
+
+def snake_to_camel(name):
+    if name[0] == "_":
+        return name
+    words = name.split("_")
+    if len(words) > 1:
+        camel_name = words[0] + "".join(map(str.capitalize, words[1:]))
+    else:
+        camel_name = words[0]
+    return camel_name
+
+
+def snake_to_upper_camel(name):
+    if name[0] == "_":
+        return name
+    words = name.split("_")
+    camel_name = "".join(map(str.capitalize, words))
+    return camel_name
 
 
 class CodeGenVisitor():
@@ -79,7 +97,8 @@ class CodeGenVisitor():
         return f"{node_name} = {expr}"
 
     def visit_RecordDecl(self, node):
-        fields = "\n".join([f"{name} {ak_type.go_code()}" for name, ak_type in node.fields.items()])
+        fields = "\n".join(
+            [f"{snake_to_upper_camel(name)} {ak_type.go_code()}" for name, ak_type in node.fields.items()])
         fields = textwrap.indent(fields, "\t")
         go_code = textwrap.dedent(f"""
         type {node.name} struct {{
@@ -108,6 +127,8 @@ class CodeGenVisitor():
             }}
             
             func ({constructor.name}) {node.name}() {{}}
+            
+            func ({constructor.name}) AkVariantConstructor() {{}}
             """))
         return variant_go_code + "\n".join(constructor_go_code)
 
@@ -133,7 +154,7 @@ class CodeGenVisitor():
         return f"{node.package_name}.{name}"
 
     def visit_FieldAccess(self, node):
-        return f"{self.visit(node.record_name)}.{snake_to_camel(node.field_name)}"
+        return f"{self.visit(node.record_name)}.{snake_to_upper_camel(node.field_name)}"
 
     def visit_PrimitiveLiteral(self, node):
         self.imports.add('"github.com/aktoro-lang/types"')
@@ -169,7 +190,7 @@ class CodeGenVisitor():
         return f"dict.Put({self.visit(node.var)}, {updates_go_code})"
 
     def visit_RecordLiteral(self, node):
-        fields = [f"{name}: {self.visit(expr)}" for name, expr in node.fields.items()]
+        fields = [f"{snake_to_upper_camel(name)}: {self.visit(expr)}" for name, expr in node.fields.items()]
         fields = ",\n".join([textwrap.indent(f, "\t") for f in fields])
         record_type = node.ak_type.go_code()
         go_code = f"{record_type}{{\n" + textwrap.indent(fields, "\t") + textwrap.dedent("}")
@@ -180,9 +201,12 @@ class CodeGenVisitor():
         updated_fields = set([field for field, value in node.updates])
         all_fields = set(node.ak_type.fields.keys())
         unchanged_fields = all_fields - updated_fields
-        unchanged_fields = [f"{name}: {self.visit(node.var)}.{name}" for name in unchanged_fields]
-        updated_fields = [f"{name}: {self.visit(expr)}" for name, expr in node.updates]
-        all_fields = unchanged_fields + updated_fields
+        unchanged_go_code = []
+        for name in unchanged_fields:
+            name = snake_to_upper_camel(name)
+            unchanged_go_code.append(f"{name}: {self.visit(node.var)}.{name}")
+        updated_go_code = [f"{snake_to_upper_camel(name)}: {self.visit(expr)}" for name, expr in node.updates]
+        all_fields = unchanged_go_code + updated_go_code
         fields_go_code = ",\n".join([textwrap.indent(f, "\t") for f in all_fields])
         go_code = f"{record_type}{{\n" + textwrap.indent(fields_go_code, "\t") + textwrap.dedent("}")
         return go_code
@@ -234,7 +258,7 @@ class CodeGenVisitor():
         go_code = []
         for param in node.params:
             go_code.append(
-                f"{param.name} := p{node.index}.({node.parent_type.go_code()}).{param.name}")
+                f"{param.name} := p{node.index}.({node.parent_type.go_code()}).{snake_to_upper_camel(param.name)}")
         return "\n".join(go_code)
 
     def visit_FuncDef(self, node):
@@ -269,7 +293,7 @@ class CodeGenVisitor():
         return "return nil"
 
     def visit_PrintStmt(self, node):
-        self.imports.add('"fmt"')
+        self.imports.add('"github.com/aktoro-lang/fmt"')
         exprs = ",".join([self.visit(expr) for expr in node.args])
         return f"fmt.Println({exprs})"
 

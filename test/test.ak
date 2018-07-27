@@ -2,19 +2,20 @@ type BinaryTree a = Node (BinaryTree a) (BinaryTree a) | Leaf a
 
 type Car = {
     name: String,
-    year: Option Int
+    my_year: Option Int,
+    owners: [String]
 }
 
 d = %{
     2 => "two"
 }
 e = %{d | 3 => "three"}
-print(e)
+print(e, 2)
 
-c = {name: "Mustang", year: Some 2013}
+c = {name: "Mustang", my_year: Some 2013, owners: ["Scott", "Jake"]}
 
-
-
+print(c)
+print([1, 2, 3])
 get_name: Car -> String
 get_name c -> c.name
 

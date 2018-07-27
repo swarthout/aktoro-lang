@@ -2,8 +2,8 @@
 
 
 ####Todo
-- convert ast to dataclasses
 - destructuring in function params
+    - list
 - Better printing with reflection
 - Basic Actor System
 - Anonymous Functions (restricted to function arguments)

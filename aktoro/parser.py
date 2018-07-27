@@ -15,17 +15,6 @@ class TypeKind(Enum):
     TYPE_ALIAS = 3
 
 
-def snake_to_camel(name):
-    if name[0] == "_":
-        return name
-    words = name.split("_")
-    if len(words) > 1:
-        camel_name = words[0] + "".join(map(str.capitalize, words[1:]))
-    else:
-        camel_name = words[0]
-    return camel_name
-
-
 class SymbolTable(object):
     """
     Class representing a symbol table.  It should provide functionality
