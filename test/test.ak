@@ -19,7 +19,7 @@ get_name: Car -> String
 get_name c -> c.name
 
 get_name_destruct: Car -> String
-get_name {name} -> name
+get_name_destruct {name} -> name
 
 print(get_name(c))
 print(get_name_destruct(c))

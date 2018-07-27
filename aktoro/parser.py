@@ -194,7 +194,7 @@ class Parser(Transformer):
 
     def var_usage(self, args):
         name = args[0]
-        root_var = self.symbol_table.get(name)
+        root_var: ast.Expr = self.symbol_table.get(name)
         if root_var:
             ak_type = root_var.ak_type
             return ast.VarUsage(name, ak_type)
