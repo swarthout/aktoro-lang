@@ -393,6 +393,8 @@ stack.pop (s)
 
 let top = stack.get_top (s)
 
+import go from "std/interop/go"
+
 list = go.import("container/list")
 
 l = go.func(list, "New")
